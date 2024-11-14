@@ -1,6 +1,6 @@
 from src.server.db.Mapper import Mapper
 
 
-class KleidungsstückMapper (Mapper):
+class KleidungsstueckMapper (Mapper):
     pass
 
