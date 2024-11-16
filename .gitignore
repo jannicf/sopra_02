@@ -2,7 +2,7 @@
 
 # PyCharm .idea-Verzeichnis ignorieren
 .idea/
-
+*.iml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
