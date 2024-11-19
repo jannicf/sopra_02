@@ -1,8 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # PyCharm .idea-Verzeichnis ignorieren
-.idea/
-*.iml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
