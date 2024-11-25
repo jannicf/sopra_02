@@ -8,10 +8,11 @@ class Mutex(BinaryConstraint):
         super().__init__()
 
     def check_constraint(self, kleidungsstuecke):
-
-        """Überprüft, ob der Mutex-Constraint erfüllt ist.
+        """
+        Überprüft, ob der Mutex-Constraint erfüllt ist.
         Returns True wenn der Constraint erfüllt ist (keine Verletzung),
-        False wenn er verletzt ist."""
+        False wenn er verletzt ist.
+        """
 
         if not self.get_bezugsobjekt1() or not self.get_bezugsobjekt2():
             return True
@@ -21,8 +22,10 @@ class Mutex(BinaryConstraint):
 
         for kleidungsstueck in kleidungsstuecke:
 
-            """prüfen, ob die übergebenen kleidungsstücke 
-            vom selben Typ sind wie das Bezugsobjekt"""
+            """
+            Prüfen, ob die übergebenen kleidungsstücke 
+            vom selben Typ sind wie das Bezugsobjekt
+            """
 
             if kleidungsstueck.get_typ() == self.get_bezugsobjekt1():
                 typ1_vorhanden = True

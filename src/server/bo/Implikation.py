@@ -9,20 +9,22 @@ class Implikation(BinaryConstraint):
 
     def check_constraint(self, kleidungsstuecke):
 
-        """Überprüft, ob der Implikation-Constraint erfüllt ist.
-        Returns True wenn der Constraint erfüllt ist (keine Verletzung),
-        False wenn er verletzt ist."""
-
         if not self.get_bezugsobjekt1() or not self.get_bezugsobjekt2():
             return True
-
+        """
+        Überprüft, ob der Implikation-Constraint erfüllt ist.
+        Returns True wenn der Constraint erfüllt ist (keine Verletzung),
+        False wenn er verletzt ist.
+        """
         typ1_vorhanden = False
         typ2_vorhanden = False
 
         for kleidungsstueck in kleidungsstuecke:
 
-            """prüfen, ob die übergebenen kleidungsstücke 
-            vom selben Typ sind wie das Bezugsobjekt"""
+            """
+            prüfen, ob die übergebenen kleidungsstücke 
+            vom selben Typ sind wie das Bezugsobjekt
+            """
 
             if kleidungsstueck.get_typ() == self.get_bezugsobjekt1():
                 typ1_vorhanden = True
