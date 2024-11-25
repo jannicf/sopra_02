@@ -1,10 +1,14 @@
 from src.server.bo import BusinessObject as bo
+from src.server.bo.Person import Person
+from src.server.bo.Kleidungsstueck import Kleidungsstueck
+# Person und Kleidungsstueck importieren um diese Objekte speichern zu können
 
 class Kleiderschrank(bo.BusinessObject):
+
     def __init__(self):
         super().__init__()
-        self.__eigentuemer = None   # Der Eigentümer des Kleiderschranks
-        self.__inhalt = list("")   # Der Inhalt des Kleiderschranks
+        self.__eigentuemer = None   # Der Eigentümer des Kleiderschranks (Person-Instanz)
+        self.__inhalt = []   # Der Inhalt des Kleiderschranks (Kleidungsstück-Instanzen)
         self.__name = ""           # Der Name des Kleiderschranks
 
     def set_name(self, new_name):
@@ -15,15 +19,11 @@ class Kleiderschrank(bo.BusinessObject):
         """Auslesen des Namens vom Kleiderschrank"""
         return self.__name
 
-    def set_inhalt(self, new_inhalt):
-        """Setzen des Kleiderschrankinhalts"""
-        self.__inhalt = list(new_inhalt)
-
     def get_inhalt(self):
         """Auslesen des Kleiderschrankinhalts"""
         return self.__inhalt
 
-    def set_eigentuemer(self, new_eigentuemer):
+    def set_eigentuemer(self, new_eigentuemer: Person):
         """Setzen des Eigentümers"""
         self.__eigentuemer = new_eigentuemer
 
@@ -31,11 +31,11 @@ class Kleiderschrank(bo.BusinessObject):
         """Auslesen des Eigentümers"""
         return self.__eigentuemer
 
-    def add_kstueck(self, new_ks):
+    def add_kstueck(self, new_ks: Kleidungsstueck):
         """Kleidungsstück in den Kleiderschrank hinzufügen"""
         pass
 
-    def delete_kstueck(self, old_ks):
+    def delete_kstueck(self, old_ks: Kleidungsstueck):
         """Kleidungsstück aus dem Kleiderschrank entfernen"""
         pass
 
@@ -49,6 +49,5 @@ class Kleiderschrank(bo.BusinessObject):
         obj = Kleiderschrank()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_name(dictionary["name"])
-        obj.set_inhalt(dictionary["inhalt"])
         obj.set_eigentuemer(dictionary["eigentuemer"])
         return obj
