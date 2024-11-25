@@ -1,8 +1,7 @@
-from abc import ABC
 from src.server.bo import UnaryConstraint
 from Kleidungstyp import Kleidungstyp
 
-class Kardinalitaet(UnaryConstraint, ABC):
+class Kardinalitaet(UnaryConstraint):
 
     def __init__(self):
         """

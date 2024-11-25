@@ -1,5 +1,5 @@
-from abc import ABC
+from abc import abstractmethod
 from src.server.bo import BinaryConstraint
 
-class Implikation(BinaryConstraint, ABC):
+class Implikation(BinaryConstraint):
     pass
