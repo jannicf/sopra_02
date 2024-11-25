@@ -9,9 +9,8 @@ class BinaryConstraint(Constraint, ABC):
         Initialisiert ein binäres Constraint.
         """
         super().__init__()
-        self.bezugsobjekt1 = None   # Objekt der Klasse Kleidungstyp
-        self.bezugsobjekt2 = None   # Objekt der Klasse Kleidungstyp
-
+        self.__bezugsobjekt1 = None   # Objekt der Klasse Kleidungstyp
+        self.__bezugsobjekt2 = None   # Objekt der Klasse Kleidungstyp
 
     def set_bezugsobjekt1(self, bezugsobjekt):
         """Setzen des Bezugsobjekts"""
