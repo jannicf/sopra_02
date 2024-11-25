@@ -7,7 +7,7 @@ class Mutex(BinaryConstraint):
     def __init__(self):
         super().__init__()
 
-    def check(self, kleidungsstuecke):
+    def check_constraint(self, kleidungsstuecke):
 
         """Überprüft, ob der Mutex-Constraint erfüllt ist.
         Returns True wenn der Constraint erfüllt ist (keine Verletzung),
