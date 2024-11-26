@@ -3,12 +3,12 @@ from src.server.bo.Person import Person
 
 class PersonMapper(Mapper):
     def insert(self, person):
-        """Einfügen eines User-Objekts in die Datenbank.
+        """Einfügen eines Person-Objekts in die Datenbank.
 
                 Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
                 berichtigt.
 
-                :param user das zu speichernde Objekt
+                :param person das zu speichernde Objekt
                 :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
                 """
         cursor = self._cnx.cursor()
@@ -18,7 +18,7 @@ class PersonMapper(Mapper):
         for (maxid) in tuples:
             if maxid[0] is not None:
                 """Wenn wir eine maximale ID festellen konnten, zählen wir diese
-                um 1 hoch und weisen diesen Wert als ID dem User-Objekt zu."""
+                um 1 hoch und weisen diesen Wert als ID dem Person-Objekt zu."""
                 person.set_id(maxid[0] + 1)
             else:
                 """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
@@ -38,7 +38,7 @@ class PersonMapper(Mapper):
     def update(self, person):
         """Wiederholtes Schreiben eines Objekts in die Datenbank.
 
-                :param user das Objekt, das in die DB geschrieben werden soll
+                :param person das Objekt, das in die DB geschrieben werden soll
                 """
         cursor = self._cnx.cursor()
 
@@ -51,9 +51,9 @@ class PersonMapper(Mapper):
         cursor.close()
 
     def delete(self, person):
-        """Löschen der Daten eines User-Objekts aus der Datenbank.
+        """Löschen der Daten eines Person-Objekts aus der Datenbank.
 
-                :param user das aus der DB zu löschende "Objekt"
+                :param person das aus der DB zu löschende "Objekt"
                 """
         cursor = self._cnx.cursor()
 
@@ -64,11 +64,11 @@ class PersonMapper(Mapper):
         cursor.close()
 
     def find_by_id(self, person_id):
-        """Suchen eines Benutzers mit vorgegebener User ID. Da diese eindeutig ist,
+        """Suchen einer Person mit vorgegebener Person ID. Da diese eindeutig ist,
                 wird genau ein Objekt zurückgegeben.
 
-                :param key Primärschlüsselattribut (->DB)
-                :return User-Objekt, das dem übergebenen Schlüssel entspricht, None bei
+                :param id Primärschlüsselattribut (->DB)
+                :return Person-Objekt, das dem übergebenen Schlüssel entspricht, None bei
                     nicht vorhandenem DB-Tupel.
                 """
 
@@ -99,11 +99,11 @@ class PersonMapper(Mapper):
         return result
 
     def find_by_vorname(self, vorname):
-        """Auslesen aller Benutzer anhand der zugeordneten E-Mail-Adresse.
+        """Auslesen aller Personen anhand der zugeordneten Vorname.
 
-        :param mail_address E-Mail-Adresse der zugehörigen Benutzer.
-        :return Eine Sammlung mit User-Objekten, die sämtliche Benutzer
-            mit der gewünschten E-Mail-Adresse enthält.
+        :param vorname Vorname der zugehörigen Person.
+        :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
+            mit der gewünschten Vorname enthält.
         """
         result = None
 
@@ -132,11 +132,11 @@ class PersonMapper(Mapper):
         return result
 
     def find_by_nachname(self, nachname):
-        """Auslesen aller Benutzer anhand der zugeordneten E-Mail-Adresse.
+        """Auslesen aller Personen anhand der zugeordneten Nachname.
 
-        :param mail_address E-Mail-Adresse der zugehörigen Benutzer.
-        :return Eine Sammlung mit User-Objekten, die sämtliche Benutzer
-            mit der gewünschten E-Mail-Adresse enthält.
+        :param nachname Nachname der zugehörigen Person.
+        :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
+            mit der gewünschten Nachname enthält.
         """
         result = None
 
@@ -165,11 +165,11 @@ class PersonMapper(Mapper):
         return result
 
     def find_by_nickname(self, nickname):
-        """Auslesen aller Benutzer anhand der zugeordneten E-Mail-Adresse.
+        """Auslesen aller Personen anhand der zugeordneten Nickname.
 
-        :param mail_address E-Mail-Adresse der zugehörigen Benutzer.
-        :return Eine Sammlung mit User-Objekten, die sämtliche Benutzer
-            mit der gewünschten E-Mail-Adresse enthält.
+        :param nickname Nickname der zugehörigen Person.
+        :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
+            mit der gewünschten Nickname enthält.
         """
         result = None
 
@@ -198,11 +198,11 @@ class PersonMapper(Mapper):
         return result
 
     def find_by_google_id(self, google_id):
-        """Auslesen aller Benutzer anhand der zugeordneten E-Mail-Adresse.
+        """Auslesen aller Personen anhand der zugeordneten google_id.
 
-        :param mail_address E-Mail-Adresse der zugehörigen Benutzer.
-        :return Eine Sammlung mit User-Objekten, die sämtliche Benutzer
-            mit der gewünschten E-Mail-Adresse enthält.
+        :param google_id Google_ID der zugehörigen Person.
+        :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
+            mit der gewünschten Google_ID enthält.
         """
         result = None
 
@@ -231,9 +231,9 @@ class PersonMapper(Mapper):
         return result
 
     def find_all(self):
-        """Auslesen aller Benutzer unseres Systems.
+        """Auslesen aller Personen unseres Systems.
 
-                :return Eine Sammlung mit User-Objekten, die sämtliche Benutzer
+                :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
                         des Systems repräsentieren.
                 """
         result = []
