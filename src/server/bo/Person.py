@@ -9,7 +9,7 @@ class Person(bo.BusinessObject):
         self.__nachname = ""  # Der Nachname des Benutzers.
         self.__nickname = ""  # Der Nickname des Benutzers.
         self.__google_id = ""  # Die Google ID.
-        self.__kleiderschrank = list("")  # Der Kleiderschrank des Benutzers.
+        self.__kleiderschrank = None  # Der Kleiderschrank des Benutzers.
 
 
     def get_vorname(self):
@@ -50,14 +50,6 @@ class Person(bo.BusinessObject):
 
     def set_kleiderschrank(self, kleiderschrank):
         """Setzen des Kleiderschranks."""
-        pass
-
-    def add_kschrank(self, kleiderschrank):
-        """Einen neuen Kleiderschrank hinzufügen."""
-        pass
-
-    def delete_kschrank(self, kleiderschrank):
-        """Einen  Kleiderschrank löschen."""
         pass
 
     def __str__(self):
