@@ -16,47 +16,47 @@ class Person(bo.BusinessObject):
         """Auslesen des Vornamens."""
         return self.__vorname
 
-    def set_vorname(self, value):
+    def set_vorname(self, vorname):
         """Setzen des Vornamens."""
-        self.__vorname = value
+        self.__vorname = vorname
 
     def get_nachname(self):
         """Auslesen des Nachnamens."""
         return self.__nachname
 
-    def set_nachname(self, value):
+    def set_nachname(self, nachname):
         """Setzen des Nachnamens."""
-        self.__nachname = value
+        self.__nachname = nachname
 
     def get_nickname(self):
         """Auslesen des Nicknamens."""
         return self.__nickname
 
-    def set_nickname(self, value):
+    def set_nickname(self, nickname):
         """Setzen des Nicknamens."""
-        self.__nickname = value
+        self.__nickname = nickname
 
     def get_google_id(self):
         """Auslesen der Google ID."""
         return self.__google_id
 
-    def set_google_id(self, value):
+    def set_google_id(self, google_id):
         """Setzen der Google ID."""
-        self.__google_id = value
+        self.__google_id = google_id
 
     def get_kleiderschrank(self):
         """Auslesen des Kleiderschanks."""
         return self.__kleiderschrank
 
-    def set_kleiderschrank(self, value):
+    def set_kleiderschrank(self, kleiderschrank):
         """Setzen des Kleiderschranks."""
         pass
 
-    def add_kschrank(self, new_ks):
+    def add_kschrank(self, kleiderschrank):
         """Einen neuen Kleiderschrank hinzufügen."""
         pass
 
-    def delete_kschrank(self, old_ks):
+    def delete_kschrank(self, kleiderschrank):
         """Einen  Kleiderschrank löschen."""
         pass
 
@@ -72,6 +72,6 @@ class Person(bo.BusinessObject):
         obj.set_vorname(dictionary["vorname"])
         obj.set_nachname(dictionary["nachname"])
         obj.set_nickname(dictionary["nickname"])
-        obj.set_google_id(dictionary["user_id"])
+        obj.set_google_id(dictionary["google_id"])
         # Kleiderschrank?
         return obj
