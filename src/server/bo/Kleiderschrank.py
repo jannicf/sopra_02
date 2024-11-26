@@ -11,9 +11,9 @@ class Kleiderschrank(bo.BusinessObject):
         self.__inhalt = []   # Der Inhalt des Kleiderschranks (Kleidungsstück-Instanzen)
         self.__name = ""           # Der Name des Kleiderschranks
 
-    def set_name(self, new_name):
+    def set_name(self, name):
         """Setzen des Namens vom Kleiderschrank"""
-        self.__name = new_name
+        self.__name = name
 
     def get_name(self):
         """Auslesen des Namens vom Kleiderschrank"""
@@ -23,19 +23,19 @@ class Kleiderschrank(bo.BusinessObject):
         """Auslesen des Kleiderschrankinhalts"""
         return self.__inhalt
 
-    def set_eigentuemer(self, new_eigentuemer: Person):
+    def set_eigentuemer(self, eigentuemer: Person):
         """Setzen des Eigentümers"""
-        self.__eigentuemer = new_eigentuemer
+        self.__eigentuemer = eigentuemer
 
     def get_eigentuemer(self):
         """Auslesen des Eigentümers"""
         return self.__eigentuemer
 
-    def add_kstueck(self, new_ks: Kleidungsstueck):
+    def add_kstueck(self, kleidungsstueck: Kleidungsstueck):
         """Kleidungsstück in den Kleiderschrank hinzufügen"""
         pass
 
-    def delete_kstueck(self, old_ks: Kleidungsstueck):
+    def delete_kstueck(self, kleidungsstueck: Kleidungsstueck):
         """Kleidungsstück aus dem Kleiderschrank entfernen"""
         pass
 

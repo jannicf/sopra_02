@@ -12,17 +12,17 @@ class BinaryConstraint(Constraint, ABC):
         self.__bezugsobjekt1 = None   # Objekt der Klasse Kleidungstyp
         self.__bezugsobjekt2 = None   # Objekt der Klasse Kleidungstyp
 
-    def set_bezugsobjekt1(self, bezugsobjekt):
+    def set_bezugsobjekt1(self, bezugsobjekt1):
         """Setzen des Bezugsobjekts"""
-        self.__bezugsobjekt1 = bezugsobjekt
+        self.__bezugsobjekt1 = bezugsobjekt1
 
     def get_bezugsobjekt1(self):
         """Auslesen des Bezugsobjekts"""
         return self.__bezugsobjekt1
 
-    def set_bezugsobjekt2(self, bezugsobjekt):
+    def set_bezugsobjekt2(self, bezugsobjekt1):
         """Setzen des Bezugsobjekts"""
-        self.__bezugsobjekt2 = bezugsobjekt
+        self.__bezugsobjekt2 = bezugsobjekt1
 
     def get_bezugsobjekt2(self):
         """Auslesen des Bezugsobjekts"""
