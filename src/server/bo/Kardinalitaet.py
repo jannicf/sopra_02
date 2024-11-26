@@ -44,4 +44,5 @@ class Kardinalitaet(UnaryConstraint):
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_min_anzahl(dictionary["min_anzahl"])
         obj.set_max_anzahl(dictionary["max_anzahl"])
+        obj.set_bezugsobjekt(dictionary["bezugsobjekt"])
         return obj
