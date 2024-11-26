@@ -11,12 +11,12 @@ class Outfit(bo.BusinessObject):
         """Fügt ein Kleidungsstück zum Outfit hinzu"""
         self.__bausteine.append(kleidungsstueck)
 
-    def remove_feature(self, kleidungsstueck: Kleidungsstueck):
+    def remove_baustein(self, kleidungsstueck: Kleidungsstueck):
         """Entfernt ein Kleidungsstück aus dem Outfit"""
         if kleidungsstueck in self.__bausteine:
             self.__bausteine.remove(kleidungsstueck)
 
-    def get_features(self):
+    def get_bausteine(self):
         """Gibt alle Kleidungsstücke des Outfits zurück"""
         return self.__bausteine
 
