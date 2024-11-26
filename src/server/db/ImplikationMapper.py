@@ -1,18 +1,145 @@
 from src.server.db.Mapper import Mapper
+from src.server.bo.Implikation import Implikation
 
 class ImplikationMapper(Mapper):
+
     def insert(self, implikation):
-        # Implementierung zum Speichern einer Implikation
-        pass
+        """Einfügen eines Implikations-Objekts in die Datenbank.
+
+                Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
+                berichtigt.
+
+                :param implikation das zu speichernde Objekt
+                :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
+                """
+        cursor = self._cnx.cursor()
+        cursor.execute("SELECT MAX(id) AS maxid FROM implikation ")
+        tuples = cursor.fetchall()
+
+        for (maxid) in tuples:
+            if maxid[0] is not None:
+                """Wenn wir eine maximale ID festellen konnten, zählen wir diese
+                um 1 hoch und weisen diesen Wert als ID dem User-Objekt zu."""
+                implikation.set_id(maxid[0] + 1)
+            else:
+                """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
+                davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
+                implikation.set_id(1)
+
+        command = "INSERT INTO implikation (id, bezugsobjekt1, bezugsobjekt2) VALUES (%s,%s,%s)"
+        data = (implikation.get_id(), implikation.get_bezugsobjekt1(), implikation.get_bezugsobjekt2())
+        cursor.execute(command, data)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return implikation
 
     def update(self, implikation):
-        pass
+        """Wiederholtes Schreiben eines Implikations-Objekts in die Datenbank.
+
+                :param implikation das Objekt, das in die DB geschrieben werden soll
+                """
+        cursor = self._cnx.cursor()
+
+        command = "UPDATE implikation " + "SET bezugsobjekt1=%s, bezugsobjekt2=%s WHERE id=%s"
+        data = (implikation.get_bezugsobjekt1(), implikation.get_bezugsobjekt2(), implikation.get_id())
+        cursor.execute(command, data)
+
+        self._cnx.commit()
+        cursor.close()
 
     def delete(self, implikation):
-        pass
+        """Löschen der Daten eines Implikations-Objekts aus der Datenbank.
+
+                :param implikation das aus der DB zu löschende "Objekt"
+                """
+        cursor = self._cnx.cursor()
+
+        command = "DELETE FROM implikation WHERE id={}".format(implikation.get_id())
+        cursor.execute(command)
+
+        self._cnx.commit()
+        cursor.close()
 
     def find_by_id(self, implikation_id):
-        pass
+        """Suchen einer Implikation mit vorgegebener ID. Da diese eindeutig ist,
+                wird genau ein Objekt zurückgegeben.
+
+                :param implikation_id Primärschlüsselattribut (->DB)
+                :return Implikations-Objekt, das dem übergebenen Schlüssel entspricht, None bei
+                    nicht vorhandenem DB-Tupel.
+                """
+
+        result = None
+
+        cursor = self._cnx.cursor()
+        command = "SELECT id, bezugsobjekt1, bezugsobjekt2 FROM implikation WHERE id={}".format(implikation_id)
+        cursor.execute(command)
+        tuples = cursor.fetchall()
+
+        try:
+            (id, bezugsobjekt1, bezugsobjekt2) = tuples[0]
+            implikation = Implikation()
+            implikation.set_id(id)
+            implikation.set_bezugsobjekt1(bezugsobjekt1)
+            implikation.set_bezugsobjekt2(bezugsobjekt2)
+            result = implikation
+        except IndexError:
+            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
+            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            result = None
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result
+
+    def find_by_any_bezugsobjekt(self, bezugsobjekt):
+        """Suchen aller Implikations-Objekte, die ein bestimmtes Bezugsobjekt enthalten.
+
+        :param bezugsobjekt: Das Bezugsobjekt nach dem gesucht werden soll
+        :return: Eine Liste mit Implikations-Objekten
+        """
+        result = []
+        cursor = self._cnx.cursor()
+
+        command = ("SELECT id, bezugsobjekt1, bezugsobjekt2 FROM implikation "
+                   "WHERE bezugsobjekt1={} OR bezugsobjekt2={}").format(bezugsobjekt, bezugsobjekt)
+        cursor.execute(command)
+        tuples = cursor.fetchall()
+
+        for (id, bezugsobjekt1, bezugsobjekt2) in tuples:
+            implikation = Implikation()
+            implikation.set_id(id)
+            implikation.set_bezugsobjekt1(bezugsobjekt1)
+            implikation.set_bezugsobjekt2(bezugsobjekt2)
+            result.append(implikation)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result
 
     def find_all(self):
-        pass
+        """Auslesen aller Implikations-Objekte unseres Systems.
+
+                :return Eine Sammlung mit Implikations-Objekten, die sämtliche Implikations-Constraints
+                        des Systems repräsentieren.
+                """
+        result = []
+        cursor = self._cnx.cursor()
+        cursor.execute("SELECT * from implikation")
+        tuples = cursor.fetchall()
+
+        for (id, bezugsobjekt1, bezugsobjekt2) in tuples:
+            implikation = Implikation()
+            implikation.set_id(id)
+            implikation.set_bezugsobjekt1(bezugsobjekt1)
+            implikation.set_bezugsobjekt2(bezugsobjekt2)
+            result.append(implikation)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result

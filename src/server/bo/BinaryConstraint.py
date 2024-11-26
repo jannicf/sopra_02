@@ -20,9 +20,9 @@ class BinaryConstraint(Constraint, ABC):
         """Auslesen des Bezugsobjekts"""
         return self.__bezugsobjekt1
 
-    def set_bezugsobjekt2(self, bezugsobjekt1):
+    def set_bezugsobjekt2(self, bezugsobjekt2):
         """Setzen des Bezugsobjekts"""
-        self.__bezugsobjekt2 = bezugsobjekt1
+        self.__bezugsobjekt2 = bezugsobjekt2
 
     def get_bezugsobjekt2(self):
         """Auslesen des Bezugsobjekts"""
