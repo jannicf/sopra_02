@@ -54,7 +54,9 @@ class Person(bo.BusinessObject):
 
     def __str__(self):
         """Erzeugen einer einfachen textuellen Darstellung der jeweiligen Instanz."""
-        return "Person: {}, {}, {}, {}, {}".format(self.get_id(), self.__vorname, self.__nachname, self.__nickname, self.__google_id)
+        return "Person: {}, {}, {}, {}, {}, {}".format(self.get_id(), self.__vorname, self.__nachname,
+                                                       self.__nickname, self.__google_id, self.__kleiderschrank)
+
 
     @staticmethod
     def from_dict(dictionary=dict()):
@@ -65,5 +67,5 @@ class Person(bo.BusinessObject):
         obj.set_nachname(dictionary["nachname"])
         obj.set_nickname(dictionary["nickname"])
         obj.set_google_id(dictionary["google_id"])
-        # Kleiderschrank?
+        obj.set_kleiderschrank(dictionary["kleiderschrank"])
         return obj

@@ -29,4 +29,8 @@ class Outfit(bo.BusinessObject):
         """Umwandeln eines Python dict() in ein Outfit()."""
         obj = Outfit()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
+        # Wenn bausteine im Dictionary vorhanden sind, diese auch setzen
+        if "bausteine" in dictionary and dictionary["bausteine"] is not None:
+            for kleidungsstueck in dictionary["bausteine"]:
+                obj.add_baustein(kleidungsstueck)
         return obj

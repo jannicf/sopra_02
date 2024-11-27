@@ -41,7 +41,7 @@ class Kleiderschrank(bo.BusinessObject):
 
     def __str__(self):
         """Erzeugen einer einfachen textuellen Darstellung der jeweiligen Instanz."""
-        return "User: {}, {}, {}, {}".format(self.get_id(), self.__eigentuemer, self.__inhalt, self.__name)
+        return "User: {}, {}, {}".format(self.get_id(), self.__eigentuemer, self.__name)
 
     @staticmethod
     def from_dict(dictionary=dict()):
@@ -50,4 +50,8 @@ class Kleiderschrank(bo.BusinessObject):
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_name(dictionary["name"])
         obj.set_eigentuemer(dictionary["eigentuemer"])
+        # Wenn inhalt im Dictionary vorhanden ist, diesen auch setzen
+        if "inhalt" in dictionary and dictionary["inhalt"] is not None:
+            for kleidungsstueck in dictionary["inhalt"]:
+                obj.add_kstueck(kleidungsstueck)
         return obj

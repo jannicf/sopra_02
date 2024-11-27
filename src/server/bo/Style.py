@@ -68,4 +68,12 @@ class Style(bo.BusinessObject):
         obj = Style()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_name(dictionary["name"])
+        # Wenn constraints im Dictionary vorhanden sind, diese auch setzen
+        if "constraints" in dictionary and dictionary["constraints"] is not None:
+            for constraint in dictionary["constraints"]:
+                obj.add_constraint(constraint)
+        # Wenn features im Dictionary vorhanden sind, diese auch setzen
+        if "features" in dictionary and dictionary["features"] is not None:
+            for kleidungstyp in dictionary["kleidungstyp"]:
+                obj.add_feature(kleidungstyp)
         return obj
