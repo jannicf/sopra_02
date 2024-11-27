@@ -37,11 +37,13 @@ class Mutex(BinaryConstraint):
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
-        return "Mutex: {}".format(self.get_id())
+        return "Mutex: {}, {}, {}".format(self.get_id(), self.get_bezugsobjekt1(), self.get_bezugsobjekt2())
 
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in ein Mutex()."""
         obj = Mutex()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
+        obj.set_bezugsobjekt1(dictionary["bezugsobjekt1"])
+        obj.set_bezugsobjekt2(dictionary["bezugsobjekt2"])
         return obj
