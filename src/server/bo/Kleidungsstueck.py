@@ -28,7 +28,7 @@ class Kleidungsstueck(bo.BusinessObject):
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
-        return "Kleidungsstück: {}, {}".format(self.get_id(), self.get_typ())
+        return "Kleidungsstück: {}, {}, {}".format(self.get_id(), self.get_name(), self.get_typ())
 
     @staticmethod
     def from_dict(dictionary=dict()):
