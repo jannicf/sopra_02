@@ -37,7 +37,8 @@ class Mutex(BinaryConstraint):
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
-        return "Mutex: {}, {}, {}".format(self.get_id(), self.get_bezugsobjekt1(), self.get_bezugsobjekt2())
+        return "Mutex: {}, {}, {}".format(self.get_id(), self.get_bezugsobjekt1().get_bezeichnung(),
+                                          self.get_bezugsobjekt2().get_bezeichnung())
 
     @staticmethod
     def from_dict(dictionary=dict()):

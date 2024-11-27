@@ -53,14 +53,15 @@ class Person(bo.BusinessObject):
         pass
 
     def __str__(self):
-        """Erzeugen einer einfachen textuellen Darstellung der jeweiligen Instanz."""
+        """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
         return "Person: {}, {}, {}, {}, {}, {}".format(self.get_id(), self.__vorname, self.__nachname,
-                                                       self.__nickname, self.__google_id, self.__kleiderschrank)
+                                                       self.__nickname, self.__google_id,
+                                                       self.__kleiderschrank().get_name())
 
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        """Umwandeln eines Python dict() in einen User()."""
+        """Umwandeln eines Python dict() in eine Person()."""
         obj = Person()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_vorname(dictionary["vorname"])

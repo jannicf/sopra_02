@@ -40,12 +40,12 @@ class Kleiderschrank(bo.BusinessObject):
         pass
 
     def __str__(self):
-        """Erzeugen einer einfachen textuellen Darstellung der jeweiligen Instanz."""
-        return "User: {}, {}, {}".format(self.get_id(), self.__eigentuemer, self.__name)
+        """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
+        return "User: {}, {}, {}".format(self.get_id(), self.get_name() , self.get_eigentuemer().get_nickname())
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        """Umwandeln eines Python dict() in eine Transaction()."""
+        """Umwandeln eines Python dict() in einen Kleiderschrank()."""
         obj = Kleiderschrank()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_name(dictionary["name"])

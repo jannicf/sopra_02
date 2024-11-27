@@ -35,7 +35,8 @@ class Kardinalitaet(UnaryConstraint):
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
-        return "Kardinalität: {}, {}, {}".format(self.get_id(), self.get_min_anzahl(), self.get_max_anzahl)
+        return "Kardinalität: {}, {}, {}, {}".format(self.get_id(),self.get_bezugsobjekt().get_bezeichnung(),
+                                                 self.get_min_anzahl(), self.get_max_anzahl())
 
     @staticmethod
     def from_dict(dictionary=dict()):

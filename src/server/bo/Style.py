@@ -74,6 +74,6 @@ class Style(bo.BusinessObject):
                 obj.add_constraint(constraint)
         # Wenn features im Dictionary vorhanden sind, diese auch setzen
         if "features" in dictionary and dictionary["features"] is not None:
-            for kleidungstyp in dictionary["kleidungstyp"]:
+            for kleidungstyp in dictionary["features"]:
                 obj.add_feature(kleidungstyp)
         return obj
