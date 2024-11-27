@@ -1,5 +1,5 @@
 from src.server.db.ImplikationMapper import ImplikationMapper
-from src.server.db.KardinalitaetenMapper import KardinalitaetMapper
+from src.server.db.KardinalitaetMapper import KardinalitaetMapper
 from src.server.db.KleidungstypMapper import KleidungstypMapper
 from src.server.db.Mapper import Mapper
 from src.server.bo.Style import Style
@@ -69,9 +69,31 @@ class StyleMapper(Mapper):
         """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE style " + "SET name=%s, constraints=%s, features=%s WHERE id=%s"
-        data = (style.get_name(), style.get_constraints(), style.get_features(), style.get_id())
+        command = "UPDATE style " + "SET name=%s WHERE id=%s"
+        data = (style.get_name(), style.get_id())
         cursor.execute(command, data)
+
+        # Noch nicht fertig, Code muss hier ergänzt werden.
+
+        kardinalitaet_mapper = KardinalitaetMapper(self._cnx)
+        for constraint in style.get_constraints():
+            constraint.set_style_id(style.get_id())
+            kardinalitaet_mapper.insert(constraint)
+
+        mutex_mapper = MutexMapper(self._cnx)
+        for constraint in style.get_constraints():
+            constraint.set_style_id(style.get_id())
+            mutex_mapper.insert(constraint)
+
+        implikation_mapper = ImplikationMapper(self._cnx)
+        for constraint in style.get_constraints():
+            constraint.set_style_id(style.get_id())
+            implikation_mapper.insert(constraint)
+
+        kleidungstyp_mapper = KleidungstypMapper(self._cnx)
+        for feature in style.get_features():
+            feature.set_style_id(style.get_id())
+            kleidungstyp_mapper.insert(feature)
 
         self._cnx.commit()
         cursor.close()
@@ -82,6 +104,8 @@ class StyleMapper(Mapper):
         :param style das aus der DB zu löschende "Objekt"
         """
         cursor = self._cnx.cursor()
+
+        # Noch nicht fertig, Code muss hier ergänzt werden.
 
         command = "DELETE FROM style WHERE id={}".format(style.get_id())
         cursor.execute(command)
