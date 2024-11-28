@@ -5,12 +5,12 @@ from src.server.db.KleidungsstueckMapper import KleidungsstueckMapper
 
 class KleiderschrankMapper(Mapper):
     def insert(self, kleiderschrank):
-        """Einfügen eines Kleiderschrank-Objekts in die Datenbank.
+        """Einfügen eines kleiderschrank-Objekts in die Datenbank.
 
                 Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
                 berichtigt.
 
-                :param Kleiderschrank das zu speichernde Objekt
+                :param kleiderschrank das zu speichernde Objekt
                 :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
                 """
         cursor = self._cnx.cursor()
@@ -178,9 +178,9 @@ class KleiderschrankMapper(Mapper):
         return result
 
     def find_all(self):
-        """Auslesen aller Benutzer unseres Systems.
+        """Auslesen aller Kleiderschränke unseres Systems.
 
-                :return Eine Sammlung mit User-Objekten, die sämtliche Benutzer
+                :return Eine Sammlung mit Kleiderschrank-Objekten, die sämtliche Benutzer
                         des Systems repräsentieren.
                 """
         result = []
