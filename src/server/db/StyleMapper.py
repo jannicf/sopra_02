@@ -12,7 +12,7 @@ class StyleMapper(Mapper):
         Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
         berichtigt.
 
-        :param Style das zu speichernde Objekt
+        :param style das zu speichernde Objekt
         :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
         """
         cursor = self._cnx.cursor()
@@ -33,9 +33,9 @@ class StyleMapper(Mapper):
         data = (style.get_id(), style.get_name())
         cursor.execute(command, data)
 
-        """Inhalte des Kleiderschranks speichern, um sicherzustellen, 
-                dass die einzelnen Kleidungsstücke, die zu einem Kleiderschrank gehören, 
-                ebenfalls korrekt in die Datenbank eingefügt werden."""
+        """Constraints von Style speichern, um sicherzustellen, 
+            dass die einzelnen Constraints, die zu einem Style gehören, 
+            ebenfalls korrekt in die Datenbank eingefügt werden.
 
         kardinalitaet_mapper = KardinalitaetMapper(self._cnx)
         for constraint in style.get_constraints():
@@ -52,10 +52,14 @@ class StyleMapper(Mapper):
             constraint.set_style_id(style.get_id())
             implikation_mapper.insert(constraint)
 
+        Features von Style speichern, um sicherzustellen, 
+        dass die einzelnen Features, die zu einem Style gehören, 
+        ebenfalls korrekt in die Datenbank eingefügt werden.
+
         kleidungstyp_mapper = KleidungstypMapper(self._cnx)
         for feature in style.get_features():
             feature.set_style_id(style.get_id())
-            kleidungstyp_mapper.insert(feature)
+            kleidungstyp_mapper.insert(feature) """
 
         self._cnx.commit()
         cursor.close()
@@ -64,7 +68,6 @@ class StyleMapper(Mapper):
 
     def update(self, style):
         """Wiederholtes Schreiben eines Objekts in die Datenbank.
-
         :param style das Objekt, das in die DB geschrieben werden soll
         """
         cursor = self._cnx.cursor()
@@ -73,8 +76,7 @@ class StyleMapper(Mapper):
         data = (style.get_name(), style.get_id())
         cursor.execute(command, data)
 
-        # Noch nicht fertig, Code muss hier ergänzt werden.
-
+        """
         kardinalitaet_mapper = KardinalitaetMapper(self._cnx)
         for constraint in style.get_constraints():
             constraint.set_style_id(style.get_id())
@@ -94,18 +96,16 @@ class StyleMapper(Mapper):
         for feature in style.get_features():
             feature.set_style_id(style.get_id())
             kleidungstyp_mapper.insert(feature)
+        """
 
         self._cnx.commit()
         cursor.close()
 
     def delete(self, style):
         """Löschen der Daten eines Style-Objekts aus der Datenbank.
-
         :param style das aus der DB zu löschende "Objekt"
         """
         cursor = self._cnx.cursor()
-
-        # Noch nicht fertig, Code muss hier ergänzt werden.
 
         command = "DELETE FROM style WHERE id={}".format(style.get_id())
         cursor.execute(command)
@@ -125,17 +125,15 @@ class StyleMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, constraints, features FROM style WHERE id={}".format(style_id)
+        command = "SELECT id, name FROM style WHERE id={}".format(style_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, name, constraints, features) = tuples[0]
+            (id, name) = tuples[0]
             style = Style()
             style.set_id(id)
             style.set_name(name)
-            style.set_constraints(constraints)
-            style.set_features(features)
             result = style
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -157,17 +155,15 @@ class StyleMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, constraints, features FROM style WHERE name={}".format(name)
+        command = "SELECT id, name FROM style WHERE name={}".format(name)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, name, constraints, features) = tuples[0]
+            (id, name) = tuples[0]
             style = Style()
             style.set_id(id)
             style.set_name(name)
-            style.set_constraints(constraints)
-            style.set_features(features)
             result = Style
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -179,13 +175,16 @@ class StyleMapper(Mapper):
 
         return result
 
+    """Wir müssen vorher die Constraint Tabelle definieren.
+
+
     def find_by_constraints(self, constraints):
-        """Auslesen aller Benutzer anhand den zugeordneten Constraints.
+        Auslesen aller Benutzer anhand den zugeordneten Constraints.
 
         :param constraints Constraints der zugehörigen Benutzer.
         :return Eine Sammlung mit Style-Objekten, die sämtliche Benutzer
             mit den gewünschten Constraints enthält.
-        """
+        
         result = None
 
         cursor = self._cnx.cursor()
@@ -202,8 +201,8 @@ class StyleMapper(Mapper):
             style.set_features(features)
             result = Style
         except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
+            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt.
             result = None
 
         self._cnx.commit()
@@ -212,12 +211,12 @@ class StyleMapper(Mapper):
         return result
 
     def find_by_features(self, features):
-        """Auslesen aller Benutzer anhand den zugeordneten Features.
+        Auslesen aller Benutzer anhand den zugeordneten Features.
 
         :param features Features der zugehörigen Benutzer.
         :return Eine Sammlung mit Style-Objekten, die sämtliche Benutzer
             mit den gewünschten Features enthält.
-        """
+        
         result = None
 
         cursor = self._cnx.cursor()
@@ -234,14 +233,16 @@ class StyleMapper(Mapper):
             style.set_features(features)
             result = Style
         except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
+            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt.
             result = None
 
         self._cnx.commit()
         cursor.close()
 
         return result
+        
+        """
 
     def find_all(self):
         """Auslesen aller Benutzer unseres Systems.
@@ -254,12 +255,10 @@ class StyleMapper(Mapper):
         cursor.execute("SELECT * from style")
         tuples = cursor.fetchall()
 
-        for (id, name, constraints, features) in tuples:
+        for (id, name) in tuples:
             style = Style()
             style.set_id(id)
             style.set_name(name)
-            style.set_constraints(constraints)
-            style.set_features(features)
             result.append(style)
 
         self._cnx.commit()
