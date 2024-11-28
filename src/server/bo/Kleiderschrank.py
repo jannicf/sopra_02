@@ -33,11 +33,12 @@ class Kleiderschrank(bo.BusinessObject):
 
     def add_kstueck(self, kleidungsstueck: Kleidungsstueck):
         """Kleidungsstück in den Kleiderschrank hinzufügen"""
-        pass
+        self.__inhalt.append(kleidungsstueck)
 
     def delete_kstueck(self, kleidungsstueck: Kleidungsstueck):
         """Kleidungsstück aus dem Kleiderschrank entfernen"""
-        pass
+        if kleidungsstueck in self.__inhalt:
+            self.__inhalt.remove(kleidungsstueck)
 
     def __str__(self):
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""

@@ -67,7 +67,7 @@ class PersonMapper(Mapper):
         """Suchen einer Person mit vorgegebener Person ID. Da diese eindeutig ist,
                 wird genau ein Objekt zurückgegeben.
 
-                :param id Primärschlüsselattribut (->DB)
+                :param person_id Primärschlüsselattribut (->DB)
                 :return Person-Objekt, das dem übergebenen Schlüssel entspricht, None bei
                     nicht vorhandenem DB-Tupel.
                 """
