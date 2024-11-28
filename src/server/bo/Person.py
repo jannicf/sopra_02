@@ -1,4 +1,5 @@
 from src.server.bo import BusinessObject as bo
+from src.server.bo.Kleiderschrank import Kleiderschrank
 
 class Person(bo.BusinessObject):
 
@@ -48,9 +49,9 @@ class Person(bo.BusinessObject):
         """Auslesen des Kleiderschanks."""
         return self.__kleiderschrank
 
-    def set_kleiderschrank(self, kleiderschrank):
+    def set_kleiderschrank(self, kleiderschrank: Kleiderschrank):
         """Setzen des Kleiderschranks."""
-        pass
+        self.__kleiderschrank = kleiderschrank
 
     def __str__(self):
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""

@@ -24,7 +24,7 @@ class Kardinalitaet(UnaryConstraint):
         self.__max_anzahl = max_anzahl
 
     def get_max_anzahl(self):
-        """Auslesen dder maximalen Anzahl"""
+        """Auslesen der maximalen Anzahl"""
         return self.__max_anzahl
 
     def check_constraint(self):
