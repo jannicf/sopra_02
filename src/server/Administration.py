@@ -1,5 +1,10 @@
-from src.server.bo.Person import Person
-from src.server.db.PersonMapper import PersonMapper
+from src.server.bo.Kardinalitaet import Kardinalitaet
+from src.server.bo.Implikation import Implikation
+from src.server.bo.Mutex import Mutex
+
+from src.server.db.KardinalitaetMapper import KardinalitaetMapper
+from src.server.db.ImplikationMapper import ImplikationMapper
+from src.server.db.MutexMapper import MutexMapper
 
 class WardrobeAdministration(object):
     """Diese Klasse aggregiert sämtliche Business Logik der Anwendung"""
@@ -7,40 +12,37 @@ class WardrobeAdministration(object):
     def __init__(self):
         pass
 
-        """
-        Person-spezifische Methoden
-        """
+    """
+       Constraint-spezifische Methoden
+       """
 
-    def create_person(self, vorname, nachname, nickname, google_id):
-        """Eine neue Person anlegen."""
-        person = Person()
-        person.set_vorname(vorname)
-        person.set_nachname(nachname)
-        person.set_nickname(nickname)
-        person.set_google_id(google_id)
-        person.set_id(1)
+    def create_kardinalitaet(self, min_anzahl, max_anzahl, bezugsobjekt):
+        """Eine Kardinalität anlegen."""
+        kardinalitaet = Kardinalitaet()
+        kardinalitaet.set_min_anzahl(min_anzahl)
+        kardinalitaet.set_max_anzahl(max_anzahl)
+        kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+        kardinalitaet.set_id(1)
 
-        with PersonMapper() as mapper:
-            return mapper.insert(person)
+        with KardinalitaetMapper() as mapper:
+            return mapper.insert(kardinalitaet)
 
-    def get_person_by_id(self, number):
-        """Die Person mit der gegebenen ID auslesen."""
-        with PersonMapper() as mapper:
-            return mapper.find_by_id(number)
+    def create_mutex(self, bezugsobjekt1, bezugsobjekt2):
+        """Eine Mutex-Beziehung anlegen."""
+        mutex = Mutex()
+        mutex.set_bezugsobjekt1(bezugsobjekt1)
+        mutex.set_bezugsobjekt2(bezugsobjekt2)
+        mutex.set_id(1)
 
-    def get_person_by_google_id(self, id):
-        """Die Person mit der gegebenen Google ID auslesen."""
-        with PersonMapper() as mapper:
-            return mapper.find_by_google_id(id)
+        with MutexMapper() as mapper:
+            return mapper.insert(mutex)
 
-    def save_person(self, person):
-        """Die gegebene Person speichern."""
-        with PersonMapper() as mapper:
-            mapper.update(person)
+    def create_implikation(self, bezugsobjekt1, bezugsobjekt2):
+        """Eine Implikations-Beziehung anlegen."""
+        implikation = Implikation()
+        implikation.set_bezugsobjekt1(bezugsobjekt1)
+        implikation.set_bezugsobjekt2(bezugsobjekt2)
+        implikation.set_id(1)
 
-    def delete_person(self, person):
-        """Die gegebene Person aus unserem System löschen."""
-        with PersonMapper() as mapper:
-            if person.get_kleiderschrank() is not None:
-                self.delete_kleiderschrank(person.get_kleiderschrank())
-            mapper.delete(person)
+        with ImplikationMapper() as mapper:
+            return mapper.insert(implikation)
