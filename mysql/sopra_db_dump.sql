@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `implikation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `implikation` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `bezugsobjekt1_id` int NOT NULL,
   `bezugsobjekt2_id` int NOT NULL,
   `style_id` int NOT NULL,
@@ -56,7 +56,7 @@ DROP TABLE IF EXISTS `kardinalitaet`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kardinalitaet` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `min_anzahl` int NOT NULL DEFAULT '0',
   `max_anzahl` int NOT NULL DEFAULT '0',
   `bezugsobjekt_id` int NOT NULL,
@@ -86,7 +86,7 @@ DROP TABLE IF EXISTS `kleiderschrank`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kleiderschrank` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   `eigentuemer_id` int NOT NULL,
   PRIMARY KEY (`id`),
@@ -112,7 +112,7 @@ DROP TABLE IF EXISTS `kleidungsstueck`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kleidungsstueck` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   `typ_id` int NOT NULL,
   `kleiderschrank_id` int NOT NULL,
@@ -141,7 +141,7 @@ DROP TABLE IF EXISTS `kleidungstyp`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `kleidungstyp` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `bezeichnung` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -164,7 +164,7 @@ DROP TABLE IF EXISTS `mutex`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `mutex` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `bezugsobjekt1_id` int NOT NULL,
   `bezugsobjekt2_id` int NOT NULL,
   `style_id` int NOT NULL,
@@ -243,7 +243,7 @@ DROP TABLE IF EXISTS `person`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `person` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `vorname` varchar(128) NOT NULL DEFAULT '',
   `nachname` varchar(128) NOT NULL DEFAULT '',
   `nickname` varchar(128) NOT NULL DEFAULT '',
@@ -269,7 +269,7 @@ DROP TABLE IF EXISTS `style`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `style` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -319,4 +319,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-11-25 23:32:36
+-- Dump completed on 2024-11-29 14:43:42
