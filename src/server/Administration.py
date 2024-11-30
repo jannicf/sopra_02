@@ -355,3 +355,30 @@ class WardrobeAdministration(object):
         with KleidungstypMapper() as mapper:
             mapper.delete(kleidungstyp)
 
+
+    """
+    Validierung-spezifische Methoden
+    """
+
+    def check_outfit_constraints(self, outfit):
+        """Prüft, ob ein Outfit die Constraints seines Styles einhält."""
+        style = self.get_style_by_id(outfit.get_style_id())
+        if not style:
+            return False
+
+        # Jede Constraint-Klasse handhabt ihre Prüfung selbst -> Polymorphie
+        for constraint in style.get_constraints():
+            if not constraint.check_constraint(outfit.get_bausteine()):
+                return False
+
+        return True
+
+    def get_possible_outfits_for_style(self, style_id, kleiderschrank_id):
+        """Findet mögliche Outfit-Kreationen für einen bestimmten Style."""
+        pass
+
+    def get_possible_outfit_completions(self, kleidungsstueck_id, style_id, kleiderschrank_id):
+        """Findet Möglichkeiten, ein Outfit ausgehend von einem Kleidungsstück zu vervollständigen."""
+        pass
+
+
