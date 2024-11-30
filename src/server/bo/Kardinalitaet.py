@@ -27,11 +27,30 @@ class Kardinalitaet(UnaryConstraint):
         """Auslesen der maximalen Anzahl"""
         return self.__max_anzahl
 
-    def check_constraint(self):
+    def check_constraint(self, kleidungsstuecke):
         """
-            Überprüft, ob das Constraint erfüllt ist.
+        Überprüft, ob der Kardinalitäts-Constraint erfüllt ist.
+        Returns True wenn der Constraint erfüllt ist (keine Verletzung),
+        False wenn er verletzt ist.
         """
-        pass
+        # Wenn kein Bezugsobjekt gesetzt ist, können wir nicht prüfen
+        if not self.get_bezugsobjekt():
+            return True
+
+        anzahl = 0
+
+        for kleidungsstueck in kleidungsstuecke:
+
+            """
+            Prüfen, ob die übergebenen kleidungsstücke 
+            vom selben Typ sind wie das Bezugsobjekt
+            """
+
+            if kleidungsstueck.get_typ() == self.get_bezugsobjekt():
+                anzahl += 1
+
+        # Prüfen ob die Anzahl zwischen Minimum und Maximum liegt
+        return self.get_min_anzahl() <= anzahl <= self.get_max_anzahl()
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""

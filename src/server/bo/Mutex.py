@@ -13,7 +13,7 @@ class Mutex(BinaryConstraint):
         Returns True wenn der Constraint erfüllt ist (keine Verletzung),
         False wenn er verletzt ist.
         """
-
+        # Wenn kein Bezugsobjekt gesetzt ist, können wir nicht prüfen
         if not self.get_bezugsobjekt1() or not self.get_bezugsobjekt2():
             return True
 
