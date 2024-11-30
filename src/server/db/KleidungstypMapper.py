@@ -27,20 +27,9 @@ class KleidungstypMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 kleidungstyp.set_id(1)
 
-        command = "INSERT INTO kleidungstyp (id, bezeichnung) VALUES (%s,%s,%s)"
-        data = (kleidungstyp.get_id(), kleidungstyp.get_bezeichnung())
+        command = "INSERT INTO kleidungstyp (id, bezeichnung, verwendung) VALUES (%s,%s,%s)"
+        data = (kleidungstyp.get_id(), kleidungstyp.get_bezeichnung(), kleidungstyp.get_verwendung())
         cursor.execute(command, data)
-
-        # Verwendungen (Styles) separat behandeln
-        verwendungen = kleidungstyp.get_verwendungen()
-
-        # Falls Verwendungen vorhanden sind
-        if verwendungen:
-            # Für jede Verwendung einen separaten Eintrag in einer Verknüpfungstabelle erstellen
-            for verwendung in verwendungen:
-                verknuepfung_command = "INSERT INTO style_kleidungstyp (kleidungstyp_id, style_id) VALUES (%s, %s)"
-                verknuepfung_data = (kleidungstyp.get_id(), verwendung.get_id())
-                cursor.execute(verknuepfung_command, verknuepfung_data)
 
         self._cnx.commit()
         cursor.close()
@@ -56,22 +45,9 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptobjekt aktualisieren
-        command = "UPDATE kleidungstyp" + "SET bezeichnung=%s WHERE id=%s"
-        data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_id())
+        command = "UPDATE kleidungstyp" + "SET bezeichnung=%s, verwendung=%s WHERE id=%s"
+        data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_verwendung(), kleidungstyp.get_id())
         cursor.execute(command, data)
-
-        # Verwendungen (Styles) aktualisieren
-        # Zuerst vorhandene Verknüpfungen löschen
-        delete_command = "DELETE FROM style_kleidungstyp WHERE kleidungstyp_id=%s"
-        cursor.execute(delete_command, (kleidungstyp.get_id(),))
-
-        # Neue Verwendungen einfügen
-        verwendungen = kleidungstyp.get_verwendungen()
-        if verwendungen:
-            for verwendung in verwendungen:
-                verknuepfung_command = "INSERT INTO style_kleidungstyp (kleidungstyp_id, style_id) VALUES (%s, %s)"
-                verknuepfung_data = (kleidungstyp.get_id(), verwendung.get_id())
-                cursor.execute(verknuepfung_command, verknuepfung_data)
 
         self._cnx.commit()
         cursor.close()
@@ -84,13 +60,8 @@ class KleidungstypMapper(Mapper):
         """
         cursor = self._cnx.cursor()
 
-        # Zuerst Verknüpfungen in der Zwischentabelle löschen
-        verknuepfung_command = "DELETE FROM style_kleidungstyp WHERE kleidungstyp_id=%s"
-        cursor.execute(verknuepfung_command, (kleidungstyp.get_id(),))
-
-        # Dann den Kleidungstyp selbst löschen
-        command = "DELETE FROM kleidungstyp WHERE id=%s"
-        cursor.execute(command, (kleidungstyp.get_id(),))
+        command = "DELETE FROM person WHERE id={}".format(kleidungstyp.get_id())
+        cursor.execute(command)
 
         self._cnx.commit()
         cursor.close()
@@ -109,33 +80,16 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptabfrage für den Kleidungstyp
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE id=%s".format(kleidungstyp_id)
+        command = "SELECT id, bezeichnung, verwendung FROM kleidungstyp WHERE id=%s".format(kleidungstyp_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, bezeichnung) = tuples[0]
+            (id, bezeichnung, verwendung) = tuples[0]
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
-
-            # Abfrage der zugehörigen Verwendungen (Styles). Ohne diese Abfrage wäre die Verwendung leer.
-            verwendung_command = """
-                SELECT style.id, style.name 
-                FROM style 
-                JOIN style_kleidungstyp ON style.id = style_kleidungstyp.style_id
-                WHERE style_kleidungstyp.kleidungstyp_id = %s
-            """
-            cursor.execute(verwendung_command, (id,))
-            verwendung_tuples = cursor.fetchall()
-
-            # Styles dem Kleidungstyp hinzufügen
-            for (style_id, style_name) in verwendung_tuples:
-                style = Style()
-                style.set_id(style_id)
-                style.set_name(style_name)
-                kleidungstyp.add_verwendung(style)
-
+            kleidungstyp.add_verwendung(verwendung)
             result = kleidungstyp
 
         except IndexError:
@@ -154,44 +108,65 @@ class KleidungstypMapper(Mapper):
         Auslesen aller Kleidungstypen anhand der Bezeichnung.
 
         :param bezeichnung: Bezeichnung der zu suchenden Kleidungstypen
-        :return: Eine Liste mit Kleidungstyp-Objekten, die der Bezeichnung entsprechen
+        :return: Eine Sammlung mit Kleidungstyp-Objekten, die der Bezeichnung entsprechen
         """
-        result = []
+        result = None
 
         cursor = self._cnx.cursor()
 
         # Parameterisierte Abfrage für Sicherheit
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE bezeichnung={}".format(bezeichnung)
+        command = "SELECT id, bezeichnung, verwendung FROM kleidungstyp WHERE bezeichnung={}".format(bezeichnung)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
-        # Durchlaufen aller gefundenen Datensätze
-        for (id, bezeichnung) in tuples:
+        try:
+            (id, bezeichnung, verwendung) = tuples[0]
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
+            kleidungstyp.add_verwendung(verwendung)
+            result = kleidungstyp
 
-            # Abfrage der zugehörigen Verwendungen (Styles). Ohne diese Abfrage wäre die Verwendung leer.
-            verwendung_command = """
-                SELECT style.id, style.name 
-                FROM style 
-                JOIN style_kleidungstyp ON style.id = style_kleidungstyp.style_id
-                WHERE style_kleidungstyp.kleidungstyp_id = %s
-            """
-            cursor.execute(verwendung_command, (id,))
-            verwendung_tuples = cursor.fetchall()
+        except IndexError:
+            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
+            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            result = None
 
-            # Styles dem Kleidungstyp hinzufügen
-            for (style_id, style_name) in verwendung_tuples:
-                style_dict = {
-                    'id': style_id,
-                    'name': style_name
-                }
-                style = Style.from_dict(style_dict)
-                kleidungstyp.add_verwendung(style)
+        self._cnx.commit()
+        cursor.close()
 
-            result.append(kleidungstyp)
+        return result
 
+    def find_by_verwendung(self, verwendung):
+        """
+        Auslesen aller Kleidungstypen anhand der Verwendung.
+
+        :param verwendung: Verwendung der zu suchenden Kleidungstypen
+        :return: Eine Liste mit Kleidungstyp-Objekten, die der Verwendung entsprechen
+        """
+        result = None
+
+        cursor = self._cnx.cursor()
+
+        # Parameterisierte Abfrage für Sicherheit
+        command = "SELECT id, bezeichnung, verwendung FROM kleidungstyp WHERE bezeichnung={}".format(verwendung)
+        cursor.execute(command)
+        tuples = cursor.fetchall()
+
+        try:
+            (id, bezeichnung, verwendung) = tuples[0]
+            kleidungstyp = Kleidungstyp()
+            kleidungstyp.set_id(id)
+            kleidungstyp.set_bezeichnung(bezeichnung)
+            kleidungstyp.add_verwendung(verwendung)
+            result = kleidungstyp
+
+        except IndexError:
+            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
+            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            result = None
+
+        self._cnx.commit()
         cursor.close()
 
         return result
@@ -200,7 +175,7 @@ class KleidungstypMapper(Mapper):
         """
             Auslesen aller Kleidungstypen im System.
 
-            :return: Eine Liste mit allen Kleidungstyp-Objekten
+            :return: Eine Sammlung mit allen Kleidungstyp-Objekten
         """
         result = []
         cursor = self._cnx.cursor()
@@ -209,32 +184,14 @@ class KleidungstypMapper(Mapper):
         cursor.execute("SELECT id, bezeichnung FROM kleidungstyp")
         tuples = cursor.fetchall()
 
-        for (id, bezeichnung) in tuples:
+        for (id, bezeichnung, verwendung) in tuples:
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
-
-            # Abfrage der zugehörigen Verwendungen (Styles). Ohne diese Abfrage wäre die Verwendung leer.
-            verwendung_command = """
-                SELECT style.id, style.name 
-                FROM style 
-                JOIN style_kleidungstyp ON style.id = style_kleidungstyp.style_id
-                WHERE style_kleidungstyp.kleidungstyp_id = %s
-            """
-            cursor.execute(verwendung_command, (id,))
-            verwendung_tuples = cursor.fetchall()
-
-            # Styles dem Kleidungstyp hinzufügen
-            for (style_id, style_name) in verwendung_tuples:
-                style_dict = {
-                    'id': style_id,
-                    'name': style_name
-                }
-                style = Style.from_dict(style_dict)
-                kleidungstyp.add_verwendung(style)
-
+            kleidungstyp.add_verwendung(verwendung)
             result.append(kleidungstyp)
 
+        self._cnx.commit()
         cursor.close()
 
         return result

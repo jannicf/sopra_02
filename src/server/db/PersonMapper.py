@@ -25,9 +25,9 @@ class PersonMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 person.set_id(1)
 
-        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
+        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id, kleiderschrank) VALUES (%s,%s,%s,%s,%s,%s)"
         data = (person.get_id(), person.get_vorname(), person.get_nachname(), person.get_nickname(),
-                person.get_google_id())
+                person.get_google_id(), person.get_kleiderschrank())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -36,15 +36,15 @@ class PersonMapper(Mapper):
         return person
 
     def update(self, person):
-        """Wiederholtes Schreiben eines Objekts in die Datenbank.
+        """Wiederholtes Schreiben eines Person-Objekts in die Datenbank.
 
                 :param person das Objekt, das in die DB geschrieben werden soll
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE person " + "SET vorname=%s, nachname=%s, nickname=%s, google_id=%s WHERE id=%s"
+        command = "UPDATE person " + "SET vorname=%s, nachname=%s, nickname=%s, google_id=%s, kleiderschrank = %s WHERE id=%s"
         data = (person.get_vorname(), person.get_nachname(), person.get_nickname(),
-                person.get_google_id(), person.get_id())
+                person.get_google_id(), person.get_kleiderschrank(), person.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -75,18 +75,19 @@ class PersonMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE id={}".format(person_id)
+        command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE id={}".format(person_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, vorname, nachname, nickname, google_id) = tuples[0]
+            (id, vorname, nachname, nickname, google_id, kleiderschrank) = tuples[0]
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+            person.set_kleiderschrank(kleiderschrank)
             result = person
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -108,18 +109,19 @@ class PersonMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE vorname={}".format(vorname)
+        command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE vorname={}".format(vorname)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, vorname, nachname, nickname, google_id) = tuples[0]
+            (id, vorname, nachname, nickname, google_id, kleiderschrank) = tuples[0]
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+            person.set_kleiderschrank(kleiderschrank)
             result = person
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -141,18 +143,19 @@ class PersonMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE nachname={}".format(nachname)
+        command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE nachname={}".format(nachname)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, vorname, nachname, nickname, google_id) = tuples[0]
+            (id, vorname, nachname, nickname, google_id, kleiderschrank) = tuples[0]
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+            person.set_kleiderschrank(kleiderschrank)
             result = person
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -174,18 +177,19 @@ class PersonMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE nickname={}".format(nickname)
+        command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE nickname={}".format(nickname)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, vorname, nachname, nickname, google_id) = tuples[0]
+            (id, vorname, nachname, nickname, google_id, kleiderschrank) = tuples[0]
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+            person.set_kleiderschrank(kleiderschrank)
             result = person
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -207,18 +211,19 @@ class PersonMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE google_id={}".format(google_id)
+        command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE google_id={}".format(google_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, vorname, nachname, nickname, google_id) = tuples[0]
+            (id, vorname, nachname, nickname, google_id, kleiderschrank) = tuples[0]
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+            person.set_kleiderschrank(kleiderschrank)
             result = person
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -241,13 +246,14 @@ class PersonMapper(Mapper):
         cursor.execute("SELECT * from person")
         tuples = cursor.fetchall()
 
-        for (id, vorname, nachname, nickname, google_id) in tuples:
+        for (id, vorname, nachname, nickname, google_id, kleiderschrank) in tuples:
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+            person.set_kleiderschrank(kleiderschrank)
             result.append(person)
 
         self._cnx.commit()

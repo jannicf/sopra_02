@@ -7,7 +7,7 @@ class Kleidungstyp(bo.BusinessObject):
     def __init__(self):
         super().__init__()
         self.__bezeichnung = ""  #die Bezeichnung des Kleidungstyps
-        self.__verwendungen = []  # in welchen Styles der Kleidungsytp verwendet wird
+        self.__verwendung = None  # Der Style, in dem der Kleidungstyp verwendet wird
 
     def set_bezeichnung(self, bezeichnung):
         """Setzen des Namens vom Kleidungstyp"""
@@ -18,24 +18,22 @@ class Kleidungstyp(bo.BusinessObject):
         return self.__bezeichnung
 
     def add_verwendung(self, verwendung: Style):
-        """Hinzufügen von verwendeten Styles zu bestimmtem Kleidungstyp"""
-        self.__verwendungen.append(verwendung)
-        # auch dem Style den Kleidungstyp hinzufügen,
-        # wenn er nicht schon in der Liste ist
+        """Setzen des verwendeten Styles für den Kleidungstyp"""
+        self.__verwendung = verwendung
+        # Falls der Style den Kleidungstyp noch nicht kennt, hinzufügen
         if self not in verwendung.get_features():
             verwendung.add_feature(self)
 
-    def delete_verwendung(self, verwendung: Style):
-        """Löschen von verwendeten Styles zu bestimmtem Kleidungstyp"""
-        if verwendung in self.__verwendungen:
-            self.__verwendungen.remove(verwendung)
-            # auch aus der anderen Richtung löschen
-            if self in verwendung.get_features():
-                verwendung.remove_feature(self)
+    def delete_verwendung(self):
+        """Löschen der Verwendung des Styles für den Kleidungstyp"""
+        if self.__verwendung:
+            if self in self.__verwendung.get_features():
+                self.__verwendung.remove_feature(self)
+            self.__verwendung = None
 
-    def get_verwendungen(self):
-        """Auslesen der Verwendungen des Kleidungstyps"""
-        return self.__verwendungen
+    def get_verwendung(self):
+        """Auslesen der Verwendung des Kleidungstyps"""
+        return self.__verwendung
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
@@ -47,8 +45,8 @@ class Kleidungstyp(bo.BusinessObject):
         obj = Kleidungstyp()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_bezeichnung(dictionary["bezeichnung"])
-        # Wenn verwendungen im Dictionary vorhanden sind, diese auch setzen
-        if "verwendungen" in dictionary and dictionary["verwendungen"] is not None:
-            for style in dictionary["verwendungen"]:
-                obj.add_verwendung(style)
+        # Wenn verwendung im Dictionary vorhanden ist, diese auch setzen
+        if "verwendung" in dictionary and dictionary["verwendung"] is not None:
+            style = Style.from_dict(dictionary["verwendung"])
+            obj.add_verwendung(style)
         return obj
