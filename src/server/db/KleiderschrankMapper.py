@@ -87,8 +87,8 @@ class KleiderschrankMapper(Mapper):
         """Danach wird der Kleiderschrank selbst gelöscht. Dies stellt sicher, 
         dass keine verwaisten Kleidungsstücke ohne zugehörigen Kleiderschrank in der Datenbank verbleiben."""
 
-        command = "DELETE FROM kleiderschrank WHERE id=%s"
-        cursor.execute(command, (kleiderschrank.get_id(),))
+        command = "DELETE FROM kleiderschrank WHERE id=%s".format(kleiderschrank.get_id())
+        cursor.execute(command)
 
         self._cnx.commit()
         cursor.close()
