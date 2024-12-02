@@ -117,7 +117,7 @@ class StyleMapper(Mapper):
         """Suchen eines Benutzers mit vorgegebener Style ID. Da diese eindeutig ist,
             wird genau ein Objekt zurückgegeben.
 
-            :param key Primärschlüsselattribut (->DB)
+            :param style_id Primärschlüsselattribut (->DB)
             :return Style-Objekt, das dem übergebenen Schlüssel entspricht, None bei
             nicht vorhandenem DB-Tupel.
         """
