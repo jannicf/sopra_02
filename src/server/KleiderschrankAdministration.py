@@ -396,8 +396,21 @@ class KleiderschrankAdministration(object):
 
             return moegliche_outfits
 
-    def get_possible_outfit_completions(self, kleidungsstueck_id, style_id, kleiderschrank_id):
-        """Findet Möglichkeiten, ein Outfit ausgehend von einem Kleidungsstück zu vervollständigen."""
-        pass
+    def get_possible_outfit_completions(self, kleidungsstueck_id, kleiderschrank_id):
+        """Findet mögliche Kleidungsstücke, die das Outfit basierend auf einem gegebenen Kleidungsstück vervollständigen."""
+        possible_clothing_items = []
+
+        # Hole das Kleidungsstück
+        clothing_item = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
+
+        # Hole den Style des Kleidungsstücks
+        style = clothing_item.get_typ().get_verwendung()
+
+        # Hole alle möglichen Kleidungsstücke für den Style aus dem Kleiderschrank
+        possible_clothing_items = self.get_possible_outfits_for_style(style.get_id(), kleiderschrank_id)
+
+        # Gebe die Liste der passenden Kleidungsstücke zurück
+        return possible_clothing_items
+
 
 

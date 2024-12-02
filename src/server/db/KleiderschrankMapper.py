@@ -27,8 +27,8 @@ class KleiderschrankMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 Kleiderschrank.set_id(1)
 
-        command = "INSERT INTO kleiderschrank (id, eigentuemer, name) VALUES (%s,%s,%s)"
-        data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer(), kleiderschrank.get_name())
+        command = "INSERT INTO kleiderschrank (id, eigentuemer_id, name) VALUES (%s,%s,%s)"
+        data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name())
         cursor.execute(command, data)
 
         """Inhalte des Kleiderschranks speichern, um sicherzustellen, 
@@ -51,8 +51,8 @@ class KleiderschrankMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE kleiderschrank " + "SET eigentümer=%s, name=%s WHERE id=%s"
-        data = (kleiderschrank.get_eigentuemer(), kleiderschrank.get_name(), kleiderschrank.get_id())
+        command = "UPDATE kleiderschrank " + "SET eigentuemer_id=%s, name=%s WHERE id=%s"
+        data = (kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name(), kleiderschrank.get_id())
         cursor.execute(command, data)
 
         """Inhalte des Kleiderschranks aktualisieren:
@@ -68,8 +68,6 @@ class KleiderschrankMapper(Mapper):
 
         self._cnx.commit()
         cursor.close()
-
-
 
     def delete(self, kleiderschrank):
         """Löschen der Daten eines Kleiderschrank-Objekts aus der Datenbank.
@@ -87,18 +85,17 @@ class KleiderschrankMapper(Mapper):
         """Danach wird der Kleiderschrank selbst gelöscht. Dies stellt sicher, 
         dass keine verwaisten Kleidungsstücke ohne zugehörigen Kleiderschrank in der Datenbank verbleiben."""
 
-        command = "DELETE FROM kleiderschrank WHERE id=%s"
-        cursor.execute(command, (kleiderschrank.get_id(),))
+        command = "DELETE FROM kleiderschrank WHERE id=%s".format(kleiderschrank.get_id())
+        cursor.execute(command)
 
         self._cnx.commit()
         cursor.close()
-
 
     def find_by_id(self, kleiderschrank_id):
         """Suchen eines Kleiderschranks mit vorgegebener ID. Da diese eindeutig ist,
                 wird genau ein Objekt zurückgegeben.
 
-                :param key Primärschlüsselattribut (->DB)
+                :param kleiderschrank_id Primärschlüsselattribut (->DB)
                 :return Kleiderschrank-Objekt, das dem übergebenen Schlüssel entspricht, None bei
                     nicht vorhandenem DB-Tupel.
                 """
@@ -106,19 +103,19 @@ class KleiderschrankMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, eigentuemer, name FROM kleiderschrank WHERE id={}".format(kleiderschrank_id)
+        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE id={}".format(kleiderschrank_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, eigentuemer, name) = tuples[0]
+            (id, eigentuemer_id, name) = tuples[0]
 
             kleiderschrank = Kleiderschrank()
             kleiderschrank.set_id(id)
             kleiderschrank.set_name(name)
 
             person_mapper = PersonMapper(self._cnx)
-            eigentuemer = person_mapper.find_by_id(person_id)
+            eigentuemer = person_mapper.find_by_id(eigentuemer_id)
             kleiderschrank.set_eigentuemer(eigentuemer)
 
             kleidungsstueck_mapper = KleidungsstueckMapper(self._cnx)
@@ -136,7 +133,6 @@ class KleiderschrankMapper(Mapper):
 
         return result
 
-
     def find_by_eigentuemer(self, eigentuemer):
         """Auslesen aller Kleiderschränke anhand des zugeordneten Eigentuemers.
 
@@ -144,16 +140,16 @@ class KleiderschrankMapper(Mapper):
         :return Eine Sammlung mit Kleiderschrank-Objekten, die sämtliche Kleiderschränke
             mit dem gewünschten Eigentuemer enthält.
         """
-        result = None
+        result = []
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, eigentuemer, name FROM kleiderschrank WHERE eigentuemer={}".format(eigentuemer)
+        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE eigentuemer_id={}".format(eigentuemer.get_id())
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
             # Versuchen, alle Ergebnisse zu iterieren
-            for (id, name, eigentuemer_id) in tuples:
+            for (id, eigentuemer_id, name) in tuples:
                 kleiderschrank = Kleiderschrank()
                 kleiderschrank.set_id(id)
                 kleiderschrank.set_name(name)
@@ -188,7 +184,7 @@ class KleiderschrankMapper(Mapper):
         cursor.execute("SELECT * from kleiderschrank")
         tuples = cursor.fetchall()
 
-        for (id, name, eigentuemer_id) in tuples:
+        for (id, eigentuemer_id, name) in tuples:
             kleiderschrank = Kleiderschrank()
             kleiderschrank.set_id(id)
             kleiderschrank.set_name(name)

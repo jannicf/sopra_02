@@ -140,15 +140,15 @@ class PersonMapper(Mapper):
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
             mit der gewünschten Nachname enthält.
         """
-        result = None
+        result = []
 
         cursor = self._cnx.cursor()
         command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE nachname={}".format(nachname)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
-        try:
-            (id, vorname, nachname, nickname, google_id, kleiderschrank) = tuples[0]
+
+        for (id, vorname, nachname, nickname, google_id, kleiderschrank) in tuples[0]:
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
@@ -156,11 +156,7 @@ class PersonMapper(Mapper):
             person.set_nickname(nickname)
             person.set_google_id(google_id)
             person.set_kleiderschrank(kleiderschrank)
-            result = person
-        except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
-            result = None
+            result.append(person)
 
         self._cnx.commit()
         cursor.close()
