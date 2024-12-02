@@ -17,19 +17,12 @@ class Kleidungstyp(bo.BusinessObject):
         """Auslesen des Namens vom Kleidungstyp"""
         return self.__bezeichnung
 
-    def add_verwendung(self, verwendung: Style):
+    def set_verwendung(self, verwendung: Style):
         """Setzen des verwendeten Styles für den Kleidungstyp"""
         self.__verwendung = verwendung
         # Falls der Style den Kleidungstyp noch nicht kennt, hinzufügen
         if self not in verwendung.get_features():
             verwendung.add_feature(self)
-
-    def delete_verwendung(self):
-        """Löschen der Verwendung des Styles für den Kleidungstyp"""
-        if self.__verwendung:
-            if self in self.__verwendung.get_features():
-                self.__verwendung.remove_feature(self)
-            self.__verwendung = None
 
     def get_verwendung(self):
         """Auslesen der Verwendung des Kleidungstyps"""
@@ -48,5 +41,5 @@ class Kleidungstyp(bo.BusinessObject):
         # Wenn verwendung im Dictionary vorhanden ist, diese auch setzen
         if "verwendung" in dictionary and dictionary["verwendung"] is not None:
             style = Style.from_dict(dictionary["verwendung"])
-            obj.add_verwendung(style)
+            obj.set_verwendung(style)
         return obj

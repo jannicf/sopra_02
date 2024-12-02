@@ -89,7 +89,7 @@ class KleidungstypMapper(Mapper):
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
-            kleidungstyp.add_verwendung(verwendung)
+            kleidungstyp.set_verwendung(verwendung)
             result = kleidungstyp
 
         except IndexError:
@@ -124,7 +124,7 @@ class KleidungstypMapper(Mapper):
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
-            kleidungstyp.add_verwendung(verwendung)
+            kleidungstyp.set_verwendung(verwendung)
             result = kleidungstyp
 
         except IndexError:
@@ -158,7 +158,7 @@ class KleidungstypMapper(Mapper):
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
-            kleidungstyp.add_verwendung(verwendung)
+            kleidungstyp.set_verwendung(verwendung)
             result = kleidungstyp
 
         except IndexError:
@@ -188,7 +188,7 @@ class KleidungstypMapper(Mapper):
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
-            kleidungstyp.add_verwendung(verwendung)
+            kleidungstyp.set_verwendung(verwendung)
             result.append(kleidungstyp)
 
         self._cnx.commit()
