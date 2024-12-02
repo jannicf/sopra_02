@@ -19,7 +19,7 @@ from src.server.db.StyleMapper import StyleMapper
 from src.server.db.OutfitMapper import OutfitMapper
 from src.server.db.KleidungstypMapper import KleidungstypMapper
 
-class WardrobeAdministration(object):
+class KleiderschrankAdministration(object):
     """Diese Klasse aggregiert sämtliche Business Logik der Anwendung.
     Die Administration-Klasse übernimmt in unserer Anwendung die zentrale
     Verantwortung für die Geschäftslogik (Business Logic) und ruft die Mapper
