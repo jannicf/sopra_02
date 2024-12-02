@@ -375,7 +375,26 @@ class KleiderschrankAdministration(object):
 
     def get_possible_outfits_for_style(self, style_id, kleiderschrank_id):
         """Findet mögliche Outfit-Kreationen für einen bestimmten Style."""
-        pass
+            moegliche_outfits = []
+
+            # Hole den Style
+            style = self.get_style_by_id(style_id)
+            if not style:
+                return []
+
+            # Hole die Kleidungsstücke aus dem Kleiderschrank
+            kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+            kleidungsstuecke = kleiderschrank.get_inhalt()
+
+            # Erstelle Outfits, die dem Style entsprechen
+            for kleidungsstueck in kleidungsstuecke:
+                outfit = self.create_outfit()
+                outfit.add_baustein(kleidungsstueck)
+
+                if self.check_outfit_constraints(outfit):
+                    moegliche_outfits.append(outfit)
+
+            return moegliche_outfits
 
     def get_possible_outfit_completions(self, kleidungsstueck_id, style_id, kleiderschrank_id):
         """Findet Möglichkeiten, ein Outfit ausgehend von einem Kleidungsstück zu vervollständigen."""
