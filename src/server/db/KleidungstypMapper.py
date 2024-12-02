@@ -144,7 +144,7 @@ class KleidungstypMapper(Mapper):
         :param verwendung: Verwendung der zu suchenden Kleidungstypen
         :return: Eine Liste mit Kleidungstyp-Objekten, die der Verwendung entsprechen
         """
-        result = None
+        result = []
 
         cursor = self._cnx.cursor()
 
@@ -153,18 +153,13 @@ class KleidungstypMapper(Mapper):
         cursor.execute(command)
         tuples = cursor.fetchall()
 
-        try:
-            (id, bezeichnung, verwendung) = tuples[0]
+
+        for (id, bezeichnung, verwendung) in tuples[0]:
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
             kleidungstyp.set_verwendung(verwendung)
-            result = kleidungstyp
-
-        except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
-            result = None
+            result.append(kleidungstyp)
 
         self._cnx.commit()
         cursor.close()
