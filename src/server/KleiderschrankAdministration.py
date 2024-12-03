@@ -374,7 +374,7 @@ class KleiderschrankAdministration(object):
         return True
 
     def get_possible_outfits_for_style(self, style_id, kleiderschrank_id):
-        """Findet mögliche Outfit-Kreationen für einen bestimmten Style."""
+            """Findet mögliche Outfit-Kreationen für einen bestimmten Style."""
             moegliche_outfits = []
 
             # Hole den Style
