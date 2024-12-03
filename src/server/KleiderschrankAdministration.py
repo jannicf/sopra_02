@@ -396,6 +396,18 @@ class KleiderschrankAdministration(object):
 
             return moegliche_outfits
 
+    def create_outfit_from_selection(self, passende_kleidungsstuecke, style_id):  #Der Parameter passende_kleidungsstuecke kommt aus der Liste mit Kleidungsstücken
+        """Erstellt ein Outfit aus ausgewählten Style."""
+        outfit = self.create_outfit()
+        style = self.get_style_by_id(style_id)
+        outfit.set_style(style)
+
+        for kleidungsstueck in passende_kleidungsstuecke:
+            kleidungsstueck = self.get_kleidungsstueck_by_id(kleidungsstueck)
+            outfit.add_baustein(kleidungsstueck)
+
+        return outfit if self.check_outfit_constraints(outfit) else None
+
     def get_possible_outfit_completions(self, kleidungsstueck_id, kleiderschrank_id):
         """Findet mögliche Kleidungsstücke, die das Outfit basierend auf einem gegebenen Kleidungsstück vervollständigen."""
         possible_clothing_items = []
