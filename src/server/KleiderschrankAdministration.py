@@ -420,5 +420,21 @@ class KleiderschrankAdministration(object):
         # Gebe die Liste der passenden Kleidungsstücke zurück
         return possible_clothing_items
 
+    def create_outfit_from_base_item(self, possible_clothing_items):
+        """Erstellt ein Outfit aus einer Liste von Kleidungsstücken, die zu einer bestimmten Basis gehört."""
+        # Wenn die Liste der Kleidungsstücke leer ist, gebe None zurück
+        if not possible_clothing_items:
+            return None
+
+        # Erstelle ein neues Outfit
+        outfit = self.create_outfit()
+
+        # Füge alle passenden Kleidungsstücke aus der Liste zum Outfit hinzu
+        for kleidungsstueck in possible_clothing_items:
+            outfit.add_baustein(kleidungsstueck)
+
+        # Überprüfe, ob das Outfit den Constraints entspricht
+        return outfit if self.check_outfit_constraints(outfit) else None
+
 
 
