@@ -26,8 +26,9 @@ class Style(bo.BusinessObject):
     def add_feature(self, kleidungstyp: Kleidungstyp):
         """Fügt einen Kleidungstyp zum Style hinzu"""
         self.__features.append(kleidungstyp)
-        # auch dem Kleidungstyp den Style hinzufügen
-        if kleidungstyp.get_verwendung() != self:
+        # auch dem Kleidungstyp den Style hinzufügen,
+        # wenn er nicht schon in der Liste ist
+        if self not in kleidungstyp.get_verwendungen():
             kleidungstyp.add_verwendung(self)
 
     def remove_feature(self, kleidungstyp: Kleidungstyp):
@@ -35,8 +36,8 @@ class Style(bo.BusinessObject):
         if kleidungstyp in self.__features:
             self.__features.remove(kleidungstyp)
             # auch aus der anderen Richtung löschen
-            if kleidungstyp.get_verwendung() == self:
-                kleidungstyp.delete_verwendung()
+            if self in kleidungstyp.get_verwendungen():
+                kleidungstyp.delete_verwendung(self)
 
     def get_features(self):
         """Gibt alle Kleidungstypen zurück"""
