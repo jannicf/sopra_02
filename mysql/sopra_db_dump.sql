@@ -250,7 +250,7 @@ CREATE TABLE `person` (
   `vorname` varchar(128) NOT NULL DEFAULT '',
   `nachname` varchar(128) NOT NULL DEFAULT '',
   `nickname` varchar(128) NOT NULL DEFAULT '',
-  `google_id` int NOT NULL,
+  `google_id` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -322,4 +322,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-02 17:06:18
+-- Dump completed on 2024-12-05 13:34:36
