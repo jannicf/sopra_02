@@ -14,7 +14,7 @@ class Mapper(AbstractContextManager, ABC):
             Die App befindet sich somit im **Production Mode** und zwar im *Standard Environment*.
             Hierbei handelt es sich also um die Verbindung zwischen Google App Engine und Cloud SQL."""
 
-            self._cnx = connector.connect(user='root', password='sopra2425',
+            self._cnx = connector.connect(user='root', password='peterthies',
                                           unix_socket='#hier kommt google cloud verbindung hin#',
                                           database='sopra_db')
         else:
@@ -22,7 +22,7 @@ class Mapper(AbstractContextManager, ABC):
             also auf einem Local Development Server. Hierbei stellen wir eine einfache Verbindung zu einer lokal
             installierten mySQL-Datenbank her."""
 
-            self._cnx = connector.connect(host='localhost', user='root', password='sopra2425',
+            self._cnx = connector.connect(host='localhost', user='root', password='peterthies',
                                           database='sopra_db')
 
         return self
