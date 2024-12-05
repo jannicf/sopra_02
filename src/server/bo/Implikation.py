@@ -1,4 +1,4 @@
-from src.server.bo import BinaryConstraint
+from src.server.bo.BinaryConstraint import BinaryConstraint
 from src.server.bo.Kleidungsstueck import Kleidungsstueck
 # Kleidungsstueck importieren um die Methode get_typ() zu verwenden
 

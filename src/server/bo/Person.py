@@ -1,5 +1,4 @@
 from src.server.bo import BusinessObject as bo
-from src.server.bo.Kleiderschrank import Kleiderschrank
 
 class Person(bo.BusinessObject):
 
@@ -49,9 +48,11 @@ class Person(bo.BusinessObject):
         """Auslesen des Kleiderschanks."""
         return self.__kleiderschrank
 
-    def set_kleiderschrank(self, kleiderschrank: Kleiderschrank):
+    def set_kleiderschrank(self, kleiderschrank):
         """Setzen des Kleiderschranks."""
-        self.__kleiderschrank = kleiderschrank
+        from src.server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
+        if isinstance(kleiderschrank, Kleiderschrank):
+            self.__kleiderschrank = kleiderschrank
 
     def __str__(self):
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
@@ -63,11 +64,13 @@ class Person(bo.BusinessObject):
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in eine Person()."""
+        from src.server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
         obj = Person()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
+        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject!
         obj.set_vorname(dictionary["vorname"])
         obj.set_nachname(dictionary["nachname"])
         obj.set_nickname(dictionary["nickname"])
         obj.set_google_id(dictionary["google_id"])
-        obj.set_kleiderschrank(dictionary["kleiderschrank"])
+        if dictionary["kleiderschrank"]:
+            obj.set_kleiderschrank(Kleiderschrank.from_dict(dictionary["kleiderschrank"]))
         return obj

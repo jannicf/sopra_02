@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
-from src.server.bo import Constraint
-from Kleidungstyp import Kleidungstyp
+from abc import abstractmethod
+from src.server.bo.Constraint import Constraint
+from src.server.bo import Kleidungstyp
 
 
-class BinaryConstraint(Constraint, ABC):
+class BinaryConstraint(Constraint):
     def __init__(self):
         """
         Initialisiert ein binäres Constraint.

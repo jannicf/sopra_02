@@ -1,11 +1,6 @@
 from src.server.bo import BusinessObject as bo
 from src.server.bo.Constraint import Constraint
-from src.server.bo.Implikation import Implikation
-from src.server.bo.Kardinalitaet import Kardinalitaet
-from src.server.bo.Mutex import Mutex
-#Constraints importieren um Objekte der Kindklassen von Constraint speichern zu können
-from src.server.bo.Kleidungstyp import Kleidungstyp
-#Kleidungstyp importieren um KLeidungstyp-Objekte speichern zu können
+
 
 class Style(bo.BusinessObject):
 
@@ -23,15 +18,17 @@ class Style(bo.BusinessObject):
         """Auslesen des Namens vom Style"""
         return self.__name
 
-    def add_feature(self, kleidungstyp: Kleidungstyp):
+    def add_feature(self, kleidungstyp):
         """Fügt einen Kleidungstyp zum Style hinzu"""
+        from src.server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
         self.__features.append(kleidungstyp)
         # auch dem Kleidungstyp den Style hinzufügen
         if kleidungstyp.get_verwendung() != self:
             kleidungstyp.add_verwendung(self)
 
-    def remove_feature(self, kleidungstyp: Kleidungstyp):
+    def remove_feature(self, kleidungstyp):
         """Entfernt einen Kleidungstyp aus dem Style"""
+        from src.server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
         if kleidungstyp in self.__features:
             self.__features.remove(kleidungstyp)
             # auch aus der anderen Richtung löschen
@@ -42,9 +39,12 @@ class Style(bo.BusinessObject):
         """Gibt alle Kleidungstypen zurück"""
         return self.__features
 
-    def add_constraint(self, constraint: Constraint):
+    def add_constraint(self, constraint):
         """Fügt einen Constraint zum Style hinzu, sofern er ein Objekt von
            instantiierbaren Constraint-Kindklassen ist"""
+        from src.server.bo.Kardinalitaet import Kardinalitaet
+        from src.server.bo.Mutex import Mutex
+        from src.server.bo.Implikation import Implikation
         if isinstance(constraint, (Kardinalitaet, Mutex, Implikation)):
             self.__constraints.append(constraint)
 
@@ -64,8 +64,13 @@ class Style(bo.BusinessObject):
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in einen Style()."""
+        from src.server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
+        from src.server.bo.Kardinalitaet import Kardinalitaet
+        from src.server.bo.Mutex import Mutex
+        from src.server.bo.Implikation import Implikation
+
         obj = Style()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
+        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject!
         obj.set_name(dictionary["name"])
         # Wenn constraints im Dictionary vorhanden sind, diese auch setzen
         if "constraints" in dictionary and dictionary["constraints"] is not None:

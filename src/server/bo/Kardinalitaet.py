@@ -1,5 +1,5 @@
-from src.server.bo import UnaryConstraint
-from Kleidungstyp import Kleidungstyp
+from src.server.bo.UnaryConstraint import UnaryConstraint
+from src.server.bo.Kleidungstyp import Kleidungstyp
 
 class Kardinalitaet(UnaryConstraint):
 

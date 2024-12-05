@@ -1,6 +1,4 @@
 from src.server.bo import BusinessObject as bo
-from src.server.bo.Person import Person
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
 # Person und Kleidungsstueck importieren um diese Objekte speichern zu können
 
 class Kleiderschrank(bo.BusinessObject):
@@ -23,20 +21,25 @@ class Kleiderschrank(bo.BusinessObject):
         """Auslesen des Kleiderschrankinhalts"""
         return self.__inhalt
 
-    def set_eigentuemer(self, eigentuemer: Person):
+    def set_eigentuemer(self, eigentuemer):
         """Setzen des Eigentümers"""
-        self.__eigentuemer = eigentuemer
+        from src.server.bo.Person import Person  # Lokaler Import
+        if isinstance(eigentuemer, Person):
+            self.__eigentuemer = eigentuemer
 
     def get_eigentuemer(self):
         """Auslesen des Eigentümers"""
         return self.__eigentuemer
 
-    def add_kstueck(self, kleidungsstueck: Kleidungsstueck):
+    def add_kstueck(self, kleidungsstueck):
         """Kleidungsstück in den Kleiderschrank hinzufügen"""
-        self.__inhalt.append(kleidungsstueck)
+        from src.server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
+        if isinstance(kleidungsstueck, Kleidungsstueck):
+            self.__inhalt.append(kleidungsstueck)
 
-    def delete_kstueck(self, kleidungsstueck: Kleidungsstueck):
+    def delete_kstueck(self, kleidungsstueck):
         """Kleidungsstück aus dem Kleiderschrank entfernen"""
+        from src.server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
         if kleidungsstueck in self.__inhalt:
             self.__inhalt.remove(kleidungsstueck)
 
@@ -47,12 +50,15 @@ class Kleiderschrank(bo.BusinessObject):
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in einen Kleiderschrank()."""
+        from src.server.bo.Person import Person  # Lokaler Import
+        from src.server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
         obj = Kleiderschrank()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
+        obj.set_id(dictionary["id"])  # Teil von BusinessObject
         obj.set_name(dictionary["name"])
-        obj.set_eigentuemer(dictionary["eigentuemer"])
-        # Wenn inhalt im Dictionary vorhanden ist, diesen auch setzen
+        if dictionary["eigentuemer"]:
+            obj.set_eigentuemer(Person.from_dict(dictionary["eigentuemer"]))
+        # Wenn Inhalt im Dictionary vorhanden ist, diesen auch setzen
         if "inhalt" in dictionary and dictionary["inhalt"] is not None:
             for kleidungsstueck in dictionary["inhalt"]:
-                obj.add_kstueck(kleidungsstueck)
+                obj.add_kstueck(Kleidungsstueck.from_dict(kleidungsstueck))
         return obj

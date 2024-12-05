@@ -1,8 +1,9 @@
-from abc import ABC, abstractmethod
-from src.server.bo import Constraint
-from Kleidungstyp import Kleidungstyp
+from abc import abstractmethod
+from src.server.bo.Constraint import Constraint
+from src.server.bo import Kleidungstyp
 
-class UnaryConstraint(Constraint, ABC):
+
+class UnaryConstraint(Constraint):
 
     def __init__(self):
         """

@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
-from src.server.bo import BusinessObject
+from abc import abstractmethod
+from src.server.bo.BusinessObject import BusinessObject
 
-class Constraint(BusinessObject, ABC):
+class Constraint(BusinessObject):
 
     def __init__(self):
         """
