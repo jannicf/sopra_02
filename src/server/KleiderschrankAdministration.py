@@ -474,11 +474,14 @@ class KleiderschrankAdministration(object):
 
         # Hole den Style des Kleidungsstücks
         kleidungstyp = clothing_item.get_typ()
-        style = kleidungstyp.get_verwendungen()
+        style_liste = kleidungstyp.get_verwendungen()
 
         # Hole alle möglichen Kleidungsstücke für den Style aus dem Kleiderschrank
-        for kleidungsstueck in self.get_possible_outfits_for_style(style.get_id(), kleiderschrank_id):
-            possible_clothing_items.append(kleidungsstueck)
+        for style in style_liste:
+            kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+            for kleidungsstueck in kleiderschrank.get_inhalt():
+                if kleidungsstueck.get_typ() in style.get_features():
+                    possible_clothing_items.append(kleidungsstueck)
 
         # Gebe die Liste der passenden Kleidungsstücke zurück
         return possible_clothing_items
