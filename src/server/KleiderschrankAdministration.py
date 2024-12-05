@@ -54,6 +54,11 @@ class KleiderschrankAdministration(object):
         with KardinalitaetMapper() as mapper:
             return mapper.find_all()
 
+    def get_all_kardinalitaeten_by_bezugsobjekt(self, bezugsobjekt):
+        """Alle Kardinalitäten mit bestimmtem Bezugsobjekt auslesen"""
+        with KardinalitaetMapper() as mapper:
+            return mapper.find_all_bezugsobjekt(bezugsobjekt)
+
     def save_kardinalitaet(self, kardinalitaet):
         """Die gegebene Kardinalität speichern."""
         with KardinalitaetMapper() as mapper:
@@ -84,6 +89,11 @@ class KleiderschrankAdministration(object):
         with MutexMapper() as mapper:
             return mapper.find_all()
 
+    def get_all_mutex_by_bezugsobjekt(self, bezugsobjekt):
+        """Alle Mutex mit bestimmtem Bezugsobjekt auslesen"""
+        with MutexMapper() as mapper:
+            return mapper.find_by_any_bezugsobjekt(bezugsobjekt)
+
     def save_mutex(self, mutex):
         """Die gegebene Mutex-Beziehung speichern."""
         with MutexMapper() as mapper:
@@ -113,6 +123,11 @@ class KleiderschrankAdministration(object):
         """Alle Implikations-Beziehungen auslesen."""
         with ImplikationMapper() as mapper:
             return mapper.find_all()
+
+    def get_all_implikationen_by_bezugsobjekt(self, bezugsobjekt):
+        """Alle Implikationen mit bestimmtem Bezugsobjekt auslesen"""
+        with ImplikationMapper() as mapper:
+            return mapper.find_by_any_bezugsobjekt(bezugsobjekt)
 
     def save_implikation(self, implikation):
         """Die gegebene Implikations-Beziehung speichern."""
@@ -162,11 +177,12 @@ class KleiderschrankAdministration(object):
             # Prüfen, ob die Person einen Kleiderschrank besitzt
             if person.get_kleiderschrank() is not None:
                 kleiderschrank = person.get_kleiderschrank()
-                # Kleiderschrank mit allen Inhalten löschen
-                with KleiderschrankMapper() as kleiderschrank_mapper:
-                    kleiderschrank_mapper.delete(kleiderschrank)
+                # Erst alle Kleidungsstücke aus dem Kleiderschrank löschen
+                for kleidungsstueck in kleiderschrank.get_inhalt():
+                    self.delete_kleidungsstueck(kleidungsstueck)
+                # Dann den Kleiderschrank löschen
+                self.delete_kleiderschrank(kleiderschrank)
 
-            # Schließlich die Person selbst löschen
             person_mapper.delete(person)
 
 
@@ -236,7 +252,20 @@ class KleiderschrankAdministration(object):
     def delete_style(self, style):
         """Den gegebenen Style aus unserem System löschen."""
         with StyleMapper() as mapper:
+            # Prüfen, ob Style die bestimmten Constraints besitzt und diese dann ggf. auch löschen
+            for constraint in style.get_constraints():
+                if isinstance(constraint, Kardinalitaet):
+                    self.delete_kardinalitaet(constraint)
+                elif isinstance(constraint, Mutex):
+                    self.delete_mutex(constraint)
+                elif isinstance(constraint, Implikation):
+                    self.delete_implikation(constraint)
+            # Verbindungen zu Kleidungstypen auflösen
+            for kleidungstyp in style.get_features():
+                kleidungstyp.delete_verwendung(style)
+            # Schließlich den Style selbst löschen
             mapper.delete(style)
+
 
 
     """
@@ -269,6 +298,7 @@ class KleiderschrankAdministration(object):
     def delete_outfit(self, outfit):
         """Das gegebene Outfit aus unserem System löschen."""
         with OutfitMapper() as mapper:
+            outfit.get_bausteine().clear()
             mapper.delete(outfit)
 
 
@@ -314,6 +344,15 @@ class KleiderschrankAdministration(object):
     def delete_kleidungsstueck(self, kleidungsstueck):
         """Das gegebene Kleidungsstück aus unserem System löschen."""
         with KleidungsstueckMapper() as mapper:
+            # Aus allen Outfits entfernen
+            outfits = self.get_all_outfits()
+            for outfit in outfits:
+                outfit.remove_baustein(kleidungsstueck)
+                self.save_outfit(outfit)
+            # Aus dem Kleiderschrank entfernen
+            if kleidungsstueck.get_kleiderschrank():
+                kleidungsstueck.get_kleiderschrank().delete_kstueck(kleidungsstueck)
+            # das Kleidungsstück selbst löschen
             mapper.delete(kleidungsstueck)
 
 
@@ -353,8 +392,30 @@ class KleiderschrankAdministration(object):
     def delete_kleidungstyp(self, kleidungstyp):
         """Den gegebenen Kleidungstyp aus unserem System löschen."""
         with KleidungstypMapper() as mapper:
-            mapper.delete(kleidungstyp)
+            # Erst alle abhängigen Kleidungsstücke löschen
+            kleidungsstuecke = self.get_kleidungsstueck_by_typ(kleidungstyp)
+            for kleidungsstueck in kleidungsstuecke:
+                self.delete_kleidungsstueck(kleidungsstueck)
 
+            # Alle verknüpften Constraints finden und löschen
+            kardinalitaets_constraints = self.get_all_kardinalitaeten_by_bezugsobjekt(kleidungstyp)
+            for kardinalitaet in kardinalitaets_constraints:
+                self.delete_kardinalitaet(kardinalitaet)
+
+            mutex_constraints = self.get_all_mutex_by_bezugsobjekt(kleidungstyp)
+            for mutex in mutex_constraints:
+                self.delete_mutex(mutex)
+
+            implikation_constraints = self.get_all_implikationen_by_bezugsobjekt(kleidungstyp)
+            for implikation in implikation_constraints:
+                self.delete_implikation(implikation)
+
+            # Style-Referenzen entfernen
+            for style in kleidungstyp.get_verwendungen():
+                style.remove_feature(kleidungstyp)
+
+            # Schließlich den Kleidungstyp selbst löschen
+            mapper.delete(kleidungstyp)
 
     """
     Validierung-spezifische Methoden
