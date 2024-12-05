@@ -473,7 +473,8 @@ class KleiderschrankAdministration(object):
         clothing_item = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
 
         # Hole den Style des Kleidungsstücks
-        style = clothing_item.get_typ().get_verwendung()
+        kleidungstyp = clothing_item.get_typ()
+        style = kleidungstyp.get_verwendungen()
 
         # Hole alle möglichen Kleidungsstücke für den Style aus dem Kleiderschrank
         for kleidungsstueck in self.get_possible_outfits_for_style(style.get_id(), kleiderschrank_id):
