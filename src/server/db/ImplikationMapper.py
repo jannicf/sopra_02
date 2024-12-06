@@ -26,8 +26,8 @@ class ImplikationMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 implikation.set_id(1)
 
-        command = "INSERT INTO implikation (id, bezugsobjekt1, bezugsobjekt2) VALUES (%s,%s,%s)"
-        data = (implikation.get_id(), implikation.get_bezugsobjekt1(), implikation.get_bezugsobjekt2())
+        command = "INSERT INTO implikation (id, bezugsobjekt1_id, bezugsobjekt2_id) VALUES (%s,%s,%s)"
+        data = (implikation.get_id(), implikation.get_bezugsobjekt1().get_id(), implikation.get_bezugsobjekt2().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -42,8 +42,8 @@ class ImplikationMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE implikation " + "SET bezugsobjekt1=%s, bezugsobjekt2=%s WHERE id=%s"
-        data = (implikation.get_bezugsobjekt1(), implikation.get_bezugsobjekt2(), implikation.get_id())
+        command = "UPDATE implikation SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s WHERE id=%s"
+        data = (implikation.get_bezugsobjekt1().get_id(), implikation.get_bezugsobjekt2().get_id(), implikation.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -74,7 +74,7 @@ class ImplikationMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, bezugsobjekt1, bezugsobjekt2 FROM implikation WHERE id={}".format(implikation_id)
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM implikation WHERE id={}".format(implikation_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
@@ -104,8 +104,8 @@ class ImplikationMapper(Mapper):
         result = []
         cursor = self._cnx.cursor()
 
-        command = ("SELECT id, bezugsobjekt1, bezugsobjekt2 FROM implikation "
-                   "WHERE bezugsobjekt1={} OR bezugsobjekt2={}").format(bezugsobjekt, bezugsobjekt)
+        command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM implikation "
+                   "WHERE bezugsobjekt1_id={} OR bezugsobjekt2_id={}").format(bezugsobjekt, bezugsobjekt)
         cursor.execute(command)
         tuples = cursor.fetchall()
 

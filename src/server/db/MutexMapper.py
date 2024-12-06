@@ -26,8 +26,8 @@ class MutexMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 mutex.set_id(1)
 
-        command = "INSERT INTO mutex (id, bezugsobjekt1, bezugsobjekt2) VALUES (%s,%s,%s)"
-        data = (mutex.get_id(), mutex.get_bezugsobjekt1(), mutex.get_bezugsobjekt2())
+        command = "INSERT INTO mutex (id, bezugsobjekt1_id, bezugsobjekt2_id) VALUES (%s,%s,%s)"
+        data = (mutex.get_id(), mutex.get_bezugsobjekt1().get_id(), mutex.get_bezugsobjekt2().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -42,8 +42,8 @@ class MutexMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE mutex " + "SET bezugsobjekt1=%s, bezugsobjekt2=%s WHERE id=%s"
-        data = (mutex.get_bezugsobjekt1(), mutex.get_bezugsobjekt2(), mutex.get_id())
+        command = "UPDATE mutex SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s WHERE id=%s"
+        data = (mutex.get_bezugsobjekt1().get_id, mutex.get_bezugsobjekt2().get_id(), mutex.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -74,7 +74,7 @@ class MutexMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, bezugsobjekt1, bezugsobjekt2 FROM mutex WHERE id={}".format(mutex_id)
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM mutex WHERE id={}".format(mutex_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
@@ -104,8 +104,8 @@ class MutexMapper(Mapper):
         result = []
         cursor = self._cnx.cursor()
 
-        command = ("SELECT id, bezugsobjekt1, bezugsobjekt2 FROM mutex "
-                   "WHERE bezugsobjekt1={} OR bezugsobjekt2={}").format(bezugsobjekt, bezugsobjekt)
+        command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM mutex "
+                   "WHERE bezugsobjekt1_id={} OR bezugsobjekt2_id={}").format(bezugsobjekt, bezugsobjekt)
         cursor.execute(command)
         tuples = cursor.fetchall()
 

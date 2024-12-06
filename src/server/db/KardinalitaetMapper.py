@@ -27,8 +27,9 @@ class KardinalitaetMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 kardinalitaet.set_id(1)
 
-        command = "INSERT INTO kardinalitaet (id, min_anzahl, max_anzahl, bezugsobjekt) VALUES (%s,%s,%s,%s)"
-        data = (kardinalitaet.get_id(), kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(), kardinalitaet.get_bezugsobjekt())
+        command = "INSERT INTO kardinalitaet (id, min_anzahl, max_anzahl, bezugsobjekt_id) VALUES (%s,%s,%s,%s)"
+        data = (kardinalitaet.get_id(), kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(),
+                kardinalitaet.get_bezugsobjekt().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -43,8 +44,9 @@ class KardinalitaetMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE kardinalitaet " + "SET min_anzahl=%s, max_anzahl=%s, bezugsobjekt=%s WHERE id=%s"
-        data = (kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(), kardinalitaet.get_bezugsobjekt(), kardinalitaet.get_id())
+        command = "UPDATE kardinalitaet SET min_anzahl=%s, max_anzahl=%s, bezugsobjekt_id=%s WHERE id=%s"
+        data = (kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(),
+                kardinalitaet.get_bezugsobjekt().get_id(), kardinalitaet.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -75,7 +77,8 @@ class KardinalitaetMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt FROM kardinalitaet WHERE id={}".format(kardinalitaet_id)
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id FROM kardinalitaet WHERE id={}".format(
+            kardinalitaet_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
@@ -107,7 +110,7 @@ class KardinalitaetMapper(Mapper):
         """
         result = []
         cursor = self._cnx.cursor()
-        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt FROM kardinalitaet WHERE bezugsobjekt={}".format(
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id FROM kardinalitaet WHERE bezugsobjekt_id={}".format(
             bezugsobjekt)
         cursor.execute(command)
         tuples = cursor.fetchall()
