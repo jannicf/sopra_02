@@ -33,12 +33,13 @@ class KleiderschrankAdministration(object):
        Constraint-spezifische Methoden
        """
 
-    def create_kardinalitaet(self, min_anzahl, max_anzahl, bezugsobjekt):
+    def create_kardinalitaet(self, min_anzahl, max_anzahl, bezugsobjekt, style):
         """Eine Kardinalität anlegen."""
         kardinalitaet = Kardinalitaet()
         kardinalitaet.set_min_anzahl(min_anzahl)
         kardinalitaet.set_max_anzahl(max_anzahl)
         kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+        kardinalitaet.set_style(style)
         kardinalitaet.set_id(1)
 
         with KardinalitaetMapper() as mapper:
@@ -69,11 +70,12 @@ class KleiderschrankAdministration(object):
         with KardinalitaetMapper() as mapper:
             mapper.delete(kardinalitaet)
 
-    def create_mutex(self, bezugsobjekt1, bezugsobjekt2):
+    def create_mutex(self, bezugsobjekt1, bezugsobjekt2, style):
         """Eine Mutex-Beziehung anlegen."""
         mutex = Mutex()
         mutex.set_bezugsobjekt1(bezugsobjekt1)
         mutex.set_bezugsobjekt2(bezugsobjekt2)
+        mutex.set_style(style)
         mutex.set_id(1)
 
         with MutexMapper() as mapper:
@@ -104,11 +106,12 @@ class KleiderschrankAdministration(object):
         with MutexMapper() as mapper:
             mapper.delete(mutex)
 
-    def create_implikation(self, bezugsobjekt1, bezugsobjekt2):
+    def create_implikation(self, bezugsobjekt1, bezugsobjekt2, style):
         """Eine Implikations-Beziehung anlegen."""
         implikation = Implikation()
         implikation.set_bezugsobjekt1(bezugsobjekt1)
         implikation.set_bezugsobjekt2(bezugsobjekt2)
+        implikation.set_style(style)
         implikation.set_id(1)
 
         with ImplikationMapper() as mapper:

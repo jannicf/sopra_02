@@ -1,5 +1,7 @@
 from src.server.db.Mapper import Mapper
 from src.server.bo.Implikation import Implikation
+from src.server.db.KleidungstypMapper import KleidungstypMapper
+from src.server.db.StyleMapper import StyleMapper
 
 class ImplikationMapper(Mapper):
 
@@ -26,8 +28,9 @@ class ImplikationMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 implikation.set_id(1)
 
-        command = "INSERT INTO implikation (id, bezugsobjekt1_id, bezugsobjekt2_id) VALUES (%s,%s,%s)"
-        data = (implikation.get_id(), implikation.get_bezugsobjekt1().get_id(), implikation.get_bezugsobjekt2().get_id())
+        command = "INSERT INTO implikation (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) VALUES (%s,%s,%s,%s)"
+        data = (implikation.get_id(), implikation.get_bezugsobjekt1().get_id(), implikation.get_bezugsobjekt2().get_id(),
+                implikation.get_style().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -42,8 +45,9 @@ class ImplikationMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE implikation SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s WHERE id=%s"
-        data = (implikation.get_bezugsobjekt1().get_id(), implikation.get_bezugsobjekt2().get_id(), implikation.get_id())
+        command = "UPDATE implikation SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s, style_id=%s WHERE id=%s"
+        data = (implikation.get_bezugsobjekt1().get_id(), implikation.get_bezugsobjekt2().get_id(),
+                implikation.get_style().get_id(), implikation.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -74,16 +78,25 @@ class ImplikationMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM implikation WHERE id={}".format(implikation_id)
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM implikation WHERE id={}".format(implikation_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, bezugsobjekt1, bezugsobjekt2) = tuples[0]
+            (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) = tuples[0]
             implikation = Implikation()
             implikation.set_id(id)
+            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
             implikation.set_bezugsobjekt1(bezugsobjekt1)
             implikation.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            implikation.set_style(style)
             result = implikation
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -109,11 +122,20 @@ class ImplikationMapper(Mapper):
         cursor.execute(command)
         tuples = cursor.fetchall()
 
-        for (id, bezugsobjekt1, bezugsobjekt2) in tuples:
+        for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
             implikation = Implikation()
             implikation.set_id(id)
+            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
             implikation.set_bezugsobjekt1(bezugsobjekt1)
             implikation.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            implikation.set_style(style)
             result.append(implikation)
 
         self._cnx.commit()
@@ -132,11 +154,20 @@ class ImplikationMapper(Mapper):
         cursor.execute("SELECT * from implikation")
         tuples = cursor.fetchall()
 
-        for (id, bezugsobjekt1, bezugsobjekt2) in tuples:
+        for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
             implikation = Implikation()
             implikation.set_id(id)
+            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
             implikation.set_bezugsobjekt1(bezugsobjekt1)
             implikation.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            implikation.set_style(style)
             result.append(implikation)
 
         self._cnx.commit()

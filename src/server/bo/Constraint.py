@@ -9,6 +9,15 @@ class Constraint(BusinessObject):
 
         """
         super().__init__()
+        self._style = None
+
+    def set_style(self, style):
+        """Setzen des Styles für den Constraint"""
+        self._style = style
+
+    def get_style(self):
+        """Auslesen des Styles"""
+        return self._style
 
 
     @abstractmethod
