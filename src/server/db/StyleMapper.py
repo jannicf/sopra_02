@@ -1,9 +1,6 @@
-from src.server.db.ImplikationMapper import ImplikationMapper
-from src.server.db.KardinalitaetMapper import KardinalitaetMapper
 from src.server.db.KleidungstypMapper import KleidungstypMapper
 from src.server.db.Mapper import Mapper
 from src.server.bo.Style import Style
-from src.server.db.MutexMapper import MutexMapper
 
 
 class StyleMapper(Mapper):

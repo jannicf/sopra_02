@@ -1,5 +1,7 @@
 from src.server.db.Mapper import Mapper
 from src.server.bo.Mutex import Mutex
+from src.server.db.KleidungstypMapper import KleidungstypMapper
+from src.server.db.StyleMapper import StyleMapper
 
 class MutexMapper(Mapper):
 
@@ -26,8 +28,9 @@ class MutexMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 mutex.set_id(1)
 
-        command = "INSERT INTO mutex (id, bezugsobjekt1_id, bezugsobjekt2_id) VALUES (%s,%s,%s)"
-        data = (mutex.get_id(), mutex.get_bezugsobjekt1().get_id(), mutex.get_bezugsobjekt2().get_id())
+        command = "INSERT INTO mutex (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) VALUES (%s,%s,%s,%s)"
+        data = (mutex.get_id(), mutex.get_bezugsobjekt1().get_id(), mutex.get_bezugsobjekt2().get_id(),
+                mutex.get_style().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -42,8 +45,9 @@ class MutexMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE mutex SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s WHERE id=%s"
-        data = (mutex.get_bezugsobjekt1().get_id, mutex.get_bezugsobjekt2().get_id(), mutex.get_id())
+        command = "UPDATE mutex SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s, style_id=%s WHERE id=%s"
+        data = (mutex.get_bezugsobjekt1().get_id, mutex.get_bezugsobjekt2().get_id(), mutex.get_style().get_id(),
+                mutex.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -74,16 +78,25 @@ class MutexMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM mutex WHERE id={}".format(mutex_id)
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM mutex WHERE id={}".format(mutex_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, bezugsobjekt1, bezugsobjekt2) = tuples[0]
+            (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) = tuples[0]
             mutex = Mutex()
             mutex.set_id(id)
+            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
             mutex.set_bezugsobjekt1(bezugsobjekt1)
             mutex.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            mutex.set_style(style)
             result = mutex
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -104,16 +117,25 @@ class MutexMapper(Mapper):
         result = []
         cursor = self._cnx.cursor()
 
-        command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM mutex "
+        command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM mutex "
                    "WHERE bezugsobjekt1_id={} OR bezugsobjekt2_id={}").format(bezugsobjekt, bezugsobjekt)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
-        for (id, bezugsobjekt1, bezugsobjekt2) in tuples:
+        for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
             mutex = Mutex()
             mutex.set_id(id)
-            mutex.set_bezugsobjekt1(bezugsobjekt1)
-            mutex.set_bezugsobjekt2(bezugsobjekt2)
+            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
+            mutex.set_bezugsobjekt1(bezugsobjekt1_id)
+            mutex.set_bezugsobjekt2(bezugsobjekt2_id)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            mutex.set_style(style)
             result.append(mutex)
 
         self._cnx.commit()
@@ -132,11 +154,20 @@ class MutexMapper(Mapper):
         cursor.execute("SELECT * from mutex")
         tuples = cursor.fetchall()
 
-        for (id, bezugsobjekt1, bezugsobjekt2) in tuples:
+        for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
             mutex = Mutex()
             mutex.set_id(id)
-            mutex.set_bezugsobjekt1(bezugsobjekt1)
-            mutex.set_bezugsobjekt2(bezugsobjekt2)
+            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
+            mutex.set_bezugsobjekt1(bezugsobjekt1_id)
+            mutex.set_bezugsobjekt2(bezugsobjekt2_id)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            mutex.set_style(style)
             result.append(mutex)
 
         self._cnx.commit()
