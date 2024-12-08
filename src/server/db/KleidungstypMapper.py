@@ -109,8 +109,8 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptabfrage für den Kleidungstyp
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE id=%s".format(kleidungstyp_id)
-        cursor.execute(command)
+        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE id=%s"
+        cursor.execute(command, (kleidungstyp_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -161,8 +161,8 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Parameterisierte Abfrage für Sicherheit
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE bezeichnung={}".format(bezeichnung)
-        cursor.execute(command)
+        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE bezeichnung={}"
+        cursor.execute(command, (bezeichnung,))
         tuples = cursor.fetchall()
 
         # Durchlaufen aller gefundenen Datensätze

@@ -66,8 +66,8 @@ class KleidungsstueckMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, typ FROM kleidungsstueck WHERE id={}".format(kleidungsstueck_id)
-        cursor.execute(command)
+        command = "SELECT id, name, typ FROM kleidungsstueck WHERE id={}"
+        cursor.execute(command, (kleidungsstueck_id,))
         tuples = cursor.fetchall()
 
         try:
