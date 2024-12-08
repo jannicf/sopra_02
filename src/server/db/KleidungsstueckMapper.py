@@ -121,15 +121,15 @@ class KleidungsstueckMapper(Mapper):
         :return Eine Sammlung mit Kleidungsstück-Objekten, die sämtliche Kleidungsstücke
             mit dem gewünschtem Typ enthält.
         """
-        result = None
+        result = []
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, typ FROM kleidungsstueck WHERE typ={}".format(typ)
-        cursor.execute(command)
+        command = "SELECT id, name, typ_id FROM kleidungsstueck WHERE typ_id=%s"
+        cursor.execute(command, (typ.get_id(),))
         tuples = cursor.fetchall()
 
         try:
-            (id, name, typ) = tuples[0]
+            (id, name, typ_id) = tuples[0]
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
@@ -138,7 +138,7 @@ class KleidungsstueckMapper(Mapper):
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
             keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
-            result = None
+            pass
 
         self._cnx.commit()
         cursor.close()

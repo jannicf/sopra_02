@@ -56,7 +56,7 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptobjekt aktualisieren
-        command = "UPDATE kleidungstyp" + "SET bezeichnung=%s WHERE id=%s"
+        command = "UPDATE kleidungstyp SET bezeichnung=%s WHERE id=%s"
         data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_id())
         cursor.execute(command, data)
 
@@ -161,7 +161,7 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Parameterisierte Abfrage für Sicherheit
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE bezeichnung={}"
+        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE bezeichnung=%s"
         cursor.execute(command, (bezeichnung,))
         tuples = cursor.fetchall()
 
