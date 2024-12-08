@@ -145,6 +145,43 @@ class KleidungsstueckMapper(Mapper):
 
         return result
 
+    def find_by_kleiderschrank_id(self, kleiderschrank_id):
+        """Suchen aller Kleidungsstücke, die einem bestimmten Kleiderschrank zugeordnet sind.
+
+        :param kleiderschrank_id: Die ID des Kleiderschranks.
+        :return: Eine Liste von Kleidungsstück-Objekten.
+        """
+        result = []
+        cursor = self._cnx.cursor()
+
+        command = "SELECT id, name, typ_id FROM kleidungsstueck WHERE kleiderschrank_id=%s"
+        cursor.execute(command, (kleiderschrank_id,))
+        tuples = cursor.fetchall()
+
+        for (id, name, typ) in tuples:
+            kleidungsstueck = Kleidungsstueck()
+            kleidungsstueck.set_id(id)
+            kleidungsstueck.set_name(name)
+            kleidungsstueck.set_typ(typ)
+            result.append(kleidungsstueck)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result
+
+    def delete_by_kleiderschrank_id(self, kleiderschrank_id):
+        """
+        Löscht alle Kleidungsstücke, die mit einem bestimmten Kleiderschrank verknüpft sind.
+        :param kleiderschrank_id: ID des Kleiderschranks
+        """
+        cursor = self._cnx.cursor()
+        # SQL-Abfrage mit sicherem Platzhalter
+        query = "DELETE FROM kleidungsstueck WHERE kleiderschrank_id = %s"
+        cursor.execute(query, (kleiderschrank_id,))  # WICHTIG: kleiderschrank_id in einem Tupel übergeben
+        self._cnx.commit()
+        cursor.close()
+
     def find_all(self):
         """Auslesen aller Kleidungsstücke unseres Systems.
 
