@@ -57,8 +57,8 @@ class KleiderschrankMapper(Mapper):
 
         """Inhalte des Kleiderschranks aktualisieren:
         Alle bestehenden Kleidungsstücke, die dem Kleiderschrank zugeordnet sind, werden aus der Datenbank gelöscht."""
-        kleidungsstueck_mapper = KleidungsstueckMapper(self._cnx)
-        kleidungsstueck_mapper.delete_by_kleiderschrank_id(kleiderschrank.get_id())
+        with KleidungsstueckMapper() as kleidungsstueck_mapper:
+            kleidungsstueck_mapper.delete_by_kleiderschrank_id(kleiderschrank.get_id())
 
         """Die neuen Inhalte des Kleiderschranks werden eingefügt, indem die `kleiderschrank_id` für jedes 
         Kleidungsstück gesetzt und gespeichert wird."""
@@ -145,8 +145,8 @@ class KleiderschrankMapper(Mapper):
         result = []
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE eigentuemer_id={}".format(eigentuemer.get_id())
-        cursor.execute(command)
+        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
+        cursor.execute(command, (eigentuemer.get_id(),))
         tuples = cursor.fetchall()
 
         try:
@@ -160,10 +160,10 @@ class KleiderschrankMapper(Mapper):
                 kleiderschrank.set_eigentuemer(eigentuemer)
 
                 # Inhalte (Kleidungsstücke) laden
-                kleidungsstueck_mapper = KleidungsstueckMapper(self._cnx)
-                kleidungsstuecke = kleidungsstueck_mapper.find_by_kleiderschrank_id(id)
-                for kleidungsstueck in kleidungsstuecke:
-                    kleiderschrank.add_kstueck(kleidungsstueck)
+                with KleidungsstueckMapper() as kleidungsstueck_mapper:
+                    kleidungsstuecke = kleidungsstueck_mapper.find_by_kleiderschrank_id(id)
+                    for kleidungsstueck in kleidungsstuecke:
+                        kleiderschrank.add_kstueck(kleidungsstueck)
 
                 result.append(kleiderschrank)
 
@@ -185,7 +185,7 @@ class KleiderschrankMapper(Mapper):
                 """
         result = []
         cursor = self._cnx.cursor()
-        cursor.execute("SELECT * from kleiderschrank")
+        cursor.execute("SELECT id, eigentuemer_id, name from kleiderschrank")
         tuples = cursor.fetchall()
 
         for (id, eigentuemer_id, name) in tuples:
@@ -193,14 +193,16 @@ class KleiderschrankMapper(Mapper):
             kleiderschrank.set_id(id)
             kleiderschrank.set_name(name)
 
-            # Eigentümer laden
-            person_mapper = PersonMapper(self._cnx)
-            eigentuemer = person_mapper.find_by_id(eigentuemer_id)
-            kleiderschrank.set_eigentuemer(eigentuemer)
+            # Eigentümer anhand von eigentuemer_id laden
+            with PersonMapper() as person_mapper:
+                eigentuemer = person_mapper.find_by_id(eigentuemer_id)
+                kleiderschrank.set_eigentuemer(eigentuemer)
 
             # Inhalte (Kleidungsstücke) laden
-            kleidungsstueck_mapper = KleidungsstueckMapper()
-            kleiderschrank.set_inhalt(kleidungsstueck_mapper.find_by_kleiderschrank_id(id))
+            with KleidungsstueckMapper() as kleidungsstueck_mapper:
+                kleidungsstuecke = kleidungsstueck_mapper.find_by_kleiderschrank_id(id)
+                for kleidungsstueck in kleidungsstuecke:
+                    kleiderschrank.add_kstueck(kleidungsstueck)
 
             result.append(kleiderschrank)
 
