@@ -46,7 +46,7 @@ class MutexMapper(Mapper):
         cursor = self._cnx.cursor()
 
         command = "UPDATE mutex SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s, style_id=%s WHERE id=%s"
-        data = (mutex.get_bezugsobjekt1().get_id, mutex.get_bezugsobjekt2().get_id(), mutex.get_style().get_id(),
+        data = (mutex.get_bezugsobjekt1().get_id(), mutex.get_bezugsobjekt2().get_id(), mutex.get_style().get_id(),
                 mutex.get_id())
         cursor.execute(command, data)
 
