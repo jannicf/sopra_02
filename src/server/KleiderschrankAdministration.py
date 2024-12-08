@@ -213,6 +213,11 @@ class KleiderschrankAdministration(object):
         with KleiderschrankMapper() as mapper:
             return mapper.find_by_eigentuemer(eigentuemer)
 
+    def get_all_kleiderschraenke(self):
+        """Alle Kleiderschränke aus der Datenbank abrufen."""
+        with KleiderschrankMapper() as mapper:
+            return mapper.find_all()
+
     def save_kleiderschrank(self, kleiderschrank):
         """Den gegebenen Kleiderschrank speichern."""
         with KleiderschrankMapper() as mapper:
