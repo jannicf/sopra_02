@@ -60,6 +60,11 @@ class KleiderschrankAdministration(object):
         with KardinalitaetMapper() as mapper:
             return mapper.find_all_bezugsobjekt(bezugsobjekt)
 
+    def get_all_kardinalitaeten_by_style(self, style):
+        """Alle Kardinalitäten eines bestimmten Styles auslesen"""
+        with KardinalitaetMapper() as mapper:
+            return mapper.find_all_style(style)
+
     def save_kardinalitaet(self, kardinalitaet):
         """Die gegebene Kardinalität speichern."""
         with KardinalitaetMapper() as mapper:
@@ -96,6 +101,11 @@ class KleiderschrankAdministration(object):
         with MutexMapper() as mapper:
             return mapper.find_by_any_bezugsobjekt(bezugsobjekt)
 
+    def get_all_mutex_by_style(self, style):
+        """Alle Mutex-Constraints eines bestimmten Styles auslesen"""
+        with MutexMapper() as mapper:
+            return mapper.find_all_style(style)
+
     def save_mutex(self, mutex):
         """Die gegebene Mutex-Beziehung speichern."""
         with MutexMapper() as mapper:
@@ -131,6 +141,11 @@ class KleiderschrankAdministration(object):
         """Alle Implikationen mit bestimmtem Bezugsobjekt auslesen"""
         with ImplikationMapper() as mapper:
             return mapper.find_by_any_bezugsobjekt(bezugsobjekt)
+
+    def get_all_implikationen_by_style(self, style):
+        """Alle Implikationen eines bestimmten Styles auslesen"""
+        with ImplikationMapper() as mapper:
+            return mapper.find_all_style(style)
 
     def save_implikation(self, implikation):
         """Die gegebene Implikations-Beziehung speichern."""
