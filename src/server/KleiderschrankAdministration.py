@@ -33,12 +33,13 @@ class KleiderschrankAdministration(object):
        Constraint-spezifische Methoden
        """
 
-    def create_kardinalitaet(self, min_anzahl, max_anzahl, bezugsobjekt):
+    def create_kardinalitaet(self, min_anzahl, max_anzahl, bezugsobjekt, style):
         """Eine Kardinalität anlegen."""
         kardinalitaet = Kardinalitaet()
         kardinalitaet.set_min_anzahl(min_anzahl)
         kardinalitaet.set_max_anzahl(max_anzahl)
         kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+        kardinalitaet.set_style(style)
         kardinalitaet.set_id(1)
 
         with KardinalitaetMapper() as mapper:
@@ -69,11 +70,12 @@ class KleiderschrankAdministration(object):
         with KardinalitaetMapper() as mapper:
             mapper.delete(kardinalitaet)
 
-    def create_mutex(self, bezugsobjekt1, bezugsobjekt2):
+    def create_mutex(self, bezugsobjekt1, bezugsobjekt2, style):
         """Eine Mutex-Beziehung anlegen."""
         mutex = Mutex()
         mutex.set_bezugsobjekt1(bezugsobjekt1)
         mutex.set_bezugsobjekt2(bezugsobjekt2)
+        mutex.set_style(style)
         mutex.set_id(1)
 
         with MutexMapper() as mapper:
@@ -104,11 +106,12 @@ class KleiderschrankAdministration(object):
         with MutexMapper() as mapper:
             mapper.delete(mutex)
 
-    def create_implikation(self, bezugsobjekt1, bezugsobjekt2):
+    def create_implikation(self, bezugsobjekt1, bezugsobjekt2, style):
         """Eine Implikations-Beziehung anlegen."""
         implikation = Implikation()
         implikation.set_bezugsobjekt1(bezugsobjekt1)
         implikation.set_bezugsobjekt2(bezugsobjekt2)
+        implikation.set_style(style)
         implikation.set_id(1)
 
         with ImplikationMapper() as mapper:
@@ -473,11 +476,15 @@ class KleiderschrankAdministration(object):
         clothing_item = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
 
         # Hole den Style des Kleidungsstücks
-        style = clothing_item.get_typ().get_verwendung()
+        kleidungstyp = clothing_item.get_typ()
+        style_liste = kleidungstyp.get_verwendungen()
 
         # Hole alle möglichen Kleidungsstücke für den Style aus dem Kleiderschrank
-        for kleidungsstueck in self.get_possible_outfits_for_style(style.get_id(), kleiderschrank_id):
-            possible_clothing_items.append(kleidungsstueck)
+        for style in style_liste:
+            kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+            for kleidungsstueck in kleiderschrank.get_inhalt():
+                if kleidungsstueck.get_typ() in style.get_features():
+                    possible_clothing_items.append(kleidungsstueck)
 
         # Gebe die Liste der passenden Kleidungsstücke zurück
         return possible_clothing_items

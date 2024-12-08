@@ -22,8 +22,8 @@ class KleidungsstueckMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 kleidungsstueck.set_id(1)
 
-        command = "INSERT INTO kleidungsstueck (id, name, typ) VALUES (%s,%s,%s)"
-        data = (kleidungsstueck.get_id(), kleidungsstueck.get_name(), kleidungsstueck.get_typ())
+        command = "INSERT INTO kleidungsstueck (id, name, typ_id) VALUES (%s,%s,%s)"
+        data = (kleidungsstueck.get_id(), kleidungsstueck.get_name(), kleidungsstueck.get_typ().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -37,8 +37,8 @@ class KleidungsstueckMapper(Mapper):
         :param kleidungsstueck das Objekt, das in die DB geschrieben werden soll"""
         cursor = self._cnx.cursor()
 
-        command = "UPDATE kleidungsstueck " + "SET name=%s, typ=%s WHERE id=%s"
-        data = (kleidungsstueck.get_name(), kleidungsstueck.get_typ())
+        command = "UPDATE kleidungsstueck SET name=%s, typ_id=%s WHERE id=%s"
+        data = (kleidungsstueck.get_name(), kleidungsstueck.get_typ().get_id(), kleidungsstueck.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()

@@ -1,6 +1,7 @@
 from src.server.bo.Kardinalitaet import Kardinalitaet
 from src.server.db.Mapper import Mapper
-
+from src.server.db.KleidungstypMapper import KleidungstypMapper
+from src.server.db.StyleMapper import StyleMapper
 
 class KardinalitaetMapper(Mapper):
 
@@ -27,8 +28,9 @@ class KardinalitaetMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 kardinalitaet.set_id(1)
 
-        command = "INSERT INTO kardinalitaet (id, min_anzahl, max_anzahl, bezugsobjekt) VALUES (%s,%s,%s,%s)"
-        data = (kardinalitaet.get_id(), kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(), kardinalitaet.get_bezugsobjekt())
+        command = "INSERT INTO kardinalitaet (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) VALUES (%s,%s,%s,%s,%s)"
+        data = (kardinalitaet.get_id(), kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(),
+                kardinalitaet.get_bezugsobjekt().get_id(), kardinalitaet.get_style().get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -43,8 +45,9 @@ class KardinalitaetMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE kardinalitaet " + "SET min_anzahl=%s, max_anzahl=%s, bezugsobjekt=%s WHERE id=%s"
-        data = (kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(), kardinalitaet.get_bezugsobjekt(), kardinalitaet.get_id())
+        command = "UPDATE kardinalitaet SET min_anzahl=%s, max_anzahl=%s, bezugsobjekt_id=%s, style_id=%s WHERE id=%s"
+        data = (kardinalitaet.get_min_anzahl(), kardinalitaet.get_max_anzahl(),
+                kardinalitaet.get_bezugsobjekt().get_id(), kardinalitaet.get_style().get_id(), kardinalitaet.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -75,17 +78,27 @@ class KardinalitaetMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt FROM kardinalitaet WHERE id={}".format(kardinalitaet_id)
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE id={}".format(
+            kardinalitaet_id)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
         try:
-            (id, min_anzahl, max_anzahl, bezugsobjekt) = tuples[0]
+            (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) = tuples[0]
             kardinalitaet = Kardinalitaet()
             kardinalitaet.set_id(id)
             kardinalitaet.set_min_anzahl(min_anzahl)
             kardinalitaet.set_max_anzahl(max_anzahl)
+            # Lade das zugehörige Kleidungstyp-Objekt separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
             kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            kardinalitaet.set_style(style)
+
             result = kardinalitaet
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -107,17 +120,26 @@ class KardinalitaetMapper(Mapper):
         """
         result = []
         cursor = self._cnx.cursor()
-        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt FROM kardinalitaet WHERE bezugsobjekt={}".format(
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE bezugsobjekt_id={}".format(
             bezugsobjekt)
         cursor.execute(command)
         tuples = cursor.fetchall()
 
-        for (id, min_anzahl, max_anzahl, bezugsobjekt) in tuples:
+        for (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) in tuples:
             kardinalitaet = Kardinalitaet()
             kardinalitaet.set_id(id)
             kardinalitaet.set_min_anzahl(min_anzahl)
             kardinalitaet.set_max_anzahl(max_anzahl)
+            # Lade das zugehörige Kleidungstyp-Objekt separat aus der Datenbank
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
             kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+
+            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+            kardinalitaet.set_style(style)
+
             result.append(kardinalitaet)
 
         self._cnx.commit()
@@ -136,12 +158,13 @@ class KardinalitaetMapper(Mapper):
         cursor.execute("SELECT * from kardinalitaet")
         tuples = cursor.fetchall()
 
-        for (id, min_anzahl, max_anzahl, bezugsobjekt) in tuples:
+        for (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) in tuples:
             kardinalitaet = Kardinalitaet()
             kardinalitaet.set_id(id)
             kardinalitaet.set_min_anzahl(min_anzahl)
             kardinalitaet.set_max_anzahl(max_anzahl)
-            kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+            kardinalitaet.set_bezugsobjekt(bezugsobjekt_id)
+            kardinalitaet.set_style(style_id)
             result.append(kardinalitaet)
 
         self._cnx.commit()
