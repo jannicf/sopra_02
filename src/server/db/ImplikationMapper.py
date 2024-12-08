@@ -118,8 +118,8 @@ class ImplikationMapper(Mapper):
         cursor = self._cnx.cursor()
 
         command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM implikation "
-                   "WHERE bezugsobjekt1_id={} OR bezugsobjekt2_id={}").format(bezugsobjekt, bezugsobjekt)
-        cursor.execute(command)
+                   "WHERE bezugsobjekt1_id=%s OR bezugsobjekt2_id=%s")
+        cursor.execute(command, (bezugsobjekt.get_id(), bezugsobjekt.get_id()))
         tuples = cursor.fetchall()
 
         for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:

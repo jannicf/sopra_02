@@ -120,9 +120,8 @@ class KardinalitaetMapper(Mapper):
         """
         result = []
         cursor = self._cnx.cursor()
-        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE bezugsobjekt_id={}".format(
-            bezugsobjekt)
-        cursor.execute(command)
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE bezugsobjekt_id=%s"
+        cursor.execute(command, (bezugsobjekt.get_id(),))
         tuples = cursor.fetchall()
 
         for (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) in tuples:
