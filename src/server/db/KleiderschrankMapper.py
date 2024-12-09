@@ -51,20 +51,24 @@ class KleiderschrankMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE kleiderschrank " + "SET eigentuemer_id=%s, name=%s WHERE id=%s"
+        command = "UPDATE kleiderschrank SET eigentuemer_id=%s, name=%s WHERE id=%s"
         data = (kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name(), kleiderschrank.get_id())
         cursor.execute(command, data)
 
-        """Inhalte des Kleiderschranks aktualisieren:
-        Alle bestehenden Kleidungsstücke, die dem Kleiderschrank zugeordnet sind, werden aus der Datenbank gelöscht."""
-        with KleidungsstueckMapper() as kleidungsstueck_mapper:
-            kleidungsstueck_mapper.delete_by_kleiderschrank_id(kleiderschrank.get_id())
+        # Alle bestehenden Zuordnungen auf NULL setzen
+        delete_command = """UPDATE kleidungsstueck 
+                           SET kleiderschrank_id=NULL 
+                           WHERE kleiderschrank_id=%s"""
+        cursor.execute(delete_command, (kleiderschrank.get_id(),))
 
-        """Die neuen Inhalte des Kleiderschranks werden eingefügt, indem die `kleiderschrank_id` für jedes 
-        Kleidungsstück gesetzt und gespeichert wird."""
+        # Neue Zuordnungen erstellen
         for kleidungsstueck in kleiderschrank.get_inhalt():
-            kleidungsstueck.set_kleiderschrank_id(kleiderschrank.get_id())
-            kleidungsstueck_mapper.insert(kleidungsstueck)
+            update_command = """UPDATE kleidungsstueck 
+                               SET kleiderschrank_id=%s 
+                               WHERE id=%s"""
+            cursor.execute(update_command,
+                          (kleiderschrank.get_id(),
+                           kleidungsstueck.get_id()))
 
         self._cnx.commit()
         cursor.close()
@@ -116,12 +120,17 @@ class KleiderschrankMapper(Mapper):
 
             with PersonMapper() as person_mapper:
                 eigentuemer = person_mapper.find_by_id(eigentuemer_id)
-            kleiderschrank.set_eigentuemer(eigentuemer)
+                kleiderschrank.set_eigentuemer(eigentuemer)
 
             with KleidungsstueckMapper() as kleidungsstueck_mapper:
-                kleidungsstuecke = kleidungsstueck_mapper.find_by_kleiderschrank_id(id)
-                for kleidungsstueck in kleidungsstuecke:
-                    kleiderschrank.add_kstueck(kleidungsstueck)
+                command = "SELECT id FROM kleidungsstueck WHERE kleiderschrank_id=%s"
+                cursor.execute(command, (id,))
+                kleidungsstueck_tuples = cursor.fetchall()
+
+                for (kleidungsstueck_id,) in kleidungsstueck_tuples:
+                    kleidungsstueck = kleidungsstueck_mapper.find_by_id(kleidungsstueck_id)
+                    if kleidungsstueck:
+                        kleiderschrank.add_kstueck(kleidungsstueck)
 
             result = kleiderschrank
 
