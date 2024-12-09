@@ -25,9 +25,9 @@ class PersonMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 person.set_id(1)
 
-        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id, kleiderschrank) VALUES (%s,%s,%s,%s,%s,%s)"
+        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
         data = (person.get_id(), person.get_vorname(), person.get_nachname(), person.get_nickname(),
-                person.get_google_id(), person.get_kleiderschrank())
+                person.get_google_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -42,9 +42,9 @@ class PersonMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE person " + "SET vorname=%s, nachname=%s, nickname=%s, google_id=%s, kleiderschrank = %s WHERE id=%s"
+        command = "UPDATE person " + "SET vorname=%s, nachname=%s, nickname=%s, google_id=%s WHERE id=%s"
         data = (person.get_vorname(), person.get_nachname(), person.get_nickname(),
-                person.get_google_id(), person.get_kleiderschrank(), person.get_id())
+                person.get_google_id(), person.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()

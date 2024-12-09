@@ -353,9 +353,12 @@ class KleiderschrankAdministration(object):
                 outfit.remove_baustein(kleidungsstueck)
                 self.save_outfit(outfit)
             # Aus dem Kleiderschrank entfernen
-            if kleidungsstueck.get_kleiderschrank():
-                kleidungsstueck.get_kleiderschrank().delete_kstueck(kleidungsstueck)
-            # das Kleidungsstück selbst löschen
+            if kleidungsstueck.get_kleiderschrank_id():
+                update_command = "UPDATE kleidungsstueck SET kleiderschrank_id=NULL WHERE id=%s"
+                cursor = mapper._cnx.cursor()
+                cursor.execute(update_command, (kleidungsstueck.get_id(),))
+                cursor.close()
+
             mapper.delete(kleidungsstueck)
 
 
