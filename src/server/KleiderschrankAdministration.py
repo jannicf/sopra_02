@@ -297,10 +297,12 @@ class KleiderschrankAdministration(object):
     Outfit-spezifische Methoden
     """
 
-    def create_outfit(self):
+    def create_outfit(self, style_id):
         """Ein Outfit anlegen."""
         outfit = Outfit()
+        style = self.get_style_by_id(style_id)
         outfit.set_id(1)
+        outfit.set_style(style)
 
         with OutfitMapper() as mapper:
             return mapper.insert(outfit)
@@ -322,10 +324,18 @@ class KleiderschrankAdministration(object):
 
     def delete_outfit(self, outfit):
         """Das gegebene Outfit aus unserem System löschen."""
-        with OutfitMapper() as mapper:
-            outfit.get_bausteine().clear()
-            mapper.delete(outfit)
+        # Überprüfen, ob ein vollständiges Outfit-Objekt oder nur eine ID übergeben wurde
+        if isinstance(outfit, int):  # Wenn nur die ID übergeben wurde
+            outfit = self.get_outfit_by_id(outfit)  # Outfit anhand der ID laden
 
+        if outfit is None:
+            raise ValueError("Das zu löschende Outfit existiert nicht.")
+
+        with OutfitMapper() as mapper:
+            # Sicherstellen, dass die Bausteine geleert werden
+            outfit.get_bausteine().clear()
+            # Outfit über den Mapper löschen
+            mapper.delete(outfit)
 
     """
     Kleidungsstueck-spezifische Methoden
