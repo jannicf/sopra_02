@@ -9,6 +9,7 @@ class Kleidungsstueck(bo.BusinessObject):
         super().__init__()
         self.__name = ""  # der Name des Kleidungsstücks
         self.__typ = None # von welchem Kleidungstyp dieses Kleidungsstück ist
+        self.__kleiderschrank_id = None # ID vom Kleiderschrank
 
     def set_name(self, name):
         """Setzen des Namens vom Kleidungsstück"""
@@ -25,6 +26,14 @@ class Kleidungsstueck(bo.BusinessObject):
     def get_typ(self):
         """Auslesen des Kleidungstyps eines Kleidungsstücks"""
         return self.__typ
+
+    def set_kleiderschrank_id(self, kleiderschrank_id):
+        """Setzen der Kleiderschrank ID"""
+        self.__kleiderschrank_id = kleiderschrank_id
+
+    def get_kleiderschrank_id(self):
+        """Auslesen der Kleiderschrank ID"""
+        return self.__kleiderschrank_id
 
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""

@@ -184,6 +184,11 @@ class KleiderschrankAdministration(object):
         with PersonMapper() as mapper:
             return mapper.find_by_google_id(id)
 
+    def get_all_personen(self):
+        """Alle Personen aus der Datenbank abrufen."""
+        with PersonMapper() as mapper:
+            return mapper.find_all()
+
     def save_person(self, person):
         """Die gegebene Person speichern."""
         with PersonMapper() as mapper:
@@ -191,18 +196,15 @@ class KleiderschrankAdministration(object):
 
     def delete_person(self, person):
         """Die gegebene Person und ihre zugehörigen Ressourcen (z. B. Kleiderschrank) aus unserem System löschen."""
+        with KleiderschrankMapper() as kleiderschrank_mapper:
+            # Alle Kleiderschränke des Eigentümers löschen
+            kleiderschraenke = kleiderschrank_mapper.find_by_eigentuemer(person)
+            for kleiderschrank in kleiderschraenke:
+                kleiderschrank_mapper.delete(kleiderschrank)
+
+        # Danach die Person löschen
         with PersonMapper() as person_mapper:
-            # Prüfen, ob die Person einen Kleiderschrank besitzt
-            if person.get_kleiderschrank() is not None:
-                kleiderschrank = person.get_kleiderschrank()
-                # Erst alle Kleidungsstücke aus dem Kleiderschrank löschen
-                for kleidungsstueck in kleiderschrank.get_inhalt():
-                    self.delete_kleidungsstueck(kleidungsstueck)
-                # Dann den Kleiderschrank löschen
-                self.delete_kleiderschrank(kleiderschrank)
-
             person_mapper.delete(person)
-
 
     """
        Kleiderschrank-spezifische Methoden
@@ -227,6 +229,11 @@ class KleiderschrankAdministration(object):
         """Den Kleiderschrank des übergebenen Eigentümers auslesen."""
         with KleiderschrankMapper() as mapper:
             return mapper.find_by_eigentuemer(eigentuemer)
+
+    def get_all_kleiderschraenke(self):
+        """Alle Kleiderschränke aus der Datenbank abrufen."""
+        with KleiderschrankMapper() as mapper:
+            return mapper.find_all()
 
     def save_kleiderschrank(self, kleiderschrank):
         """Den gegebenen Kleiderschrank speichern."""
@@ -378,9 +385,12 @@ class KleiderschrankAdministration(object):
                 outfit.remove_baustein(kleidungsstueck)
                 self.save_outfit(outfit)
             # Aus dem Kleiderschrank entfernen
-            if kleidungsstueck.get_kleiderschrank():
-                kleidungsstueck.get_kleiderschrank().delete_kstueck(kleidungsstueck)
-            # das Kleidungsstück selbst löschen
+            if kleidungsstueck.get_kleiderschrank_id():
+                update_command = "UPDATE kleidungsstueck SET kleiderschrank_id=NULL WHERE id=%s"
+                cursor = mapper._cnx.cursor()
+                cursor.execute(update_command, (kleidungsstueck.get_id(),))
+                cursor.close()
+
             mapper.delete(kleidungsstueck)
 
 
