@@ -1,5 +1,6 @@
 from src.server.db.Mapper import Mapper
 from src.server.bo.Kleidungsstueck import Kleidungsstueck
+from src.server.db.KleidungstypMapper import KleidungstypMapper
 
 
 class KleidungsstueckMapper(Mapper):
@@ -39,8 +40,9 @@ class KleidungsstueckMapper(Mapper):
         :param kleidungsstueck das Objekt, das in die DB geschrieben werden soll"""
         cursor = self._cnx.cursor()
 
-        command = "UPDATE kleidungsstueck SET name=%s, typ_id=%s WHERE id=%s"
-        data = (kleidungsstueck.get_name(), kleidungsstueck.get_typ().get_id(), kleidungsstueck.get_id())
+        command = "UPDATE kleidungsstueck SET name=%s, typ_id=%s, kleiderschrank_id=%s WHERE id=%s"
+        data = (kleidungsstueck.get_name(), kleidungsstueck.get_typ().get_id(), kleidungsstueck.get_kleiderschrank_id(),
+                kleidungsstueck.get_id())
         cursor.execute(command, data)
 
         self._cnx.commit()
@@ -81,16 +83,21 @@ class KleidungsstueckMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, typ_id FROM kleidungsstueck WHERE id=%s"
+        command = "SELECT id, name, typ_id, kleiderschrank_id FROM kleidungsstueck WHERE id=%s"
         cursor.execute(command, (kleidungsstueck_id,))
         tuples = cursor.fetchall()
 
         try:
-            (id, name, typ_id) = tuples[0]
+            (id, name, typ_id, kleiderschrank_id) = tuples[0]
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
-            kleidungsstueck.set_typ(typ_id)
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                typ = kleidungstyp_mapper.find_by_id(typ_id)
+                kleidungsstueck.set_typ(typ)
+            kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+
+
             result = kleidungsstueck
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -112,16 +119,21 @@ class KleidungsstueckMapper(Mapper):
         result = []
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, typ_id FROM kleidungsstueck WHERE name=%s"
+        command = "SELECT id, name, typ_id, kleiderschrank_id FROM kleidungsstueck WHERE name=%s"
         cursor.execute(command, (name,))
         tuples = cursor.fetchall()
 
 
-        for (id, name, typ_id) in tuples:
+        for (id, name, typ_id, kleiderschrank_id) in tuples:
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
-            kleidungsstueck.set_typ(typ_id)
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                typ = kleidungstyp_mapper.find_by_id(typ_id)
+                kleidungsstueck.set_typ(typ)
+            kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+
+
             result.append(kleidungsstueck)
 
         self._cnx.commit()
@@ -139,17 +151,22 @@ class KleidungsstueckMapper(Mapper):
         result = []
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, name, typ_id FROM kleidungsstueck WHERE typ_id=%s"
+        command = "SELECT id, name, typ_id, kleiderschrank_id FROM kleidungsstueck WHERE typ_id=%s"
         cursor.execute(command, (typ.get_id(),))
         tuples = cursor.fetchall()
 
         try:
-            (id, name, typ_id) = tuples[0]
+            (id, name, typ_id, kleiderschrank_id) = tuples
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
-            kleidungsstueck.set_typ(typ_id)
-            result = kleidungsstueck
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                typ = kleidungstyp_mapper.find_by_id(typ_id)
+                kleidungsstueck.set_typ(typ)
+            kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+
+
+            result.append(kleidungsstueck)
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
             keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
@@ -169,15 +186,20 @@ class KleidungsstueckMapper(Mapper):
         result = []
         cursor = self._cnx.cursor()
 
-        command = "SELECT id, name, typ_id FROM kleidungsstueck WHERE kleiderschrank_id=%s"
+        command = "SELECT id, name, typ_id, kleiderschrank_id FROM kleidungsstueck WHERE kleiderschrank_id=%s"
         cursor.execute(command, (kleiderschrank_id,))
         tuples = cursor.fetchall()
 
-        for (id, name, typ) in tuples:
+        for (id, name, typ_id) in tuples:
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
-            kleidungsstueck.set_typ(typ)
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                typ = kleidungstyp_mapper.find_by_id(typ_id)
+                kleidungsstueck.set_typ(typ)
+            kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+
+
             result.append(kleidungsstueck)
 
         self._cnx.commit()
@@ -193,7 +215,7 @@ class KleidungsstueckMapper(Mapper):
         cursor = self._cnx.cursor()
         # SQL-Abfrage mit sicherem Platzhalter
         query = "DELETE FROM kleidungsstueck WHERE kleiderschrank_id = %s"
-        cursor.execute(query, (kleiderschrank_id,))  # WICHTIG: kleiderschrank_id in einem Tupel übergeben
+        cursor.execute(query, (kleiderschrank_id,))
         self._cnx.commit()
         cursor.close()
 
@@ -212,7 +234,9 @@ class KleidungsstueckMapper(Mapper):
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
-            kleidungsstueck.set_typ(typ_id)
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                typ = kleidungstyp_mapper.find_by_id(typ_id)
+                kleidungsstueck.set_typ(typ)
             kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
             result.append(kleidungsstueck)
 

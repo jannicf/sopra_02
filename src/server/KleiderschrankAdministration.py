@@ -331,11 +331,12 @@ class KleiderschrankAdministration(object):
     Kleidungsstueck-spezifische Methoden
     """
 
-    def create_kleidungsstueck(self, name, typ):
+    def create_kleidungsstueck(self, name, typ, kleiderschrank_id):
         """Ein Kleidungsstück anlegen."""
         kleidungsstueck = Kleidungsstueck()
         kleidungsstueck.set_name(name)
         kleidungsstueck.set_typ(typ)
+        kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
         kleidungsstueck.set_id(1)
 
         with KleidungsstueckMapper() as mapper:
@@ -451,7 +452,7 @@ class KleiderschrankAdministration(object):
 
     def check_outfit_constraints(self, outfit):
         """Prüft, ob ein Outfit die Constraints seines Styles einhält."""
-        style = self.get_style_by_id(outfit.get_style_id())
+        style = outfit.get_style()
         if not style:
             return False
 

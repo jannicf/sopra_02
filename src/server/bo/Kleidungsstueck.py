@@ -47,4 +47,5 @@ class Kleidungsstueck(bo.BusinessObject):
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_name(dictionary["name"])
         obj.set_typ(dictionary["typ"])
+        obj.set_kleiderschrank_id(dictionary["kleiderschrank_id"])
         return obj
