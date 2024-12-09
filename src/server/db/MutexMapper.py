@@ -46,7 +46,7 @@ class MutexMapper(Mapper):
         cursor = self._cnx.cursor()
 
         command = "UPDATE mutex SET bezugsobjekt1_id=%s, bezugsobjekt2_id=%s, style_id=%s WHERE id=%s"
-        data = (mutex.get_bezugsobjekt1().get_id, mutex.get_bezugsobjekt2().get_id(), mutex.get_style().get_id(),
+        data = (mutex.get_bezugsobjekt1().get_id(), mutex.get_bezugsobjekt2().get_id(), mutex.get_style().get_id(),
                 mutex.get_id())
         cursor.execute(command, data)
 
@@ -60,8 +60,8 @@ class MutexMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "DELETE FROM mutex WHERE id={}".format(mutex.get_id())
-        cursor.execute(command)
+        command = "DELETE FROM mutex WHERE id=%s"
+        cursor.execute(command, (mutex.get_id(),))
 
         self._cnx.commit()
         cursor.close()
@@ -78,8 +78,8 @@ class MutexMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM mutex WHERE id={}".format(mutex_id)
-        cursor.execute(command)
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM mutex WHERE id=%s"
+        cursor.execute(command, (mutex_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -129,13 +129,47 @@ class MutexMapper(Mapper):
             with KleidungstypMapper() as kleidungstyp_mapper:
                 bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
                 bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
-            mutex.set_bezugsobjekt1(bezugsobjekt1_id)
-            mutex.set_bezugsobjekt2(bezugsobjekt2_id)
+            mutex.set_bezugsobjekt1(bezugsobjekt1)
+            mutex.set_bezugsobjekt2(bezugsobjekt2)
 
             # Lade das zugehörige Style-Objekt separat aus der Datenbank
             with StyleMapper() as style_mapper:
                 style = style_mapper.find_by_id(style_id)
             mutex.set_style(style)
+            result.append(mutex)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result
+
+    def find_all_style(self, style):
+        """Suchen aller Mutex-Constraints, die einem bestimmten Style zugeordnet sind.
+
+        :param style: Das Style-Objekt, nach dessen Mutex-Constraints gesucht werden soll
+        :return Eine Liste mit Mutex-Objekten, die dem übergebenen Style
+                zugeordnet sind.
+        """
+        result = []
+        cursor = self._cnx.cursor()
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM mutex WHERE style_id=%s"
+        cursor.execute(command, (style.get_id(),))
+        tuples = cursor.fetchall()
+
+        for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
+            mutex = Mutex()
+            mutex.set_id(id)
+
+            # Lade die zugehörigen Kleidungstyp-Objekte separat
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
+            mutex.set_bezugsobjekt1(bezugsobjekt1)
+            mutex.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Style setzen
+            mutex.set_style(style)
+
             result.append(mutex)
 
         self._cnx.commit()

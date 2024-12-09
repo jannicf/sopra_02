@@ -60,8 +60,8 @@ class KardinalitaetMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "DELETE FROM kardinalitaet WHERE id={}".format(kardinalitaet.get_id())
-        cursor.execute(command)
+        command = "DELETE FROM kardinalitaet WHERE id=%s"
+        cursor.execute(command, (kardinalitaet.get_id(),))
 
         self._cnx.commit()
         cursor.close()
@@ -78,9 +78,8 @@ class KardinalitaetMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE id={}".format(
-            kardinalitaet_id)
-        cursor.execute(command)
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE id=%s"
+        cursor.execute(command, (kardinalitaet_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -137,6 +136,40 @@ class KardinalitaetMapper(Mapper):
             # Lade das zugehörige Style-Objekt separat aus der Datenbank
             with StyleMapper() as style_mapper:
                 style = style_mapper.find_by_id(style_id)
+            kardinalitaet.set_style(style)
+
+            result.append(kardinalitaet)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result
+
+    def find_all_style(self, style):
+        """Suchen aller Kardinalitäten, die einem bestimmten Style zugeordnet sind.
+
+        :param style: Das Style-Objekt, nach dessen Kardinalitäten gesucht werden soll
+        :return Eine Liste mit Kardinalitaets-Objekten, die dem übergebenen Style
+                zugeordnet sind.
+        """
+        result = []
+        cursor = self._cnx.cursor()
+        command = "SELECT id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id FROM kardinalitaet WHERE style_id=%s"
+        cursor.execute(command, (style.get_id(),))
+        tuples = cursor.fetchall()
+
+        for (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) in tuples:
+            kardinalitaet = Kardinalitaet()
+            kardinalitaet.set_id(id)
+            kardinalitaet.set_min_anzahl(min_anzahl)
+            kardinalitaet.set_max_anzahl(max_anzahl)
+
+            # Lade das zugehörige Kleidungstyp-Objekt separat
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
+            kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+
+            # Style setzen (wir haben es ja schon)
             kardinalitaet.set_style(style)
 
             result.append(kardinalitaet)

@@ -58,6 +58,12 @@ class Style(bo.BusinessObject):
         """Gibt alle Constraints zurück"""
         return self.__constraints
 
+    def __eq__(self, other):
+        """Zwei Styles sind gleich, wenn sie die gleiche ID und den gleichen Namen haben"""
+        if isinstance(other, Style):
+            return self.get_id() == other.get_id() and self.get_name() == other.get_name()
+        return False
+
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
         return "Style: {}, {}".format(self.get_id(), self.get_name())
