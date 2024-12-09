@@ -60,8 +60,8 @@ class ImplikationMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
-        command = "DELETE FROM implikation WHERE id={}".format(implikation.get_id())
-        cursor.execute(command)
+        command = "DELETE FROM implikation WHERE id=%s"
+        cursor.execute(command, (implikation.get_id(),))
 
         self._cnx.commit()
         cursor.close()
@@ -78,8 +78,8 @@ class ImplikationMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM implikation WHERE id={}".format(implikation_id)
-        cursor.execute(command)
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM implikation WHERE id=%s"
+        cursor.execute(command, (implikation_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -117,9 +117,9 @@ class ImplikationMapper(Mapper):
         result = []
         cursor = self._cnx.cursor()
 
-        command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id FROM implikation "
-                   "WHERE bezugsobjekt1_id={} OR bezugsobjekt2_id={}").format(bezugsobjekt, bezugsobjekt)
-        cursor.execute(command)
+        command = ("SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM implikation "
+                   "WHERE bezugsobjekt1_id=%s OR bezugsobjekt2_id=%s")
+        cursor.execute(command, (bezugsobjekt.get_id(), bezugsobjekt.get_id()))
         tuples = cursor.fetchall()
 
         for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
@@ -136,6 +136,40 @@ class ImplikationMapper(Mapper):
             with StyleMapper() as style_mapper:
                 style = style_mapper.find_by_id(style_id)
             implikation.set_style(style)
+            result.append(implikation)
+
+        self._cnx.commit()
+        cursor.close()
+
+        return result
+
+    def find_all_style(self, style):
+        """Suchen aller Implikations-Constraints, die einem bestimmten Style zugeordnet sind.
+
+        :param style: Das Style-Objekt, nach dessen Implikations-Constraints gesucht werden soll
+        :return Eine Liste mit Implikations-Objekten, die dem übergebenen Style
+                zugeordnet sind.
+        """
+        result = []
+        cursor = self._cnx.cursor()
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM implikation WHERE style_id=%s"
+        cursor.execute(command, (style.get_id(),))
+        tuples = cursor.fetchall()
+
+        for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
+            implikation = Implikation()
+            implikation.set_id(id)
+
+            # Lade die zugehörigen Kleidungstyp-Objekte separat
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
+                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
+            implikation.set_bezugsobjekt1(bezugsobjekt1)
+            implikation.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Style setzen
+            implikation.set_style(style)
+
             result.append(implikation)
 
         self._cnx.commit()
