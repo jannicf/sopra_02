@@ -156,20 +156,17 @@ class KleidungsstueckMapper(Mapper):
         tuples = cursor.fetchall()
 
         try:
-            (id, name, typ_id, kleiderschrank_id) = tuples
-            kleidungsstueck = Kleidungsstueck()
-            kleidungsstueck.set_id(id)
-            kleidungsstueck.set_name(name)
-            with KleidungstypMapper() as kleidungstyp_mapper:
-                typ = kleidungstyp_mapper.find_by_id(typ_id)
-                kleidungsstueck.set_typ(typ)
-            kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
-
-
-            result.append(kleidungsstueck)
+            for (id, name, typ_id, kleiderschrank_id) in tuples:  # Direkt über die Tupel iterieren
+                kleidungsstueck = Kleidungsstueck()
+                kleidungsstueck.set_id(id)
+                kleidungsstueck.set_name(name)
+                with KleidungstypMapper() as kleidungstyp_mapper:
+                    typ = kleidungstyp_mapper.find_by_id(typ_id)
+                    kleidungsstueck.set_typ(typ)
+                kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+                result.append(kleidungsstueck)
         except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            """Der IndexError wird auftreten, wenn die Tupel nicht die erwartete Struktur haben."""
             pass
 
         self._cnx.commit()
