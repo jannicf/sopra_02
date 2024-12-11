@@ -45,7 +45,7 @@ class Kleiderschrank(bo.BusinessObject):
 
     def __str__(self):
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
-        return "User: {}, {}, {}".format(self.get_id(), self.get_name() , self.get_eigentuemer().get_nickname())
+        return "Kleiderschrank: {}, {}, {}".format(self.get_id(), self.get_name() , self.get_eigentuemer().get_nickname())
 
     @staticmethod
     def from_dict(dictionary=dict()):

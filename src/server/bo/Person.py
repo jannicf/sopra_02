@@ -56,9 +56,13 @@ class Person(bo.BusinessObject):
 
     def __str__(self):
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
+        if self.__kleiderschrank is not None:
+            kleiderschrank_info = self.get_kleiderschrank().get_name()
+        else:
+            kleiderschrank_info = "Kein Kleiderschrank"
         return "Person: {}, {}, {}, {}, {}, {}".format(self.get_id(), self.get_vorname(), self.get_nachname(),
                                                        self.get_nickname(), self.get_google_id(),
-                                                       self.get_kleiderschrank().get_name())
+                                                       kleiderschrank_info)
 
 
     @staticmethod

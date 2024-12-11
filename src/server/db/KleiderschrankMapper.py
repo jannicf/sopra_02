@@ -145,11 +145,10 @@ class KleiderschrankMapper(Mapper):
         return result
 
     def find_by_eigentuemer(self, eigentuemer):
-        """Auslesen aller Kleiderschränke anhand des zugeordneten Eigentuemers.
+        """Auslesen des Kleiderschranks anhand des zugeordneten Eigentuemers.
 
         :param eigentuemer Eigentuemer des zugehörigen Kleiderschranks.
-        :return Eine Sammlung mit Kleiderschrank-Objekten, die sämtliche Kleiderschränke
-            mit dem gewünschten Eigentuemer enthält.
+        :return Das Kleiderschrank-Objekt, mit dem gewünschten Eigentuemer.
         """
         result = []
 
@@ -160,7 +159,7 @@ class KleiderschrankMapper(Mapper):
 
         try:
             # Versuchen, alle Ergebnisse zu iterieren
-            for (id, eigentuemer_id, name) in tuples:
+                (id, eigentuemer_id, name) = tuples[0]
                 kleiderschrank = Kleiderschrank()
                 kleiderschrank.set_id(id)
                 kleiderschrank.set_name(name)
@@ -174,7 +173,7 @@ class KleiderschrankMapper(Mapper):
                     for kleidungsstueck in kleidungsstuecke:
                         kleiderschrank.add_kstueck(kleidungsstueck)
 
-                result.append(kleiderschrank)
+                result = kleiderschrank
 
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf

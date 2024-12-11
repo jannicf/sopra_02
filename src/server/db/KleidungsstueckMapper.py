@@ -187,7 +187,7 @@ class KleidungsstueckMapper(Mapper):
         cursor.execute(command, (kleiderschrank_id,))
         tuples = cursor.fetchall()
 
-        for (id, name, typ_id) in tuples:
+        for (id, name, typ_id, kleiderschrank_id) in tuples:
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
             kleidungsstueck.set_name(name)
