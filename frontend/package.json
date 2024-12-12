@@ -8,8 +8,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "firebase": "^11.0.2"
-  }
+  },
+  "description": ""
 }
