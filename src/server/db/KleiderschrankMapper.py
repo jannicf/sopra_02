@@ -107,8 +107,8 @@ class KleiderschrankMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE id={}".format(kleiderschrank_id)
-        cursor.execute(command)
+        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE id=%s"
+        cursor.execute(command, (kleiderschrank_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -150,7 +150,7 @@ class KleiderschrankMapper(Mapper):
         :param eigentuemer Eigentuemer des zugehörigen Kleiderschranks.
         :return Das Kleiderschrank-Objekt, mit dem gewünschten Eigentuemer.
         """
-        result = []
+        result = None
 
         cursor = self._cnx.cursor()
         command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE eigentuemer_id=%s"

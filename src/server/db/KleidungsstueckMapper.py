@@ -155,19 +155,17 @@ class KleidungsstueckMapper(Mapper):
         cursor.execute(command, (typ.get_id(),))
         tuples = cursor.fetchall()
 
-        try:
-            for (id, name, typ_id, kleiderschrank_id) in tuples:  # Direkt über die Tupel iterieren
-                kleidungsstueck = Kleidungsstueck()
-                kleidungsstueck.set_id(id)
-                kleidungsstueck.set_name(name)
-                with KleidungstypMapper() as kleidungstyp_mapper:
-                    typ = kleidungstyp_mapper.find_by_id(typ_id)
-                    kleidungsstueck.set_typ(typ)
-                kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
-                result.append(kleidungsstueck)
-        except IndexError:
-            """Der IndexError wird auftreten, wenn die Tupel nicht die erwartete Struktur haben."""
-            pass
+
+        for (id, name, typ_id, kleiderschrank_id) in tuples:
+            kleidungsstueck = Kleidungsstueck()
+            kleidungsstueck.set_id(id)
+            kleidungsstueck.set_name(name)
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                typ = kleidungstyp_mapper.find_by_id(typ_id)
+                kleidungsstueck.set_typ(typ)
+            kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+            result.append(kleidungsstueck)
+
 
         self._cnx.commit()
         cursor.close()
