@@ -519,7 +519,7 @@ class KleiderschrankAdministration(object):
 
     def create_outfit_from_selection(self, passende_kleidungsstuecke, style_id):  #Der Parameter passende_kleidungsstuecke kommt aus der Liste mit Kleidungsstücken
         """Erstellt ein Outfit aus ausgewählten Style."""
-        outfit = self.create_outfit()
+        outfit = self.create_outfit(style_id)
         style = self.get_style_by_id(style_id)
         outfit.set_style(style)
 
@@ -550,14 +550,14 @@ class KleiderschrankAdministration(object):
         # Gebe die Liste der passenden Kleidungsstücke zurück
         return possible_clothing_items
 
-    def create_outfit_from_base_item(self, possible_clothing_items):
+    def create_outfit_from_base_item(self, possible_clothing_items, style_id):
         """Erstellt ein Outfit aus einer Liste von Kleidungsstücken, die zu einer bestimmten Basis gehört."""
         # Wenn die Liste der Kleidungsstücke leer ist, gebe None zurück
         if not possible_clothing_items:
             return None
 
         # Erstelle ein neues Outfit
-        outfit = self.create_outfit()
+        outfit = self.create_outfit(style_id)
 
         # Füge alle passenden Kleidungsstücke aus der Liste zum Outfit hinzu
         for kleidungsstueck in possible_clothing_items:

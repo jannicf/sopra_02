@@ -88,7 +88,7 @@ DROP TABLE IF EXISTS `kleiderschrank`;
 CREATE TABLE `kleiderschrank` (
   `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
-  `eigentuemer_id` int NOT NULL,
+  `eigentuemer_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `eigentuemer_id` (`eigentuemer_id`),
   CONSTRAINT `kleiderschrank_ibfk_1` FOREIGN KEY (`eigentuemer_id`) REFERENCES `person` (`id`)
@@ -115,7 +115,7 @@ CREATE TABLE `kleidungsstueck` (
   `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   `typ_id` int NOT NULL,
-  `kleiderschrank_id` int NOT NULL,
+  `kleiderschrank_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `typ_id` (`typ_id`),
   KEY `kleiderschrank_id` (`kleiderschrank_id`),
@@ -196,7 +196,7 @@ DROP TABLE IF EXISTS `outfit`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `outfit` (
   `id` int NOT NULL,
-  `style_id` int NOT NULL,
+  `style_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `style_id` (`style_id`),
   CONSTRAINT `outfit_ibfk_1` FOREIGN KEY (`style_id`) REFERENCES `style` (`id`)
@@ -322,4 +322,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-05 13:34:36
+-- Dump completed on 2024-12-12 17:58:18

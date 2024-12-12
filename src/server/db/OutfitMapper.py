@@ -58,8 +58,8 @@ class OutfitMapper(Mapper):
         cursor.execute(command, data)
 
         # bestehende Verknüpfungen zu bausteinen löschen
-        delete_command = "DELETE FROM outfit_kleidungsstueck WHERE outfit_id = {}".format(outfit.get_id())
-        cursor.execute(delete_command)
+        delete_command = "DELETE FROM outfit_kleidungsstueck WHERE outfit_id = %s"
+        cursor.execute(delete_command, (outfit.get_id(),))
 
         # Neue Verknüpfungen zu bausteinen einfügen
         bausteine = outfit.get_bausteine()
@@ -81,12 +81,12 @@ class OutfitMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Verknüpfungen zu Kleidungsstücken löschen
-        delete_relations = "DELETE FROM outfit_kleidungsstueck WHERE outfit_id = {}".format(outfit.get_id())
-        cursor.execute(delete_relations)
+        delete_relations = "DELETE FROM outfit_kleidungsstueck WHERE outfit_id = %s"
+        cursor.execute(delete_relations, (outfit.get_id(),))
 
         # Das Outfit selbst löschen
-        delete_outfit = "DELETE FROM outfit WHERE id = {}".format(outfit.get_id())
-        cursor.execute(delete_outfit)
+        delete_outfit = "DELETE FROM outfit WHERE id = %s"
+        cursor.execute(delete_outfit, (outfit.get_id(),))
 
         self._cnx.commit()
         cursor.close()
@@ -102,8 +102,8 @@ class OutfitMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, style_id FROM outfit WHERE id={}".format(outfit_id)
-        cursor.execute(command)
+        command = "SELECT id, style_id FROM outfit WHERE id=%s"
+        cursor.execute(command, (outfit_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -120,9 +120,9 @@ class OutfitMapper(Mapper):
             bausteine_command = """
                 SELECT kleidungsstueck_id 
                 FROM outfit_kleidungsstueck 
-                WHERE outfit_id={}
-            """.format(outfit_id)
-            cursor.execute(bausteine_command)
+                WHERE outfit_id=%s
+            """
+            cursor.execute(bausteine_command, (outfit.get_id(),))
             bausteine_tuples = cursor.fetchall()
 
             for (baustein_id,) in bausteine_tuples:
@@ -166,9 +166,9 @@ class OutfitMapper(Mapper):
             bausteine_command = """
                 SELECT kleidungsstueck_id 
                 FROM outfit_kleidungsstueck 
-                WHERE outfit_id={}
-            """.format(id)
-            cursor.execute(bausteine_command)
+                WHERE outfit_id=%s
+            """
+            cursor.execute(bausteine_command, (id,))
             bausteine_tuples = cursor.fetchall()
 
             for (baustein_id,) in bausteine_tuples:
