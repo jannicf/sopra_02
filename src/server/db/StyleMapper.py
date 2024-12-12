@@ -1,7 +1,15 @@
-from src.server.db.KleidungstypMapper import KleidungstypMapper
 from src.server.db.Mapper import Mapper
 from src.server.bo.Style import Style
+from src.server.bo.Kardinalitaet import Kardinalitaet
+from src.server.bo.Mutex import Mutex
+from src.server.bo.Implikation import Implikation
+from src.server.bo.Kleidungstyp import Kleidungstyp
 
+"""In dieser Klasse könnte man durch die Nutzung von with-statements die jeweils benötigten Mapper
+direkt aufrufen, um die benötigten Daten zu laden bzw. zu verändern. Da dies jedoch zu einem
+Verbindungsfehler der Datenbank führt, da die Mapper sich immer wieder selbst aufrufen, wurden der Aufruf 
+der Mapper durch eine ausführlichere Implementierung mit SQL-Statements ersetzt, was zwar aufwendiger
+daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht."""
 
 class StyleMapper(Mapper):
     def insert(self, style):
@@ -30,33 +38,42 @@ class StyleMapper(Mapper):
         data = (style.get_id(), style.get_name())
         cursor.execute(command, data)
 
-        """Constraints von Style speichern, um sicherzustellen, 
-            dass die einzelnen Constraints, die zu einem Style gehören, 
-            ebenfalls korrekt in die Datenbank eingefügt werden.
+        features = style.get_features()
+        if features:
+            for feature in features:
+                command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s, %s)"
+                data = (style.get_id(), feature.get_id())
+                cursor.execute(command, data)
 
-        kardinalitaet_mapper = KardinalitaetMapper(self._cnx)
-        for constraint in style.get_constraints():
-            constraint.set_style_id(style.get_id())
-            kardinalitaet_mapper.insert(constraint)
+        # Constraints einfügen
+        constraints = style.get_constraints()
+        if constraints:
+            for constraint in constraints:
+                constraint.set_style(style)
+                if isinstance(constraint, Kardinalitaet):
+                    command = """INSERT INTO kardinalitaet 
+                        (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
+                        VALUES (%s, %s, %s, %s, %s)"""
+                    data = (constraint.get_id(), constraint.get_min_anzahl(),
+                            constraint.get_max_anzahl(), constraint.get_bezugsobjekt().get_id(),
+                            style.get_id())
+                    cursor.execute(command, data)
 
-        mutex_mapper = MutexMapper(self._cnx)
-        for constraint in style.get_constraints():
-            constraint.set_style_id(style.get_id())
-            mutex_mapper.insert(constraint)
+                elif isinstance(constraint, Mutex):
+                    command = """INSERT INTO mutex 
+                        (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                        VALUES (%s, %s, %s, %s)"""
+                    data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
+                            constraint.get_bezugsobjekt2().get_id(), style.get_id())
+                    cursor.execute(command, data)
 
-        implikation_mapper = ImplikationMapper(self._cnx)
-        for constraint in style.get_constraints():
-            constraint.set_style_id(style.get_id())
-            implikation_mapper.insert(constraint)
-
-        Features von Style speichern, um sicherzustellen, 
-        dass die einzelnen Features, die zu einem Style gehören, 
-        ebenfalls korrekt in die Datenbank eingefügt werden.
-
-        kleidungstyp_mapper = KleidungstypMapper(self._cnx)
-        for feature in style.get_features():
-            feature.set_style_id(style.get_id())
-            kleidungstyp_mapper.insert(feature) """
+                elif isinstance(constraint, Implikation):
+                    command = """INSERT INTO implikation 
+                        (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                        VALUES (%s, %s, %s, %s)"""
+                    data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
+                            constraint.get_bezugsobjekt2().get_id(), style.get_id())
+                    cursor.execute(command, data)
 
         self._cnx.commit()
         cursor.close()
@@ -73,27 +90,54 @@ class StyleMapper(Mapper):
         data = (style.get_name(), style.get_id())
         cursor.execute(command, data)
 
-        """
-        kardinalitaet_mapper = KardinalitaetMapper(self._cnx)
-        for constraint in style.get_constraints():
-            constraint.set_style_id(style.get_id())
-            kardinalitaet_mapper.insert(constraint)
+        # Features (Kleidungstypen) aktualisieren
+        # Zuerst vorhandene Verknüpfungen löschen
+        delete_command = "DELETE FROM style_kleidungstyp WHERE style_id=%s"
+        cursor.execute(delete_command, (style.get_id(),))
 
-        mutex_mapper = MutexMapper(self._cnx)
-        for constraint in style.get_constraints():
-            constraint.set_style_id(style.get_id())
-            mutex_mapper.insert(constraint)
+        # Neue Features einfügen
+        features = style.get_features()
+        if features:
+            for feature in features:
+                feature_command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s, %s)"
+                feature_data = (style.get_id(), feature.get_id())
+                cursor.execute(feature_command, feature_data)
 
-        implikation_mapper = ImplikationMapper(self._cnx)
-        for constraint in style.get_constraints():
-            constraint.set_style_id(style.get_id())
-            implikation_mapper.insert(constraint)
+        # Constraints aktualisieren
+        # Zuerst vorhandene Verknüpfungen löschen
+        delete_command2 = "DELETE FROM kardinalitaet WHERE style_id=%s"
+        cursor.execute(delete_command2, (style.get_id(),))
+        delete_command3 = "DELETE FROM mutex WHERE style_id=%s"
+        cursor.execute(delete_command3, (style.get_id(),))
+        delete_command4 = "DELETE FROM implikation WHERE style_id=%s"
+        cursor.execute(delete_command4, (style.get_id(),))
 
-        kleidungstyp_mapper = KleidungstypMapper(self._cnx)
-        for feature in style.get_features():
-            feature.set_style_id(style.get_id())
-            kleidungstyp_mapper.insert(feature)
-        """
+        # Neue Constraints einfügen
+        for constraint in style.get_constraints():
+            if isinstance(constraint, Kardinalitaet):
+                command = """INSERT INTO kardinalitaet 
+                          (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
+                          VALUES (%s, %s, %s, %s, %s)"""
+                data = (constraint.get_id(), constraint.get_min_anzahl(),
+                        constraint.get_max_anzahl(), constraint.get_bezugsobjekt().get_id(),
+                        style.get_id())
+                cursor.execute(command, data)
+
+            elif isinstance(constraint, Mutex):
+                command = """INSERT INTO mutex 
+                          (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                          VALUES (%s, %s, %s, %s)"""
+                data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
+                        constraint.get_bezugsobjekt2().get_id(), style.get_id())
+                cursor.execute(command, data)
+
+            elif isinstance(constraint, Implikation):
+                command = """INSERT INTO implikation 
+                          (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                          VALUES (%s, %s, %s, %s)"""
+                data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
+                        constraint.get_bezugsobjekt2().get_id(), style.get_id())
+                cursor.execute(command, data)
 
         self._cnx.commit()
         cursor.close()
@@ -104,26 +148,39 @@ class StyleMapper(Mapper):
         """
         cursor = self._cnx.cursor()
 
-        command = "DELETE FROM style WHERE id={}".format(style.get_id())
-        cursor.execute(command)
+        """umgekehrte Reihenfolge der Löschungen um Abhängigkeiten nicht zu verletzen"""
+
+        # Constraints löschen
+        delete_command2 = "DELETE FROM kardinalitaet WHERE style_id=%s"
+        cursor.execute(delete_command2, (style.get_id(),))
+        delete_command3 = "DELETE FROM mutex WHERE style_id=%s"
+        cursor.execute(delete_command3, (style.get_id(),))
+        delete_command4 = "DELETE FROM implikation WHERE style_id=%s"
+        cursor.execute(delete_command4, (style.get_id(),))
+        # Features löschen
+        delete_command = "DELETE FROM style_kleidungstyp WHERE style_id=%s"
+        cursor.execute(delete_command, (style.get_id(),))
+        #dann erst den Style löschen
+        command = "DELETE FROM style WHERE id=%s"
+        cursor.execute(command, (style.get_id(),))
 
         self._cnx.commit()
         cursor.close()
 
     def find_by_id(self, style_id):
-        """Suchen eines Benutzers mit vorgegebener Style ID. Da diese eindeutig ist,
+        """Suchen eines Styles mit vorgegebener ID. Da diese eindeutig ist,
             wird genau ein Objekt zurückgegeben.
 
             :param style_id Primärschlüsselattribut (->DB)
             :return Style-Objekt, das dem übergebenen Schlüssel entspricht, None bei
             nicht vorhandenem DB-Tupel.
         """
-
         result = None
-
         cursor = self._cnx.cursor()
-        command = "SELECT id, name FROM style WHERE id={}".format(style_id)
-        cursor.execute(command)
+
+        # Style-Basisdaten laden
+        command = "SELECT id, name FROM style WHERE id=%s"
+        cursor.execute(command, (style_id,))
         tuples = cursor.fetchall()
 
         try:
@@ -131,10 +188,93 @@ class StyleMapper(Mapper):
             style = Style()
             style.set_id(id)
             style.set_name(name)
+
+            # Kleidungstypen mit einem JOIN laden
+            feature_command = """
+                SELECT kleidungstyp.id, kleidungstyp.bezeichnung
+                FROM kleidungstyp 
+                JOIN style_kleidungstyp ON kleidungstyp.id = style_kleidungstyp.kleidungstyp_id
+                WHERE style_kleidungstyp.style_id = %s
+            """
+            cursor.execute(feature_command, (id,))
+            feature_tuples = cursor.fetchall()
+
+            # Kleidungstypen direkt erstellen und zuweisen
+            for (kleidungstyp_id, kleidungstyp_bezeichnung) in feature_tuples:
+                kleidungstyp = Kleidungstyp()
+                kleidungstyp.set_id(kleidungstyp_id)
+                kleidungstyp.set_bezeichnung(kleidungstyp_bezeichnung)
+                style.add_feature(kleidungstyp)
+
+            # Kardinalitäten laden
+            kardinalitaet_command = """
+                SELECT kardinalitaet.id, kardinalitaet.min_anzahl, kardinalitaet.max_anzahl, 
+                kardinalitaet.bezugsobjekt_id
+                FROM kardinalitaet 
+                WHERE kardinalitaet.style_id = %s
+            """
+            cursor.execute(kardinalitaet_command, (id,))
+            kardinalitaet_tuples = cursor.fetchall()
+
+            for (kardinalitaet_id, min_anzahl, max_anzahl, bezugsobjekt_id) in kardinalitaet_tuples:
+                kardinalitaet = Kardinalitaet()
+                kardinalitaet.set_id(kardinalitaet_id)
+                kardinalitaet.set_min_anzahl(min_anzahl)
+                kardinalitaet.set_max_anzahl(max_anzahl)
+                # Bezugsobjekt setzen
+                kleidungstyp = Kleidungstyp()
+                kleidungstyp.set_id(bezugsobjekt_id)
+                kardinalitaet.set_bezugsobjekt(kleidungstyp)
+                kardinalitaet.set_style(style)
+                style.add_constraint(kardinalitaet)
+
+            # Mutex laden
+            mutex_command = """
+                SELECT mutex.id, mutex.bezugsobjekt1_id, mutex.bezugsobjekt2_id
+                FROM mutex 
+                WHERE mutex.style_id = %s
+            """
+            cursor.execute(mutex_command, (id,))
+            mutex_tuples = cursor.fetchall()
+
+            for (mutex_id, bezugsobjekt1_id, bezugsobjekt2_id) in mutex_tuples:
+                mutex = Mutex()
+                mutex.set_id(mutex_id)
+                # Bezugsobjekte setzen
+                bezugsobjekt1 = Kleidungstyp()
+                bezugsobjekt1.set_id(bezugsobjekt1_id)
+                bezugsobjekt2 = Kleidungstyp()
+                bezugsobjekt2.set_id(bezugsobjekt2_id)
+                mutex.set_bezugsobjekt1(bezugsobjekt1)
+                mutex.set_bezugsobjekt2(bezugsobjekt2)
+                mutex.set_style(style)
+                style.add_constraint(mutex)
+
+            # Implikationen laden
+            implikation_command = """
+                SELECT implikation.id, implikation.bezugsobjekt1_id, implikation.bezugsobjekt2_id
+                FROM implikation 
+                WHERE implikation.style_id = %s
+            """
+            cursor.execute(implikation_command, (id,))
+            implikation_tuples = cursor.fetchall()
+
+            for (implikation_id, bezugsobjekt1_id, bezugsobjekt2_id) in implikation_tuples:
+                implikation = Implikation()
+                implikation.set_id(implikation_id)
+                # Bezugsobjekte setzen
+                bezugsobjekt1 = Kleidungstyp()
+                bezugsobjekt1.set_id(bezugsobjekt1_id)
+                bezugsobjekt2 = Kleidungstyp()
+                bezugsobjekt2.set_id(bezugsobjekt2_id)
+                implikation.set_bezugsobjekt1(bezugsobjekt1)
+                implikation.set_bezugsobjekt2(bezugsobjekt2)
+                implikation.set_style(style)
+                style.add_constraint(implikation)
+
             result = style
+
         except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
             result = None
 
         self._cnx.commit()
@@ -143,122 +283,47 @@ class StyleMapper(Mapper):
         return result
 
     def find_by_name(self, name):
-        """Auslesen aller Benutzer anhand des zugeordneten namen.
+        """Auslesen eines Styles anhand des zugeordneten Namens.
 
-        :param name Name der zugehörigen Benutzer.
-        :return Eine Sammlung mit Style-Objekten, die sämtliche Benutzer
-            mit dem gewünschten Name enthält.
+        :param name Name des Styles.
+        :return Style-Objekt mit dem gesuchten Namen, None wenn nicht gefunden.
         """
         result = None
-
         cursor = self._cnx.cursor()
-        command = "SELECT id, name FROM style WHERE name={}".format(name)
-        cursor.execute(command)
+
+        # Zunächst finden wir nur die ID des Styles mit dem gesuchten Namen
+        command = "SELECT id FROM style WHERE name=%s"
+        cursor.execute(command, (name,))
         tuples = cursor.fetchall()
 
         try:
-            (id, name) = tuples[0]
-            style = Style()
-            style.set_id(id)
-            style.set_name(name)
-            result = Style
+            (id,) = tuples[0]
+            # Dann nutzen wir find_by_id, um ein vollständiges Objekt zu laden
+            result = self.find_by_id(id)
         except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
             result = None
 
-        self._cnx.commit()
         cursor.close()
-
         return result
-
-    """Wir müssen vorher die Constraint Tabelle definieren.
-
-
-    def find_by_constraints(self, constraints):
-        Auslesen aller Benutzer anhand den zugeordneten Constraints.
-
-        :param constraints Constraints der zugehörigen Benutzer.
-        :return Eine Sammlung mit Style-Objekten, die sämtliche Benutzer
-            mit den gewünschten Constraints enthält.
-        
-        result = None
-
-        cursor = self._cnx.cursor()
-        command = "SELECT id, name, constraints, features FROM style WHERE constraints={}".format(constraints)
-        cursor.execute(command)
-        tuples = cursor.fetchall()
-
-        try:
-            (id, name, constraints, features) = tuples[0]
-            style = Style()
-            style.set_id(id)
-            style.set_name(name)
-            style.set_constraints(constraints)
-            style.set_features(features)
-            result = Style
-        except IndexError:
-            Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt.
-            result = None
-
-        self._cnx.commit()
-        cursor.close()
-
-        return result
-
-    def find_by_features(self, features):
-        Auslesen aller Benutzer anhand den zugeordneten Features.
-
-        :param features Features der zugehörigen Benutzer.
-        :return Eine Sammlung mit Style-Objekten, die sämtliche Benutzer
-            mit den gewünschten Features enthält.
-        
-        result = None
-
-        cursor = self._cnx.cursor()
-        command = "SELECT id, name, constraints, features FROM style WHERE features={}".format(features)
-        cursor.execute(command)
-        tuples = cursor.fetchall()
-
-        try:
-            (id, name, constraints, features) = tuples[0]
-            style = Style()
-            style.set_id(id)
-            style.set_name(name)
-            style.set_constraints(constraints)
-            style.set_features(features)
-            result = Style
-        except IndexError:
-            Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt.
-            result = None
-
-        self._cnx.commit()
-        cursor.close()
-
-        return result
-        
-        """
 
     def find_all(self):
-        """Auslesen aller Benutzer unseres Systems.
+        """Auslesen aller Styles unseres Systems.
 
-        :return Eine Sammlung mit Style-Objekten, die sämtliche Benutzer
-        des Systems repräsentieren.
+        :return Eine Liste mit Style-Objekten, die sämtliche Styles
+                des Systems repräsentieren.
         """
         result = []
         cursor = self._cnx.cursor()
-        cursor.execute("SELECT * from style")
+
+        # Wir holen uns nur die IDs aller Styles
+        cursor.execute("SELECT id FROM style")
         tuples = cursor.fetchall()
 
-        for (id, name) in tuples:
-            style = Style()
-            style.set_id(id)
-            style.set_name(name)
-            result.append(style)
+        for (id,) in tuples:
+            # Für jede ID laden wir das vollständige Objekt über find_by_id
+            style = self.find_by_id(id)
+            if style:
+                result.append(style)
 
-        self._cnx.commit()
         cursor.close()
-
         return result

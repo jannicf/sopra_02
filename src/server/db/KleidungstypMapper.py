@@ -2,6 +2,12 @@ from src.server.db.Mapper import Mapper
 from src.server.bo.Kleidungstyp import Kleidungstyp
 from src.server.bo.Style import Style
 
+"""In dieser Klasse könnte man durch die Nutzung von with-statements die jeweiligen Mapper der Attribute
+direkt aufrufen, um die benötigten Daten zu laden bzw. zu verändern. Da dies jedoch zu einem
+Verbindungsfehler der Datenbank führt, weil die Mapper sich immer wieder selbst aufrufen, wurde der Aufruf 
+der Mapper durch eine ausführlichere Implementierung mit SQL-Statements ersetzt, was zwar aufwendiger
+daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht."""
+
 
 class KleidungstypMapper(Mapper):
 
@@ -113,15 +119,16 @@ class KleidungstypMapper(Mapper):
         cursor.execute(command, (kleidungstyp_id,))
         tuples = cursor.fetchall()
 
+
         try:
             (id, bezeichnung) = tuples[0]
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
 
-            # Abfrage der zugehörigen Verwendungen (Styles). Ohne diese Abfrage wäre die Verwendung leer.
+            # Abfrage der zugehörigen Verwendungen (Styles)
             verwendung_command = """
-                        SELECT style.id, style.name 
+                        SELECT style.id, style.name
                         FROM style 
                         JOIN style_kleidungstyp ON style.id = style_kleidungstyp.style_id
                         WHERE style_kleidungstyp.kleidungstyp_id = %s
@@ -129,7 +136,7 @@ class KleidungstypMapper(Mapper):
             cursor.execute(verwendung_command, (id,))
             verwendung_tuples = cursor.fetchall()
 
-            # Styles dem Kleidungstyp hinzufügen
+            # Styles dem Kleidungstyp direkt hinzufügen
             for (style_id, style_name) in verwendung_tuples:
                 style = Style()
                 style.set_id(style_id)
@@ -139,102 +146,51 @@ class KleidungstypMapper(Mapper):
             result = kleidungstyp
 
         except IndexError:
-            """
-            Der IndexError tritt auf, wenn keine Datensätze gefunden werden.
-            In diesem Fall bleibt result None.
-            """
             result = None
 
         cursor.close()
-
         return result
 
     def find_by_bezeichnung(self, bezeichnung):
-        """
-        Auslesen aller Kleidungstypen anhand der Bezeichnung.
+        """Suchen eines Kleidungstyps anhand seiner Bezeichnung.
 
-        :param bezeichnung: Bezeichnung der zu suchenden Kleidungstypen
-        :return: Eine Sammlung mit Kleidungstyp-Objekten, die der Bezeichnung entsprechen
+        :param bezeichnung: Bezeichnung des gesuchten Kleidungstyps
+        :return Kleidungstyp-Objekt oder None
         """
-        result = []
-
+        result = None
         cursor = self._cnx.cursor()
 
-        # Parameterisierte Abfrage für Sicherheit
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE bezeichnung=%s"
+        # Nur die ID abfragen
+        command = "SELECT id FROM kleidungstyp WHERE bezeichnung=%s"
         cursor.execute(command, (bezeichnung,))
         tuples = cursor.fetchall()
 
-        # Durchlaufen aller gefundenen Datensätze
-        for (id, bezeichnung) in tuples:
-            kleidungstyp = Kleidungstyp()
-            kleidungstyp.set_id(id)
-            kleidungstyp.set_bezeichnung(bezeichnung)
-
-            # Abfrage der zugehörigen Verwendungen (Styles). Ohne diese Abfrage wäre die Verwendung leer.
-            verwendung_command = """
-                        SELECT style.id, style.name 
-                        FROM style 
-                        JOIN style_kleidungstyp ON style.id = style_kleidungstyp.style_id
-                        WHERE style_kleidungstyp.kleidungstyp_id = %s
-                    """
-            cursor.execute(verwendung_command, (id,))
-            verwendung_tuples = cursor.fetchall()
-
-            # Styles dem Kleidungstyp hinzufügen
-            for (style_id, style_name) in verwendung_tuples:
-                style_dict = {
-                    'id': style_id,
-                    'name': style_name
-                }
-                style = Style.from_dict(style_dict)
-                kleidungstyp.add_verwendung(style)
-
-            result.append(kleidungstyp)
+        try:
+            (id,) = tuples[0]
+            # Vollständiges Objekt über find_by_id laden
+            result = self.find_by_id(id)
+        except IndexError:
+            result = None
 
         cursor.close()
-
         return result
 
     def find_all(self):
-        """
-            Auslesen aller Kleidungstypen im System.
+        """Auslesen aller Kleidungstypen.
 
-            :return: Eine Sammlung mit allen Kleidungstyp-Objekten
+        :return Eine Liste mit allen Kleidungstyp-Objekten
         """
         result = []
         cursor = self._cnx.cursor()
 
-        # Hauptabfrage für Kleidungstypen
-        cursor.execute("SELECT id, bezeichnung FROM kleidungstyp")
+        cursor.execute("SELECT id FROM kleidungstyp")
         tuples = cursor.fetchall()
 
-        for (id, bezeichnung) in tuples:
-            kleidungstyp = Kleidungstyp()
-            kleidungstyp.set_id(id)
-            kleidungstyp.set_bezeichnung(bezeichnung)
-
-            # Abfrage der zugehörigen Verwendungen (Styles). Ohne diese Abfrage wäre die Verwendung leer.
-            verwendung_command = """
-                       SELECT style.id, style.name 
-                       FROM style 
-                       JOIN style_kleidungstyp ON style.id = style_kleidungstyp.style_id
-                       WHERE style_kleidungstyp.kleidungstyp_id = %s
-                   """
-            cursor.execute(verwendung_command, (id,))
-            verwendung_tuples = cursor.fetchall()
-
-            # Styles dem Kleidungstyp hinzufügen
-            for (style_id, style_name) in verwendung_tuples:
-                style_dict = {
-                    'id': style_id,
-                    'name': style_name
-                }
-                style = Style.from_dict(style_dict)
-                kleidungstyp.add_verwendung(style)
-
-            result.append(kleidungstyp)
+        for (id,) in tuples:
+            # Vollständige Objekte über find_by_id laden
+            kleidungstyp = self.find_by_id(id)
+            if kleidungstyp:
+                result.append(kleidungstyp)
 
         cursor.close()
-
         return result
