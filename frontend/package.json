@@ -8,8 +8,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "description": "",
   "dependencies": {
-    "firebase": "^11.0.2"
-  },
-  "description": ""
+    "firebase": "^10.0.0",
+    "firebaseui": "^6.1.0"
+  }
 }
