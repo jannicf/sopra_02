@@ -79,6 +79,8 @@ class PersonMapper(Mapper):
         cursor.execute(command, (person_id,))
         tuples = cursor.fetchall()
 
+        """ Hier wird bewusst auf das Attribut des Kleiderschranks in der Person-Klasse verzichtet, da diese Beziehung
+                    schon durch die Kleiderschrank- bzw. die KleiderschrankMapper-Klasse gehandhabt wird"""
         try:
             (id, vorname, nachname, nickname, google_id) = tuples[0]
             person = Person()
@@ -105,26 +107,22 @@ class PersonMapper(Mapper):
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
             mit der gewünschten Vorname enthält.
         """
-        result = None
+        result = []
 
         cursor = self._cnx.cursor()
         command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE vorname=%s"
         cursor.execute(command, (vorname,))
         tuples = cursor.fetchall()
 
-        try:
-            (id, vorname, nachname, nickname, google_id) = tuples[0]
+
+        for (id, vorname, nachname, nickname, google_id) in tuples:
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
-            result = person
-        except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
-            result = None
+            result.append(person)
 
         self._cnx.commit()
         cursor.close()
@@ -146,7 +144,7 @@ class PersonMapper(Mapper):
         tuples = cursor.fetchall()
 
 
-        for (id, vorname, nachname, nickname, google_id, kleiderschrank) in tuples[0]:
+        for (id, vorname, nachname, nickname, google_id) in tuples:
             person = Person()
             person.set_id(id)
             person.set_vorname(vorname)
@@ -170,7 +168,7 @@ class PersonMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, vorname, nachname, nickname, google_id, kleiderschrank FROM person WHERE nickname=%s"
+        command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE nickname=%s"
         cursor.execute(command, (nickname,))
         tuples = cursor.fetchall()
 

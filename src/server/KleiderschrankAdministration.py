@@ -179,6 +179,21 @@ class KleiderschrankAdministration(object):
         with PersonMapper() as mapper:
             return mapper.find_by_id(number)
 
+    def get_person_by_vorname(self, vorname):
+        """Die Person mit dem gegebenen Vornamen auslesen."""
+        with PersonMapper() as mapper:
+            return mapper.find_by_vorname(vorname)
+
+    def get_person_by_nachname(self, nachname):
+        """Die Person mit dem gegebenen Nachnamen auslesen."""
+        with PersonMapper() as mapper:
+            return mapper.find_by_nachname(nachname)
+
+    def get_person_by_nickname(self, nickname):
+        """Die Person mit dem gegebenen Nickname auslesen."""
+        with PersonMapper() as mapper:
+            return mapper.find_by_nickname(nickname)
+
     def get_person_by_google_id(self, id):
         """Die Person mit der gegebenen Google ID auslesen."""
         with PersonMapper() as mapper:
@@ -197,9 +212,9 @@ class KleiderschrankAdministration(object):
     def delete_person(self, person):
         """Die gegebene Person und ihre zugehörigen Ressourcen (z. B. Kleiderschrank) aus unserem System löschen."""
         with KleiderschrankMapper() as kleiderschrank_mapper:
-            # Alle Kleiderschränke des Eigentümers löschen
-            kleiderschraenke = kleiderschrank_mapper.find_by_eigentuemer(person)
-            for kleiderschrank in kleiderschraenke:
+            # Kleiderschrank des Eigentümers löschen
+            kleiderschrank = kleiderschrank_mapper.find_by_eigentuemer(person)
+            if kleiderschrank is not None:
                 kleiderschrank_mapper.delete(kleiderschrank)
 
         # Danach die Person löschen
@@ -263,6 +278,11 @@ class KleiderschrankAdministration(object):
         """Den Style mit der gegebenen ID auslesen."""
         with StyleMapper() as mapper:
             return mapper.find_by_id(number)
+
+    def get_style_by_name(self, name):
+        """Den Style mit dem gegebenen Namen auslesen."""
+        with StyleMapper() as mapper:
+            return mapper.find_by_name(name)
 
     def get_all_styles(self):
         """Alle Styles auslesen."""
@@ -366,6 +386,11 @@ class KleiderschrankAdministration(object):
         """Alle Kleidungsstücke eines bestimmten Typs auslesen."""
         with KleidungsstueckMapper() as mapper:
             return mapper.find_by_typ(typ)
+
+    def get_kleidungsstueck_by_kleiderschrank_id(self, kleiderschrank_id):
+        """Alle Kleidungsstücke eines bestimmten Kleiderschranks auslesen."""
+        with KleidungsstueckMapper() as mapper:
+            return mapper.find_by_kleiderschrank_id(kleiderschrank_id)
 
     def get_all_kleidungsstuecke(self):
         """Alle Kleidungsstücke auslesen."""
