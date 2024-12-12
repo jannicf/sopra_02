@@ -148,6 +148,81 @@ class PersonOperations(Resource):
         else:
             return '', 500
 
+@wardrobe.route('/persons-by-nachname/<string:nachname>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('nachname', 'Der Nachname der Person')
+class PersonsByNameOperations(Resource):
+    @wardrobe.marshal_with(person)
+    # @secured
+    def get(self, nachname):
+        """ Auslesen von Personen-Objekten, die durch den Nachnamen bestimmt werden.
+
+        Die auszulesenden Objekte werden durch ```lastname``` in dem URI bestimmt.
+        """
+        adm = KleiderschrankAdministration()
+        persons = adm.get_person_by_nachname(nachname)
+        return persons
+
+@wardrobe.route('/wardrobes')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class WardrobeListOperations(Resource):
+    @wardrobe.marshal_list_with(wardrobe)
+    # @secured
+    def get(self):
+        """Auslesen aller Kleiderschrank-Objekte.
+
+        Sollten keine Kleiderschrank-Objekte verfügbar sein, so wird eine leere Sequenz zurückgegeben."""
+        adm = KleiderschrankAdministration()
+        wardrobe_list = adm.get_all_kleiderschraenke()
+        return wardrobe_list
+
+
+@wardrobe.route('/wardrobes/<int:id>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('id', 'Die ID des Kleiderschrank-Objekts')
+class WardrobeOperations(Resource):
+    @wardrobe.marshal_with(wardrobe)
+    # @secured
+    def get(self, id):
+        """Auslesen eines bestimmten Kleiderschrank-Objekts.
+
+        Das auszulesende Objekt wird durch die ```id``` in dem URI bestimmt.
+        """
+        adm = KleiderschrankAdministration()
+        wardrobe_obj = adm.get_kleiderschrank_by_id(id)
+        return wardrobe_obj
+
+    # @secured
+    def delete(self, id):
+        """Löschen eines bestimmten Kleiderschrank-Objekts.
+
+        Das zu löschende Objekt wird durch die ```id``` in dem URI bestimmt.
+        """
+        adm = KleiderschrankAdministration()
+        wardrobe_obj = adm.get_kleiderschrank_by_id(id)
+        adm.delete_kleiderschrank(wardrobe_obj)
+        return '', 200
+
+    @wardrobe.marshal_with(wardrobe)
+    # @secured
+    def put(self, id):
+        """Update eines bestimmten Kleiderschrank-Objekts.
+
+        **ACHTUNG:** Relevante id ist die id, die mittels URI bereitgestellt und somit als Methodenparameter
+        verwendet wird. Dieser Parameter überschreibt das ID-Attribut des im Payload der Anfrage übermittelten
+        Kleiderschrank-Objekts.
+        """
+        adm = KleiderschrankAdministration()
+        w = Kleiderschrank.from_dict(api.payload)
+
+        if w is not None:
+            """Hierdurch wird die id des zu überschreibenden Kleiderschrank-Objekts gesetzt."""
+            w.set_id(id)
+            adm.save_kleiderschrank(w)
+            return '', 200
+        else:
+            return '', 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
