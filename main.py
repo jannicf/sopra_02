@@ -62,6 +62,28 @@ outfit = api.inherit('Outfit', bo, {
     'bausteine': fields.List(fields.Nested(kleidungsstueck), description='Kleidungsstücke im Outfit')
 })
 
+constraint = api.inherit('Constraint', bo, {
+    'style': fields.String(attribute='_style', description='Style des Constraints')
+})
+
+unary_constraint = api.inherit('UnaryConstraint', constraint, {
+    'bezugsobjekt': fields.Integer(attribute='_bezugsobjekt', description='Das Bezugsobjekt für den Unary Constraint')
+})
+
+binary_constraint = api.inherit('BinaryConstraint', constraint, {
+    'bezugsobjekt1': fields.Integer(attribute='bezugsobjekt1', description='Das erste Bezugsobjekt'),
+    'bezugsobjekt2': fields.Integer(attribute='bezugsobjekt2', description='Das zweite Bezugsobjekt')
+})
+
+mutex = api.inherit('MutexConstraint', binary_constraint, {})
+
+implikation = api.inherit('ImplicationConstraint', binary_constraint, {})
+
+kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
+    'min_anzahl': fields.Integer(attribute='min_anzahl', description='Minimaler Wert der Kardinalität'),
+    'max_anzahl': fields.Integer(attribute='max_anzahl', description='Maximaler Wert der Kardinalität')
+})
+
 
 @wardrobe.route('/person')
 @wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -491,6 +513,199 @@ class ClothingTypeOperations(Resource):
             return '', 200
         else:
             return '', 500
+
+
+@wardrobe.route('/cardinalityconstraints')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class CardinalityConstraintListOperations(Resource):
+    @wardrobe.marshal_list_with(kardinalitaet)
+    # @secured
+    def get(self):
+        """Auslesen aller Kardinalitäts-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraints_list = adm.get_all_kardinalitaeten()
+        return constraints_list
+
+    @wardrobe.marshal_with(kardinalitaet, code=201)
+    @wardrobe.expect(kardinalitaet)
+    # @secured
+    def post(self):
+        """Erstellen eines neuen Kardinalitäts-Constraints"""
+        adm = KleiderschrankAdministration()
+        proposal = Kardinalitaet.from_dict(api.payload)
+        if proposal is not None:
+            constraint = adm.create_kardinalitaet(
+                proposal.get_min_anzahl(),
+                proposal.get_max_anzahl(),
+                proposal.get_bezugsobjekt(),
+                proposal.get_style()
+            )
+            return constraint, 201
+        else:
+            return '', 500
+
+
+@wardrobe.route('/cardinalityconstraints/<int:id>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('id', 'Die ID des Kardinalitäts-Constraints')
+class CardinalityConstraintOperations(Resource):
+    @wardrobe.marshal_with(kardinalitaet)
+    # @secured
+    def get(self, id):
+        """Auslesen eines spezifischen Kardinalitäts-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraint = adm.get_kardinalitaet_by_id(id)
+        return constraint
+
+    # @secured
+    def delete(self, id):
+        """Löschen eines Kardinalitäts-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraint = adm.get_kardinalitaet_by_id(id)
+        adm.delete_kardinalitaet(constraint)
+        return '', 200
+
+    @wardrobe.marshal_with(kardinalitaet)
+    @wardrobe.expect(kardinalitaet, validate=True)
+    # @secured
+    def put(self, id):
+        """Updaten eines Kardinalitäts-Constraints"""
+        adm = KleiderschrankAdministration()
+        cc = Kardinalitaet.from_dict(api.payload)
+        if cc is not None:
+            cc.set_id(id)
+            adm.save_kardinalitaet(cc)
+            return '', 200
+        else:
+            return '', 500
+
+
+@wardrobe.route('/implicationconstraints')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class ImplicationConstraintListOperations(Resource):
+    @wardrobe.marshal_list_with(implikation)
+    # @secured
+    def get(self):
+        """Auslesen aller Implikations-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraints_list = adm.get_all_implikationen()
+        return constraints_list
+
+    @wardrobe.marshal_with(implikation, code=201)
+    @wardrobe.expect(implikation)
+    # @secured
+    def post(self):
+        """Erstellen eines neuen Implikations-Constraints"""
+        adm = KleiderschrankAdministration()
+        proposal = Implikation.from_dict(api.payload)
+        if proposal is not None:
+            constraint = adm.create_implikation(
+                proposal.get_bezugsobjekt1(),
+                proposal.get_bezugsobjekt2(),
+                proposal.get_style()
+            )
+            return constraint, 201
+        else:
+            return '', 500
+
+
+@wardrobe.route('/implicationconstraints/<int:id>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('id', 'Die ID des Implikations-Constraints')
+class ImplicationConstraintOperations(Resource):
+    @wardrobe.marshal_with(implikation)
+    # @secured
+    def get(self, id):
+        """Auslesen eines spezifischen Implikations-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraint = adm.get_implikation_by_id(id)
+        return constraint
+
+    # @secured
+    def delete(self, id):
+        """Löschen eines Implikations-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraint = adm.get_implikation_by_id(id)
+        adm.delete_implikation(constraint)
+        return '', 200
+
+    @wardrobe.marshal_with(implikation)
+    @wardrobe.expect(implikation, validate=True)
+    # @secured
+    def put(self, id):
+        """Updaten eines Implikations-Constraints"""
+        adm = KleiderschrankAdministration()
+        ic = Implikation.from_dict(api.payload)
+        if ic is not None:
+            ic.set_id(id)
+            adm.save_implikation(ic)
+            return '', 200
+        else:
+            return '', 500
+
+
+@wardrobe.route('/mutexconstraints')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class MutexConstraintListOperations(Resource):
+    @wardrobe.marshal_list_with(mutex)
+    # @secured
+    def get(self):
+        """Auslesen aller Mutex-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraints_list = adm.get_all_mutex()
+        return constraints_list
+
+    @wardrobe.marshal_with(mutex, code=201)
+    @wardrobe.expect(mutex)
+    # @secured
+    def post(self):
+        """Erstellen eines neuen Mutex-Constraints"""
+        adm = KleiderschrankAdministration()
+        proposal = Mutex.from_dict(api.payload)
+        if proposal is not None:
+            constraint = adm.create_mutex(
+                proposal.get_bezugsobjekt1(),
+                proposal.get_bezugsobjekt2(),
+                proposal.get_style()
+            )
+            return constraint, 201
+        else:
+            return '', 500
+
+@wardrobe.route('/mutexconstraints/<int:id>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('id', 'Die ID des Mutex-Constraints')
+class MutexConstraintOperations(Resource):
+    @wardrobe.marshal_with(mutex)
+    # @secured
+    def get(self, id):
+        """Auslesen eines spezifischen Mutex-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraint = adm.get_mutex_by_id(id)
+        return constraint
+
+    # @secured
+    def delete(self, id):
+        """Löschen eines Mutex-Constraints"""
+        adm = KleiderschrankAdministration()
+        constraint = adm.get_mutex_by_id(id)
+        adm.delete_mutex(constraint)
+        return '', 200
+
+    @wardrobe.marshal_with(mutex)
+    @wardrobe.expect(mutex, validate=True)
+    # @secured
+    def put(self, id):
+        """Updaten eines Mutex-Constraints"""
+        adm = KleiderschrankAdministration()
+        mc = Mutex.from_dict(api.payload)
+        if mc is not None:
+            mc.set_id(id)
+            adm.save_mutex(mc)
+            return '', 200
+        else:
+            return '', 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
