@@ -1,0 +1,114 @@
+import BusinessObject from './BusinessObject.js';
+import StyleBO from "./StyleBO.js";
+
+/**
+* Repräsentiert einen Kleidungstyp im digitalen Kleiderschranksystem.
+*/
+export default class KleidungstypBO extends BusinessObject {
+ /**
+  * Erstellt ein KleidungstypBO Objekt.
+  */
+ constructor() {
+   super();
+   this.bezeichnung = "";
+   this.verwendungen = []; // Array von StyleBO Objekten
+ }
+
+ /**
+  * Setzt die Bezeichnung des Kleidungstyps.
+  *
+  * @param {String} aBezeichnung - Die neue Bezeichnung des Kleidungstyps
+  */
+ setBezeichnung(aBezeichnung) {
+   this.bezeichnung = aBezeichnung;
+ }
+
+ /**
+  * Gibt die Bezeichnung des Kleidungstyps zurück.
+  */
+ getBezeichnung() {
+   return this.bezeichnung;
+ }
+
+ /**
+  * Fügt einen Style zur Liste der Verwendungen hinzu.
+  * Fügt auch diesem Style den Kleidungstyp hinzu, wenn er noch nicht enthalten ist.
+  *
+  * @param {StyleBO} aStyle - Der hinzuzufügende Style
+  */
+ addVerwendung(aStyle) {
+   if (aStyle instanceof StyleBO) {
+     this.verwendungen.push(aStyle);
+     // Auch dem Style den Kleidungstyp hinzufügen, wenn er nicht schon in der Liste ist
+     if (!aStyle.getFeatures().some(feature => feature.getId() === this.getId())) {
+       aStyle.addFeature(this);
+     }
+   }
+ }
+
+ /**
+  * Entfernt einen Style aus der Liste der Verwendungen.
+  * Entfernt auch den Kleidungstyp aus diesem Style.
+  *
+  * @param {StyleBO} aStyle - Der zu entfernende Style
+  */
+ deleteVerwendung(aStyle) {
+   const index = this.verwendungen.findIndex(v => v.getId() === aStyle.getId());
+   if (index > -1) {
+     this.verwendungen.splice(index, 1);
+     // Auch aus der anderen Richtung löschen
+     if (aStyle.getFeatures().some(feature => feature.getId() === this.getId())) {
+       aStyle.removeFeature(this);
+     }
+   }
+ }
+
+ /**
+  * Gibt alle Verwendungen (Styles) des Kleidungstyps zurück.
+  */
+ getVerwendungen() {
+   return this.verwendungen;
+ }
+
+ /**
+  * Konvertiert eine JSON-Antwort in ein KleidungstypBO Objekt bzw. Array von KleidungstypBO Objekten.
+  *
+  * @param {*} json - JSON-Daten aus dem Backend
+  */
+ static fromJSON(json) {
+   let result = [];
+
+   if (Array.isArray(json)) {
+     json.forEach((k) => {
+       let kleidungstyp = new KleidungstypBO();
+       kleidungstyp.setId(k.id);
+       kleidungstyp.setBezeichnung(k.bezeichnung);
+
+       // Verwendungen (Styles) konvertieren wenn vorhanden
+       if (k.verwendungen && Array.isArray(k.verwendungen)) {
+         k.verwendungen.forEach(style => {
+           const styleBO = StyleBO.fromJSON([style])[0];
+           kleidungstyp.addVerwendung(styleBO);
+         });
+       }
+
+       result.push(kleidungstyp);
+     });
+   } else if (json) {
+     let kleidungstyp = new KleidungstypBO();
+     kleidungstyp.setId(json.id);
+     kleidungstyp.setBezeichnung(json.bezeichnung);
+
+     if (json.verwendungen && Array.isArray(json.verwendungen)) {
+       json.verwendungen.forEach(style => {
+         const styleBO = StyleBO.fromJSON([style])[0];
+         kleidungstyp.addVerwendung(styleBO);
+       });
+     }
+
+     result.push(kleidungstyp);
+   }
+
+   return result;
+ }
+}
