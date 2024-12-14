@@ -405,5 +405,92 @@ class StyleOperations(Resource):
             return '', 500
 
 
+@wardrobe.route('/clothing-types')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class ClothingTypeListOperations(Resource):
+    @wardrobe.marshal_list_with(kleidungstyp)
+    # @secured
+    def get(self):
+        """Auslesen aller Kleidungstyp-Objekte.
+
+        Sollten keine Kleidungstypen verfügbar sein, so wird eine leere Sequenz zurückgegeben."""
+        adm = KleiderschrankAdministration()
+        clothing_types_list = adm.get_all_kleidungstypen()
+        return clothing_types_list
+
+    @wardrobe.marshal_with(kleidungstyp, code=201)
+    @wardrobe.expect(kleidungstyp)
+    # @secured
+    def post(self):
+        """Anlegen eines neuen Kleidungstyp-Objekts.
+
+        **ACHTUNG:** Wir fassen die vom Client gesendeten Daten als Vorschlag auf.
+        Die Vergabe der ID erfolgt serverseitig.
+        *Das korrigierte Objekt wird zurückgegeben.*
+        """
+        adm = KleiderschrankAdministration()
+
+        # Erstelle Kleidungstyp-Objekt aus den übertragenen Daten
+        proposal = Kleidungstyp.from_dict(api.payload)
+
+        if proposal is not None:
+            """ Wir erstellen ein Kleidungstyp-Objekt basierend auf den Vorschlagsdaten.
+            Das serverseitig erzeugte Objekt ist das maßgebliche und 
+            wird dem Client zurückgegeben. 
+            """
+            clothing_type = adm.create_kleidungstyp(
+                proposal.get_bezeichnung()
+            )
+            return clothing_type, 201
+        else:
+            # Wenn etwas schiefgeht, werfen wir einen Server-Fehler.
+            return '', 500
+
+
+@wardrobe.route('/clothing-types/<int:id>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('id', 'Die ID des Kleidungstyp-Objekts')
+class ClothingTypeOperations(Resource):
+    @wardrobe.marshal_with(kleidungstyp)
+    # @secured
+    def get(self, id):
+        """Auslesen eines bestimmten Kleidungstyp-Objekts.
+
+        Das auszulesende Objekt wird durch die ```id``` in dem URI bestimmt.
+        """
+        adm = KleiderschrankAdministration()
+        clothing_type = adm.get_kleidungstyp_by_id(id)
+        return clothing_type
+
+    # @secured
+    def delete(self, id):
+        """Löschen eines bestimmten Kleidungstyp-Objekts.
+
+        Das zu löschende Objekt wird durch die ```id``` in dem URI bestimmt.
+        """
+        adm = KleiderschrankAdministration()
+        clothing_type = adm.get_kleidungstyp_by_id(id)
+        adm.delete_kleidungstyp(clothing_type)
+        return '', 200
+
+    @wardrobe.marshal_with(kleidungstyp)
+    @wardrobe.expect(kleidungstyp, validate=True)
+    # @secured
+    def put(self, id):
+        """Update eines bestimmten Kleidungstyp-Objekts.
+
+        Die Objekt-ID wird durch den URI-Parameter überschrieben.
+        """
+        adm = KleiderschrankAdministration()
+        ct = Kleidungstyp.from_dict(api.payload)
+
+        if ct is not None:
+            """Setze die ID des zu überschreibenden Kleidungstyp-Objekts."""
+            ct.set_id(id)
+            adm.save_kleidungstyp(ct)
+            return '', 200
+        else:
+            return '', 500
+
 if __name__ == '__main__':
     app.run(debug=True)
