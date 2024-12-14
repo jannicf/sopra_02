@@ -1,7 +1,7 @@
 import BusinessObject from './BusinessObject.js';
 
 /**
- * Repräsentiert eine Person im Kleiderschrank-Verwaltungssystem.
+ * Repräsentiert eine Person im digitalen Kleiderschranksystem.
  */
 export default class PersonBO extends BusinessObject {
 
