@@ -1,24 +1,19 @@
 import BusinessObject from './BusinessObject.js';
 
 /**
- * Repräsentiert eine Person im Kleiderschrank-Verwaltungssystem.
+ * Repräsentiert eine Person im digitalen Kleiderschranksystem.
  */
 export default class PersonBO extends BusinessObject {
 
   /**
-   * Erstellt ein PersonBO Objekt mit den gegebenen Attributen.
-   *
-   * @param {String} aFirstName - Der Vorname dieser Person
-   * @param {String} aLastName - Der Nachname dieser Person
-   * @param {String} aNickname - Der Spitzname dieser Person
-   * @param {String} aGoogleId - Die Google ID dieser Person
+   * Erstellt ein PersonBO Objekt.
    */
-  constructor(aFirstName, aLastName, aNickname, aGoogleId) {
+  constructor() {
     super();
-    this.vorname = aFirstName;
-    this.nachname = aLastName;
-    this.nickname = aNickname;
-    this.google_id = aGoogleId;
+    this.vorname = "";
+    this.nachname = "";
+    this.nickname = "";
+    this.google_id = "";
     this.kleiderschrank = null;
   }
 
@@ -55,16 +50,16 @@ export default class PersonBO extends BusinessObject {
   }
 
   /**
-   * Setzt den Spitznamen der Person.
+   * Setzt den Nickname der Person.
    *
-   * @param {String} aNickname - Der neue Spitzname dieser Person
+   * @param {String} aNickname - Der neue Nickname dieser Person
    */
   setNickname(aNickname) {
     this.nickname = aNickname;
   }
 
   /**
-   * Gibt den Spitznamen der Person zurück.
+   * Gibt den Nickname der Person zurück.
    */
   getNickname() {
     return this.nickname;

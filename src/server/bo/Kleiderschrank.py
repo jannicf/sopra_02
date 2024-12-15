@@ -39,7 +39,6 @@ class Kleiderschrank(bo.BusinessObject):
 
     def delete_kstueck(self, kleidungsstueck):
         """Kleidungsstück aus dem Kleiderschrank entfernen"""
-        from src.server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
         if kleidungsstueck in self.__inhalt:
             self.__inhalt.remove(kleidungsstueck)
 
