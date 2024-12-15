@@ -38,12 +38,12 @@ class Kleidungstyp(bo.BusinessObject):
         return self.__verwendungen
 
     def __eq__(self, other):
-        """Zwei Kleidungstypen sind gleich, wenn sie die gleiche ID und Bezeichnung haben
+        """Zwei Kleidungstypen sind gleich, wenn sie die gleiche ID haben
         wichtig für Vergleich der Bezugsobjekte bei den Constraints
         -> Python checkt nicht mehr die exakten Speicheradressen bei == , sondern gleiche iD und gleiche Bezeichnung"""
 
         if isinstance(other, Kleidungstyp):
-            return self.get_id() == other.get_id() and self.get_bezeichnung() == other.get_bezeichnung()
+            return self.get_id() == other.get_id()
         return False
 
     def __str__(self) -> str:

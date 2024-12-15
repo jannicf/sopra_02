@@ -42,6 +42,8 @@ class KleiderschrankAdministration(object):
         kardinalitaet.set_style(style)
         kardinalitaet.set_id(1)
 
+        style.add_constraint(kardinalitaet)
+
         with KardinalitaetMapper() as mapper:
             return mapper.insert(kardinalitaet)
 
@@ -83,6 +85,8 @@ class KleiderschrankAdministration(object):
         mutex.set_style(style)
         mutex.set_id(1)
 
+        style.add_constraint(mutex)
+
         with MutexMapper() as mapper:
             return mapper.insert(mutex)
 
@@ -123,6 +127,8 @@ class KleiderschrankAdministration(object):
         implikation.set_bezugsobjekt2(bezugsobjekt2)
         implikation.set_style(style)
         implikation.set_id(1)
+
+        style.add_constraint(implikation)
 
         with ImplikationMapper() as mapper:
             return mapper.insert(implikation)
@@ -369,6 +375,10 @@ class KleiderschrankAdministration(object):
         kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
         kleidungsstueck.set_id(1)
 
+        kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+        kleiderschrank.add_kstueck(kleidungsstueck)
+        self.save_kleiderschrank(kleiderschrank)
+
         with KleidungsstueckMapper() as mapper:
             return mapper.insert(kleidungsstueck)
 
@@ -508,63 +518,107 @@ class KleiderschrankAdministration(object):
         kleidungsstuecke = kleiderschrank.get_inhalt()
 
         passende_kleidungsstuecke = []
+        erlaubte_typen = style.get_features()
 
         for kleidungsstueck in kleidungsstuecke:
-            kleidungstyp = kleidungsstueck.get_typ()
-            if style in kleidungstyp.get_verwendungen():
+            if kleidungsstueck.get_typ() in erlaubte_typen:
                 passende_kleidungsstuecke.append(kleidungsstueck)
 
         return passende_kleidungsstuecke
 
 
-    def create_outfit_from_selection(self, passende_kleidungsstuecke, style_id):  #Der Parameter passende_kleidungsstuecke kommt aus der Liste mit Kleidungsstücken
-        """Erstellt ein Outfit aus ausgewählten Style."""
-        outfit = self.create_outfit(style_id)
+    def create_outfit_from_selection(self, ausgewaehlte_kleidungsstuecke, style_id):
+        """Erstellt ein Outfit aus den vom Nutzer ausgewählten Kleidungsstücken."""
         style = self.get_style_by_id(style_id)
-        outfit.set_style(style)
+        if not style:
+            return None
 
-        for kleidungsstueck in passende_kleidungsstuecke:
-            kleidungsstueck = self.get_kleidungsstueck_by_id(kleidungsstueck)
+        # Prüfe ZUERST, ob die Auswahl alle Constraints erfüllt
+        for constraint in style.get_constraints():
+            if not constraint.check_constraint(ausgewaehlte_kleidungsstuecke):
+                return None  # Wenn auch nur ein Constraint verletzt ist, kein Outfit erstellen
+
+        outfit = self.create_outfit(style_id)
+        for kleidungsstueck in ausgewaehlte_kleidungsstuecke:
             outfit.add_baustein(kleidungsstueck)
 
-        return outfit if self.check_outfit_constraints(outfit) else None
+        if self.check_outfit_constraints(outfit):
+            return outfit
+        else:
+            return None
 
     def get_possible_outfit_completions(self, kleidungsstueck_id, kleiderschrank_id):
         """Findet mögliche Kleidungsstücke, die das Outfit basierend auf einem gegebenen Kleidungsstück vervollständigen."""
-        possible_clothing_items = []
 
-        # Hole das Kleidungsstück
-        clothing_item = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
+        basis_kleidungsstueck = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
+        kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
 
-        # Hole den Style des Kleidungsstücks
-        kleidungstyp = clothing_item.get_typ()
-        style_liste = kleidungstyp.get_verwendungen()
+        if not basis_kleidungsstueck or not kleiderschrank:
+            return {}
 
-        # Hole alle möglichen Kleidungsstücke für den Style aus dem Kleiderschrank
-        for style in style_liste:
-            kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+        # Ein Dictionary für unsere Ergebnisse: {Style: [Kleidungsstücke]}
+        style_komplettierungen = {}
+
+        # Für jeden Style des Basis-Kleidungsstücks
+        for style in basis_kleidungsstueck.get_typ().get_verwendungen():
+            # Liste für Kleidungsstücke dieses Styles
+            passende_kleidungsstuecke = []
+
+            # Gehe durch den Kleiderschrank
             for kleidungsstueck in kleiderschrank.get_inhalt():
-                if kleidungsstueck.get_typ() in style.get_features():
-                    possible_clothing_items.append(kleidungsstueck)
+                # Überspringe das Basis-Kleidungsstück selbst
+                if kleidungsstueck.get_id() == kleidungsstueck_id:
+                    continue
 
-        # Gebe die Liste der passenden Kleidungsstücke zurück
-        return possible_clothing_items
+                # Prüfe, ob die Kombination alle Constraints erfüllt
+                test_kombination = [basis_kleidungsstueck, kleidungsstueck]
+                constraints_erfuellt = True
 
-    def create_outfit_from_base_item(self, possible_clothing_items, style_id):
+                for constraint in style.get_constraints():
+                    if not constraint.check_constraint(test_kombination):
+                        constraints_erfuellt = False
+                        break
+
+                if constraints_erfuellt:
+                    passende_kleidungsstuecke.append(kleidungsstueck)
+
+            # Wenn wir passende Kleidungsstücke gefunden haben
+            if passende_kleidungsstuecke:
+                style_komplettierungen[style.get_name()] = (style,passende_kleidungsstuecke)
+
+        return style_komplettierungen
+
+    def create_outfit_from_base_item(self, basis_kleidungsstueck_id, ausgewaehlte_kleidungsstuecke, style_id):
         """Erstellt ein Outfit aus einer Liste von Kleidungsstücken, die zu einer bestimmten Basis gehört."""
-        # Wenn die Liste der Kleidungsstücke leer ist, gebe None zurück
-        if not possible_clothing_items:
+
+        style = self.get_style_by_id(style_id)
+        basis_kleidungsstueck = self.get_kleidungsstueck_by_id(basis_kleidungsstueck_id)
+        if not basis_kleidungsstueck:
             return None
 
-        # Erstelle ein neues Outfit
+        # Komplette Auswahl zusammenstellen
+        alle_kleidungsstuecke = [basis_kleidungsstueck] + ausgewaehlte_kleidungsstuecke
+
+        # ZUERST prüfen, ob die Gesamtauswahl alle Constraints erfüllt
+        for constraint in style.get_constraints():
+            if not constraint.check_constraint(alle_kleidungsstuecke):
+                return None  # Bei Constraint-Verletzung KEIN Outfit erstellen
+
         outfit = self.create_outfit(style_id)
+        outfit.add_baustein(basis_kleidungsstueck)
 
-        # Füge alle passenden Kleidungsstücke aus der Liste zum Outfit hinzu
-        for kleidungsstueck in possible_clothing_items:
-            outfit.add_baustein(kleidungsstueck)
 
-        # Überprüfe, ob das Outfit den Constraints entspricht
-        return outfit if self.check_outfit_constraints(outfit) else None
+        # Füge NUR die vom Nutzer ausgewählten Kleidungsstücke hinzu
+        for kleidungsstueck in ausgewaehlte_kleidungsstuecke:
+            if kleidungsstueck.get_typ() in style.get_features():
+                outfit.add_baustein(kleidungsstueck)
+
+        if self.check_outfit_constraints(outfit):
+            return outfit
+        else:
+            return None
+
+
 
 
 

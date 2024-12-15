@@ -47,7 +47,8 @@ class Style(bo.BusinessObject):
         from src.server.bo.Mutex import Mutex
         from src.server.bo.Implikation import Implikation
         if isinstance(constraint, (Kardinalitaet, Mutex, Implikation)):
-            self.__constraints.append(constraint)
+            if constraint not in self.__constraints:
+                self.__constraints.append(constraint)
 
     def remove_constraint(self, constraint: Constraint):
         """Entfernt einen Constraint aus dem Style"""
@@ -59,9 +60,9 @@ class Style(bo.BusinessObject):
         return self.__constraints
 
     def __eq__(self, other):
-        """Zwei Styles sind gleich, wenn sie die gleiche ID und den gleichen Namen haben"""
+        """Zwei Styles sind gleich, wenn sie die gleiche ID haben"""
         if isinstance(other, Style):
-            return self.get_id() == other.get_id() and self.get_name() == other.get_name()
+            return self.get_id() == other.get_id()
         return False
 
     def __str__(self) -> str:
