@@ -515,6 +515,35 @@ class ClothingTypeOperations(Resource):
             return '', 500
 
 
+@wardrobe.route('/outfits')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class OutfitListOperations(Resource):
+    @wardrobe.marshal_list_with(outfit)
+    def get(self):
+        """Auslesen aller Outfit-Objekte.
+
+        Sollten keine Outfits verfügbar sein, so wird eine leere Sequenz zurückgegeben."""
+        adm = KleiderschrankAdministration()
+        outfits = adm.get_all_outfits()
+        return outfits
+
+    @wardrobe.marshal_with(outfit, code=201)
+    @wardrobe.expect(outfit)
+    def post(self):
+        """Erstellt ein neues Outfit basierend auf einem Style."""
+        adm = KleiderschrankAdministration()
+
+        # Outfit-Objekt aus dem Payload erstellen
+        proposed_outfit = Outfit()
+        if 'style' in api.payload:
+            style = adm.get_style_by_id(api.payload['style']['id'])
+            if style:
+                outfit = adm.create_outfit(style.get_id())
+                return outfit, 201
+
+        return {'message': 'Style fehlt oder ist ungültig'}, 400
+
+
 @wardrobe.route('/cardinalityconstraints')
 @wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class CardinalityConstraintListOperations(Resource):
