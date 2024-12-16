@@ -530,18 +530,20 @@ class OutfitListOperations(Resource):
     @wardrobe.marshal_with(outfit, code=201)
     @wardrobe.expect(outfit)
     def post(self):
-        """Erstellt ein neues Outfit basierend auf einem Style."""
+        """Erstellt ein neues Outfit basierend auf ausgewählten Kleidungsstücken."""
         adm = KleiderschrankAdministration()
+        data = api.payload
 
-        # Outfit-Objekt aus dem Payload erstellen
-        proposed_outfit = Outfit()
-        if 'style' in api.payload:
-            style = adm.get_style_by_id(api.payload['style']['id'])
-            if style:
-                outfit = adm.create_outfit(style.get_id())
-                return outfit, 201
+        # Kleidungsstücke laden
+        kleidungsstuecke = [adm.get_kleidungsstueck_by_id(k_id)
+                            for k_id in data['kleidungsstueck_ids']]
 
-        return {'message': 'Style fehlt oder ist ungültig'}, 400
+        # Outfit erstellen
+        outfit = adm.create_outfit_from_selection(kleidungsstuecke, data['style_id'])
+
+        if outfit:
+            return outfit, 201
+        return {'message': 'Outfit konnte nicht erstellt werden'}, 400
 
 
 @wardrobe.route('/cardinalityconstraints')
