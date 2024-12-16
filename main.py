@@ -546,6 +546,41 @@ class OutfitListOperations(Resource):
         return {'message': 'Outfit konnte nicht erstellt werden'}, 400
 
 
+@wardrobe.route('/outfits/<int:id>')
+@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe.param('id', 'Die ID des Outfit-Objekts')
+class OutfitOperations(Resource):
+    @wardrobe.marshal_with(outfit)
+    def get(self, id):
+        """Auslesen eines bestimmten Outfit-Objekts."""
+        adm = KleiderschrankAdministration()
+        outfit = adm.get_outfit_by_id(id)
+        return outfit
+
+    def delete(self, id):
+        """Löschen eines bestimmten Outfit-Objekts."""
+        adm = KleiderschrankAdministration()
+        outfit = adm.get_outfit_by_id(id)
+        if outfit:
+            adm.delete_outfit(outfit)
+            return '', 200
+        return {'message': 'Outfit nicht gefunden'}, 404
+
+
+@wardrobe.route('/outfits/validate/<int:id>')
+class OutfitValidation(Resource):
+    def get(self, id):
+        """Überprüft, ob ein Outfit alle Style-Constraints erfüllt."""
+        adm = KleiderschrankAdministration()
+        outfit = adm.get_outfit_by_id(id)
+
+        if not outfit:
+            return {'message': 'Outfit nicht gefunden'}, 404
+
+        is_valid = adm.check_outfit_constraints(outfit)
+        return {'valid': is_valid}
+
+
 @wardrobe.route('/cardinalityconstraints')
 @wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class CardinalityConstraintListOperations(Resource):
