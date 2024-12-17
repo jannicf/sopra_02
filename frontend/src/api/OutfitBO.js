@@ -66,13 +66,13 @@ export default class OutfitBO extends BusinessObject {
   /**
    * Konvertiert eine JSON-Antwort in ein OutfitBO Objekt bzw. Array von OutfitBO Objekten.
    *
-   * @param {*} json - JSON-Daten aus dem Backend
+   * @param {*} outfits - JSON-Daten aus dem Backend
    */
-  static fromJSON(json) {
+  static fromJSON(outfits) {
     let result = [];
 
-    if (Array.isArray(json)) {
-      json.forEach((o) => {
+    if (Array.isArray(outfits)) {
+      outfits.forEach((o) => {
         let outfit = new OutfitBO();
         outfit.setID(o.id);
 
@@ -91,16 +91,16 @@ export default class OutfitBO extends BusinessObject {
 
         result.push(outfit);
       });
-    } else if (json) {
+    } else if (outfits) {
       let outfit = new OutfitBO();
-      outfit.setID(json.id);
+      outfit.setID(outfits.id);
 
-      if (json.style) {
-        outfit.setStyle(StyleBO.fromJSON([json.style])[0]);
+      if (outfits.style) {
+        outfit.setStyle(StyleBO.fromJSON([outfits.style])[0]);
       }
 
-      if (json.bausteine && Array.isArray(json.bausteine)) {
-        json.bausteine.forEach(baustein => {
+      if (outfits.bausteine && Array.isArray(outfits.bausteine)) {
+        outfits.bausteine.forEach(baustein => {
           const kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
           outfit.addBaustein(kleidungsstueck);
         });

@@ -47,13 +47,13 @@ export default class MutexBO extends BinaryConstraintBO {
   /**
    * Konvertiert eine JSON-Antwort in ein MutexBO Objekt bzw. Array von MutexBO Objekten.
    *
-   * @param {*} json - JSON-Daten aus dem Backend
+   * @param {*} mutexe - JSON-Daten aus dem Backend
    */
-  static fromJSON(json) {
+  static fromJSON(mutexe) {
     let result = [];
 
     if (Array.isArray(json)) {
-      json.forEach((m) => {
+      mutexe.forEach((m) => {
         let mutex = new MutexBO();
         mutex.setID(m.id);
 
@@ -71,19 +71,19 @@ export default class MutexBO extends BinaryConstraintBO {
         }
         result.push(mutex);
       });
-    } else if (json) {
+    } else if (mutexe) {
       let mutex = new MutexBO();
-      mutex.setID(json.id);
+      mutex.setID(mutexe.id);
 
-      if (json.bezugsobjekt1) {
-        mutex.setBezugsobjekt1(KleidungstypBO.fromJSON([json.bezugsobjekt1])[0]);
+      if (mutexe.bezugsobjekt1) {
+        mutex.setBezugsobjekt1(KleidungstypBO.fromJSON([mutexe.bezugsobjekt1])[0]);
       }
-      if (json.bezugsobjekt2) {
-        mutex.setBezugsobjekt2(KleidungstypBO.fromJSON([json.bezugsobjekt2])[0]);
+      if (mutexe.bezugsobjekt2) {
+        mutex.setBezugsobjekt2(KleidungstypBO.fromJSON([mutexe.bezugsobjekt2])[0]);
       }
 
-      if (json.style) {
-        mutex.setStyle(StyleBO.fromJSON([json.style])[0]);
+      if (mutexe.style) {
+        mutex.setStyle(StyleBO.fromJSON([mutexe.style])[0]);
       }
       result.push(mutex);
     }
