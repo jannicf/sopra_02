@@ -68,13 +68,13 @@ export default class KleidungsstueckBO extends BusinessObject {
   /**
    * Gibt ein Array von KleidungsstueckBO Objekten aus einer gegebenen JSON-Struktur zurück.
    *
-   * @param {*} json - JSON-Daten, die in KleidungsstueckBO Objekte umgewandelt werden sollen
+   * @param {*} kleidungsstuecke - JSON-Daten, die in KleidungsstueckBO Objekte umgewandelt werden sollen
    */
-  static fromJSON(json) {
+  static fromJSON(kleidungsstuecke) {
     let result = [];
 
-    if (Array.isArray(json)) {
-      json.forEach((k) => {
+    if (Array.isArray(kleidungsstuecke)) {
+      kleidungsstuecke.forEach((k) => {
         let kleidungsstueck = new KleidungsstueckBO();
         kleidungsstueck.setId(k.id);
         kleidungsstueck.setName(k.name);
@@ -86,16 +86,16 @@ export default class KleidungsstueckBO extends BusinessObject {
         kleidungsstueck.setKleiderschrankId(k.kleiderschrank_id);
         result.push(kleidungsstueck);
       })
-    } else if (json) {
+    } else if (kleidungsstuecke) {
       let kleidungsstueck = new KleidungsstueckBO();
-      kleidungsstueck.setId(json.id);
-      kleidungsstueck.setName(json.name);
+      kleidungsstueck.setId(kleidungsstuecke.id);
+      kleidungsstueck.setName(kleidungsstuecke.name);
 
-      if (json.typ) {
-        kleidungsstueck.setTyp(KleidungstypBO.fromJSON([json.typ])[0]);
+      if (kleidungsstuecke.typ) {
+        kleidungsstueck.setTyp(KleidungstypBO.fromJSON([kleidungsstuecke.typ])[0]);
       }
 
-      kleidungsstueck.setKleiderschrankId(json.kleiderschrank_id);
+      kleidungsstueck.setKleiderschrankId(kleidungsstuecke.kleiderschrank_id);
       result.push(kleidungsstueck);
     }
 

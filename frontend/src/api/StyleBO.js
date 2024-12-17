@@ -105,13 +105,13 @@ export default class StyleBO extends BusinessObject {
   /**
    * Konvertiert eine JSON-Antwort in ein StyleBO Objekt bzw. Array von StyleBO Objekten.
    *
-   * @param {*} json - JSON-Daten aus dem Backend
+   * @param {*} styles - JSON-Daten aus dem Backend
    */
-  static fromJSON(json) {
+  static fromJSON(styles) {
     let result = [];
 
-    if (Array.isArray(json)) {
-      json.forEach((s) => {
+    if (Array.isArray(styles)) {
+      styles.forEach((s) => {
         let style = new StyleBO();
         style.setId(s.id);
         style.setName(s.name);
@@ -136,20 +136,20 @@ export default class StyleBO extends BusinessObject {
 
         result.push(style);
       });
-    } else if (json) {
+    } else if (styles) {
       let style = new StyleBO();
-      style.setId(json.id);
-      style.setName(json.name);
+      style.setId(styles.id);
+      style.setName(styles.name);
 
-      if (json.features && Array.isArray(json.features)) {
-        json.features.forEach(feature => {
+      if (styles.features && Array.isArray(styles.features)) {
+        styles.features.forEach(feature => {
           const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
           style.addFeature(kleidungstyp);
         });
       }
 
-      if (json.constraints && Array.isArray(json.constraints)) {
-        json.constraints.forEach(constraint => {
+      if (styles.constraints && Array.isArray(styles.constraints)) {
+        styles.constraints.forEach(constraint => {
           let constraintBO = ConstraintBO.fromJSON([constraint])[0];
           if (constraintBO) {
             style.addConstraint(constraintBO);
