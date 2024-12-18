@@ -52,7 +52,7 @@ export default class MutexBO extends BinaryConstraintBO {
   static fromJSON(mutexe) {
     let result = [];
 
-    if (Array.isArray(json)) {
+    if (Array.isArray(mutexe)) {
       mutexe.forEach((m) => {
         let mutex = new MutexBO();
         mutex.setID(m.id);
