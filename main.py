@@ -567,6 +567,16 @@ class OutfitOperations(Resource):
         return {'message': 'Outfit nicht gefunden'}, 404
 
 
+@wardrobe.route('/styles/<int:style_id>/outfits/complete')
+class OutfitCompletion(Resource):
+    @wardrobe.expect(kleidungsstueck)
+    def post(self, style_id):
+        """Outfit vervollständigen basierend auf einem Basis-Kleidungsstück"""
+        adm = KleiderschrankAdministration()
+        basis_kleidungsstueck = Kleidungsstueck.from_dict(api.payload)
+        return adm.get_possible_outfit_completions(basis_kleidungsstueck.get_id(), style_id)
+
+
 @wardrobe.route('/outfits/validate/<int:id>')
 class OutfitValidation(Resource):
     def get(self, id):
