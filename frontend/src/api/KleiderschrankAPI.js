@@ -75,7 +75,8 @@ export default class KleiderschrankAPI {
     #updateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
     #deleteOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
     #validateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/validate/${id}`;
-    #getPossibleOutfitsURL = (styleId, wardrobeId) => `${this.#KleiderschrankServerBaseURL}/outfits/possible/${styleId}/${wardrobeId}`;
+    #getPossibleOutfitsForStyleURL = (styleId, wardrobeId) => `${this.#KleiderschrankServerBaseURL}/styles/${styleId}/wardrobes/${wardrobeId}/possible-outfits`;
+    #getPossibleOutfitCompletionsURL = (styleId, kleidungsstueckId) => `${this.#KleiderschrankServerBaseURL}/styles/${styleId}/outfits/complete/${kleidungsstueckId}`;
 
     // URLs für Constraints
     #getKardinalitaetenURL = () => `${this.#KleiderschrankServerBaseURL}/cardinalityconstraints`;
@@ -211,6 +212,7 @@ export default class KleiderschrankAPI {
             method: 'DELETE'
         })
     }
+
     // Kleidungsstück-bezogene Methoden
     addKleidungsstueck(kleidungsstueckBO) {
         return this.#fetchAdvanced(this.#addKleidungsstueckURL(), {
@@ -269,6 +271,7 @@ export default class KleiderschrankAPI {
             method: 'DELETE'
         })
     }
+
     // Kleidungstyp-Methoden
     getKleidungstyp(id) {
         return this.#fetchAdvanced(this.#getKleidungstypURL(id))
@@ -324,6 +327,299 @@ export default class KleiderschrankAPI {
 
     deleteKleidungstyp(id) {
         return this.#fetchAdvanced(this.#deleteKleidungstypURL(id), {
+            method: 'DELETE'
+        })
+    }
+
+    // Style-Methoden
+    getStyles() {
+        return this.#fetchAdvanced(this.#getStylesURL())
+            .then(responseJSON => {
+                let styleBOs = StyleBO.fromJSON(responseJSON);
+                return new Promise(function (resolve) {
+                    resolve(styleBOs);
+                })
+            })
+    }
+
+    getStyle(id) {
+        return this.#fetchAdvanced(this.#getStyleURL(id))
+            .then(responseJSON => {
+                let styleBO = StyleBO.fromJSON(responseJSON)[0];
+                return new Promise(function (resolve) {
+                    resolve(styleBO);
+                })
+            })
+    }
+
+    addStyle(styleBO) {
+        return this.#fetchAdvanced(this.#addStyleURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(styleBO)
+        }).then(responseJSON => {
+            let responseStyleBO = StyleBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseStyleBO);
+            })
+        })
+    }
+
+    updateStyle(styleBO) {
+        return this.#fetchAdvanced(this.#updateStyleURL(styleBO.getID()), {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(styleBO)
+        }).then(responseJSON => {
+            let responseStyleBO = StyleBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseStyleBO);
+            })
+        })
+    }
+
+    deleteStyle(id) {
+        return this.#fetchAdvanced(this.#deleteStyleURL(id), {
+            method: 'DELETE'
+        })
+    }
+
+// Outfit-bezogene Methoden
+    getOutfit(id) {
+        return this.#fetchAdvanced(this.#getOutfitURL(id))
+            .then(responseJSON => {
+                let outfitBO = OutfitBO.fromJSON(responseJSON)[0];
+                return new Promise(function (resolve) {
+                    resolve(outfitBO);
+                })
+            })
+    }
+
+    getOutfits() {
+        return this.#fetchAdvanced(this.#getOutfitsURL())
+            .then(responseJSON => {
+                let outfitBOs = OutfitBO.fromJSON(responseJSON);
+                return new Promise(function (resolve) {
+                    resolve(outfitBOs);
+                })
+            })
+    }
+
+    addOutfit(outfitData) {
+        return this.#fetchAdvanced(this.#addOutfitURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(outfitData)
+        }).then(responseJSON => {
+            let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseOutfitBO);
+            })
+        })
+    }
+
+    updateOutfit(outfitBO) {
+        return this.#fetchAdvanced(this.#updateOutfitURL(outfitBO.getID()), {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(outfitBO)
+        }).then(responseJSON => {
+            let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseOutfitBO);
+            })
+        })
+    }
+
+    deleteOutfit(id) {
+        return this.#fetchAdvanced(this.#deleteOutfitURL(id), {
+            method: 'DELETE'
+        })
+    }
+
+    validateOutfit(outfitId) {
+        return this.#fetchAdvanced(this.#validateOutfitURL(outfitId))
+            .then(responseJSON => {
+                return new Promise(function (resolve) {
+                    resolve(responseJSON.valid);
+                })
+            })
+    }
+
+    getPossibleOutfitsForStyle(styleId, wardrobeId) {
+        return this.#fetchAdvanced(this.#getPossibleOutfitsForStyleURL(styleId, wardrobeId))
+            .then(responseJSON => {
+                let possibleOutfits = KleidungsstueckBO.fromJSON(responseJSON);
+                return new Promise(function (resolve) {
+                    resolve(possibleOutfits);
+                })
+            })
+    }
+
+    getPossibleOutfitCompletions(kleidungsstueckId, styleId) {
+        return this.#fetchAdvanced(this.#getPossibleOutfitCompletionsURL(styleId, kleidungsstueckId))
+            .then(responseJSON => {
+                return new Promise(function (resolve) {
+                    resolve(responseJSON);
+                })
+            })
+    }
+
+// Kardinalitäts-Methoden
+    getKardinalitaeten() {
+        return this.#fetchAdvanced(this.#getKardinalitaetenURL())
+            .then(responseJSON => {
+                let kardinalitaetBOs = KardinalitaetBO.fromJSON(responseJSON);
+                return new Promise(function (resolve) {
+                    resolve(kardinalitaetBOs);
+                })
+            })
+    }
+
+    addKardinalitaet(kardinalitaetBO) {
+        return this.#fetchAdvanced(this.#addKardinalitaetURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(kardinalitaetBO)
+        }).then(responseJSON => {
+            let responseKardinalitaetBO = KardinalitaetBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseKardinalitaetBO);
+            })
+        })
+    }
+
+    updateKardinalitaet(kardinalitaetBO) {
+        return this.#fetchAdvanced(this.#updateKardinalitaetURL(kardinalitaetBO.getID()), {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(kardinalitaetBO)
+        }).then(responseJSON => {
+            let responseKardinalitaetBO = KardinalitaetBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseKardinalitaetBO);
+            })
+        })
+    }
+
+    deleteKardinalitaet(id) {
+        return this.#fetchAdvanced(this.#deleteKardinalitaetURL(id), {
+            method: 'DELETE'
+        })
+    }
+
+// Mutex-Methoden
+    getMutexConstraints() {
+        return this.#fetchAdvanced(this.#getMutexURL())
+            .then(responseJSON => {
+                let mutexBOs = MutexBO.fromJSON(responseJSON);
+                return new Promise(function (resolve) {
+                    resolve(mutexBOs);
+                })
+            })
+    }
+
+    addMutexConstraint(mutexBO) {
+        return this.#fetchAdvanced(this.#addMutexURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(mutexBO)
+        }).then(responseJSON => {
+            let responseMutexBO = MutexBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseMutexBO);
+            })
+        })
+    }
+
+    updateMutexConstraint(mutexBO) {
+        return this.#fetchAdvanced(this.#updateMutexURL(mutexBO.getID()), {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(mutexBO)
+        }).then(responseJSON => {
+            let responseMutexBO = MutexBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseMutexBO);
+            })
+        })
+    }
+
+    deleteMutexConstraint(id) {
+        return this.#fetchAdvanced(this.#deleteMutexURL(id), {
+            method: 'DELETE'
+        })
+    }
+
+// Implikations-Methoden
+    getImplikationen() {
+        return this.#fetchAdvanced(this.#getImplikationenURL())
+            .then(responseJSON => {
+                let implikationBOs = ImplikationBO.fromJSON(responseJSON);
+                return new Promise(function (resolve) {
+                    resolve(implikationBOs);
+                })
+            })
+    }
+
+    addImplikation(implikationBO) {
+        return this.#fetchAdvanced(this.#addImplikationURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(implikationBO)
+        }).then(responseJSON => {
+            let responseImplikationBO = ImplikationBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseImplikationBO);
+            })
+        })
+    }
+
+    updateImplikation(implikationBO) {
+        return this.#fetchAdvanced(this.#updateImplikationURL(implikationBO.getID()), {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(implikationBO)
+        }).then(responseJSON => {
+            let responseImplikationBO = ImplikationBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseImplikationBO);
+            })
+        })
+    }
+
+    deleteImplikation(id) {
+        return this.#fetchAdvanced(this.#deleteImplikationURL(id), {
             method: 'DELETE'
         })
     }
