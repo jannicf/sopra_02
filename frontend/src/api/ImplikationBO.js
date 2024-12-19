@@ -48,12 +48,12 @@ export default class ImplikationBO extends BinaryConstraintBO {
   /**
    * Konvertiert eine JSON-Antwort in ein ImplikationBO Objekt bzw. Array von ImplikationBO Objekten.
    *
-   * @param {*} implikationen - JSON-Daten aus dem Backend
+   * @param {*} implicationconstraints - JSON-Daten aus dem Backend
    */
-  static fromJSON(implikationen) {
+  static fromJSON(implicationconstraints) {
     let result = [];
-    if (Array.isArray(implikationen)) {
-      implikationen.forEach((i) => {
+    if (Array.isArray(implicationconstraints)) {
+      implicationconstraints.forEach((i) => {
         let implikation = new ImplikationBO();
         implikation.setID(i.id);
 
@@ -71,19 +71,19 @@ export default class ImplikationBO extends BinaryConstraintBO {
         }
         result.push(implikation);
       });
-    } else if (implikationen) {
+    } else if (implicationconstraints) {
       let implikation = new ImplikationBO();
-      implikation.setID(json.id);
+      implikation.setID(implicationconstraints.id);
 
-      if (implikationen.bezugsobjekt1) {
-        implikation.setBezugsobjekt1(KleidungstypBO.fromJSON([implikationen.bezugsobjekt1])[0]);
+      if (implicationconstraints.bezugsobjekt1) {
+        implikation.setBezugsobjekt1(KleidungstypBO.fromJSON([implicationconstraints.bezugsobjekt1])[0]);
       }
-      if (implikationen.bezugsobjekt2) {
-        implikation.setBezugsobjekt2(KleidungstypBO.fromJSON([implikationen.bezugsobjekt2])[0]);
+      if (implicationconstraints.bezugsobjekt2) {
+        implikation.setBezugsobjekt2(KleidungstypBO.fromJSON([implicationconstraints.bezugsobjekt2])[0]);
       }
 
-      if (implikationen.style) {
-        implikation.setStyle(StyleBO.fromJSON([implikationen.style])[0]);
+      if (implicationconstraints.style) {
+        implikation.setStyle(StyleBO.fromJSON([implicationconstraints.style])[0]);
       }
       result.push(implikation);
     }
