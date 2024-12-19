@@ -100,19 +100,19 @@ export default class PersonBO extends BusinessObject {
   /**
    * Gibt ein Array von PersonBO Objekten aus einer gegebenen JSON-Struktur zurück.
    *
-   * @param {*} personen - JSON-Daten, die in PersonBO Objekte umgewandelt werden sollen
+   * @param {*} persons - JSON-Daten, die in PersonBO Objekte umgewandelt werden sollen
    */
-  static fromJSON(personen) {
+  static fromJSON(persons) {
     let result = [];
 
-    if (Array.isArray(personen)) {
-      personen.forEach((p) => {
+    if (Array.isArray(persons)) {
+      persons.forEach((p) => {
         Object.setPrototypeOf(p, PersonBO.prototype);
         result.push(p);
       })
     } else {
       // Es handelt sich offenbar um ein singuläres Objekt
-      let p = personen;
+      let p = persons;
       Object.setPrototypeOf(p, PersonBO.prototype);
       result.push(p);
     }
