@@ -32,47 +32,47 @@ bo = api.model('BusinessObject', {
 
 # Vererbungshierarchie für die Kleiderschrank-Modelle
 person = api.inherit('Person', bo, {
-    'vorname': fields.String(attribute='_vorname', description='Vorname der Person'),
-    'nachname': fields.String(attribute='_nachname', description='Nachname der Person'),
-    'nickname': fields.String(attribute='_nickname', description='Nickname der Person'),
-    'google_id': fields.String(attribute='_google_id', description='Google ID der Person')
+    'vorname': fields.String(attribute='_Person__vorname', description='Vorname der Person'),
+    'nachname': fields.String(attribute='_Person__nachname', description='Nachname der Person'),
+    'nickname': fields.String(attribute='_Person__nickname', description='Nickname der Person'),
+    'google_id': fields.String(attribute='_Person__google_id', description='Google ID der Person')
 })
 
-kleiderschrank = api.inherit('Kleiderschrank', bo, {
-    'name': fields.String(attribute='_name', description='Name des Kleiderschranks'),
-    'eigentuemer': fields.Nested(person, description='Eigentümer des Kleiderschranks')
+kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
+    'name': fields.String(attribute='_Kleiderschrank__name', description='Name des Kleiderschranks'),
+    'eigentuemer_id': fields.Integer(attribute=lambda x: x.get_eigentuemer().get_id() if x.get_eigentuemer() else None, description='ID des Eigentümers')
 })
 
 kleidungstyp = api.inherit('Kleidungstyp', bo, {
-    'bezeichnung': fields.String(attribute='_bezeichnung', description='Bezeichnung des Kleidungstyps')
+    'bezeichnung': fields.String(attribute='_Kleidungstyp__bezeichnung', description='Bezeichnung des Kleidungstyps')
 })
 
 kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
-    'name': fields.String(attribute='_name', description='Name des Kleidungsstücks'),
-    'typ': fields.Nested(kleidungstyp, description='Typ des Kleidungsstücks'),
-    'kleiderschrank_id': fields.Integer(attribute='_kleiderschrank_id', description='ID des zugehörigen Kleiderschranks')
+    'name': fields.String(attribute='_Kleidungsstueck__name', description='Name des Kleidungsstücks'),
+    'typ': fields.Integer(attribute=lambda x: x.get_typ().get_id() if x.get_typ() else None, description='Typ des Kleidungsstücks'),
+    'kleiderschrank_id': fields.Integer(attribute='_Kleidungsstueck__kleiderschrank_id', description='ID des zugehörigen Kleiderschranks')
 })
 
 style = api.inherit('Style', bo, {
-    'name': fields.String(attribute='_name', description='Name des Styles')
+    'name': fields.String(attribute='_Style__name', description='Name des Styles')
 })
 
 outfit = api.inherit('Outfit', bo, {
-    'style': fields.Nested(style, description='Style des Outfits'),
-    'bausteine': fields.List(fields.Nested(kleidungsstueck), description='Kleidungsstücke im Outfit')
+    'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if x.get_style() else None, description='Style des Outfits'),
+    'bausteine': fields.List(fields.Integer(attribute=lambda x: x.get_bausteine().get_id() if x.get_bausteine() else None), description='Kleidungsstücke im Outfit')
 })
 
 constraint = api.inherit('Constraint', bo, {
-    'style': fields.String(attribute='_style', description='Style des Constraints')
+    'style': fields.String(attribute='_Constraint__style', description='Style des Constraints')
 })
 
 unary_constraint = api.inherit('UnaryConstraint', constraint, {
-    'bezugsobjekt': fields.Integer(attribute='_bezugsobjekt', description='Das Bezugsobjekt für den Unary Constraint')
+    'bezugsobjekt': fields.Integer(attribute='_UnaryConstraint__bezugsobjekt', description='Das Bezugsobjekt für den Unary Constraint')
 })
 
 binary_constraint = api.inherit('BinaryConstraint', constraint, {
-    'bezugsobjekt1': fields.Integer(attribute='bezugsobjekt1', description='Das erste Bezugsobjekt'),
-    'bezugsobjekt2': fields.Integer(attribute='bezugsobjekt2', description='Das zweite Bezugsobjekt')
+    'bezugsobjekt1': fields.Integer(attribute='_BinaryConstraint__bezugsobjekt1', description='Das erste Bezugsobjekt'),
+    'bezugsobjekt2': fields.Integer(attribute='_BinaryConstraint__bezugsobjekt2', description='Das zweite Bezugsobjekt')
 })
 
 mutex = api.inherit('MutexConstraint', binary_constraint, {})
@@ -80,8 +80,8 @@ mutex = api.inherit('MutexConstraint', binary_constraint, {})
 implikation = api.inherit('ImplicationConstraint', binary_constraint, {})
 
 kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
-    'min_anzahl': fields.Integer(attribute='min_anzahl', description='Minimaler Wert der Kardinalität'),
-    'max_anzahl': fields.Integer(attribute='max_anzahl', description='Maximaler Wert der Kardinalität')
+    'min_anzahl': fields.Integer(attribute='_CardinalityConstraint__min_anzahl', description='Minimaler Wert der Kardinalität'),
+    'max_anzahl': fields.Integer(attribute='_CardinalityConstraint__max_anzahl', description='Maximaler Wert der Kardinalität')
 })
 
 
@@ -98,32 +98,24 @@ class PersonListOperations(Resource):
         personen = adm.get_all_personen()
         return personen
 
-@wardrobe.marshal_with(person, code=200)
-@wardrobe.expect(person)
-# @secured
-def post(self):
-    """Anlegen eines neuen Personen-Objekts."""
-
-
-    adm = KleiderschrankAdministration()
-
-    proposal = Person.from_dict(api.payload)
-
-    if proposal is not None:
-        """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
-        eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
-        wird auch dem Client zurückgegeben. 
-        """
-        p = adm.create_person(
-            proposal.get_first_name(),
-            proposal.get_last_name(),
-            proposal.get_nickname(),
-            proposal.get_google_id(),
-        )
-        return p, 200
-    else:
-        # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
-        return '', 500
+    @wardrobe.marshal_with(person, code=200)
+    @wardrobe.expect(person)
+    def post(self):
+        try:
+            adm = KleiderschrankAdministration()
+            proposal = Person.from_dict(api.payload)  # Nutzlast aus Postman verarbeiten
+            if proposal is not None:
+                new_person = adm.create_person(
+                    proposal.get_vorname(),
+                    proposal.get_nachname(),
+                    proposal.get_nickname(),
+                    proposal.get_google_id()
+                )
+                return new_person, 200
+            else:
+                return {"message": "Fehler bei der Verarbeitung des Requests"}, 400
+        except Exception as e:
+            return {"message": str(e)}, 500
 
 
 @wardrobe.route('/persons/<int:id>')
@@ -190,24 +182,25 @@ class PersonsByNameOperations(Resource):
         return persons
 
 @wardrobe.route('/wardrobes')
-@wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class WardrobeListOperations(Resource):
-    @wardrobe.marshal_list_with(wardrobe)
-    # @secured
+    @wardrobe.marshal_list_with(kleiderschrank_model)
     def get(self):
-        """Auslesen aller Kleiderschrank-Objekte.
-
-        Sollten keine Kleiderschrank-Objekte verfügbar sein, so wird eine leere Sequenz zurückgegeben."""
+        """Auslesen aller Kleiderschrank-Objekte."""
         adm = KleiderschrankAdministration()
-        wardrobe_list = adm.get_all_kleiderschraenke()
-        return wardrobe_list
+        wardrobes = adm.get_all_kleiderschraenke()
+
+        for w in wardrobes:
+            print(f"Vor Return: ID={w.get_id()}, Name={w.get_name()}, Eigentuemer={w.get_eigentuemer()}")
+
+        return wardrobes, 200
+
 
 
 @wardrobe.route('/wardrobes/<int:id>')
 @wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 @wardrobe.param('id', 'Die ID des Kleiderschrank-Objekts')
 class WardrobeOperations(Resource):
-    @wardrobe.marshal_with(wardrobe)
+    @wardrobe.marshal_with(kleiderschrank_model)
     # @secured
     def get(self, id):
         """Auslesen eines bestimmten Kleiderschrank-Objekts.
@@ -229,7 +222,7 @@ class WardrobeOperations(Resource):
         adm.delete_kleiderschrank(wardrobe_obj)
         return '', 200
 
-    @wardrobe.marshal_with(wardrobe)
+    @wardrobe.marshal_with(kleiderschrank_model)
     # @secured
     def put(self, id):
         """Update eines bestimmten Kleiderschrank-Objekts.
