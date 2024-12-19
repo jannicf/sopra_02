@@ -71,13 +71,13 @@ export default class KardinalitaetBO extends UnaryConstraintBO {
   /**
    * Konvertiert eine JSON-Antwort in ein KardinalitaetBO Objekt bzw. Array von KardinalitaetBO Objekten.
    *
-   * @param {*} kardinalitaeten - JSON-Daten aus dem Backend
+   * @param {*} cardinalityconstraints - JSON-Daten aus dem Backend
    */
-  static fromJSON(kardinalitaeten) {
+  static fromJSON(cardinalityconstraints) {
     let result = [];
 
-    if (Array.isArray(kardinalitaeten)) {
-      kardinalitaeten.forEach((k) => {
+    if (Array.isArray(cardinalityconstraints)) {
+      cardinalityconstraints.forEach((k) => {
         let kardinalitaet = new KardinalitaetBO();
         kardinalitaet.setID(k.id);
         kardinalitaet.setMinAnzahl(k.min_anzahl);
@@ -93,18 +93,18 @@ export default class KardinalitaetBO extends UnaryConstraintBO {
 
         result.push(kardinalitaet);
       });
-    } else if (kardinalitaeten) {
+    } else if (cardinalityconstraints) {
       let kardinalitaet = new KardinalitaetBO();
-      kardinalitaet.setID(kardinalitaeten.id);
-      kardinalitaet.setMinAnzahl(kardinalitaeten.min_anzahl);
-      kardinalitaet.setMaxAnzahl(kardinalitaeten.max_anzahl);
+      kardinalitaet.setID(cardinalityconstraints.id);
+      kardinalitaet.setMinAnzahl(cardinalityconstraints.minAnzahl);
+      kardinalitaet.setMaxAnzahl(cardinalityconstraints.maxAnzahl);
 
-      if (kardinalitaeten.bezugsobjekt) {
-        kardinalitaet.setBezugsobjekt(kardinalitaeten.bezugsobjekt);
+      if (cardinalityconstraints.bezugsobjekt) {
+        kardinalitaet.setBezugsobjekt(cardinalityconstraints.bezugsobjekt);
       }
 
-      if (kardinalitaeten.style) {
-        kardinalitaet.setStyle(kardinalitaeten.style);
+      if (cardinalityconstraints.style) {
+        kardinalitaet.setStyle(cardinalityconstraints.style);
       }
 
       result.push(kardinalitaet);
