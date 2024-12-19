@@ -87,7 +87,7 @@ kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
 })
 
 
-@wardrobe.route('/person')
+@wardrobe.route('/persons')
 @wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class PersonListOperations(Resource):
     @wardrobe.marshal_list_with(person)
@@ -176,7 +176,7 @@ class PersonOperations(Resource):
         else:
             return '', 500
 
-@wardrobe.route('/persons-by-nachname/<string:nachname>')
+@wardrobe.route('/persons-by-name/<string:nachname>')
 @wardrobe.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 @wardrobe.param('nachname', 'Der Nachname der Person')
 class PersonsByNameOperations(Resource):

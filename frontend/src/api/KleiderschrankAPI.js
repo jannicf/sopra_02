@@ -35,10 +35,10 @@ export default class KleiderschrankAPI {
     // URLs für Person
     #getPersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #addPersonURL = () => `${this.#KleiderschrankServerBaseURL}/person`;
-    #getPersonsURL = () => `${this.#KleiderschrankServerBaseURL}/person`;
+    #getPersonsURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
     #updatePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #deletePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
-    #searchPersonByNameURL = (name) => `${this.#KleiderschrankServerBaseURL}/persons-by-nachname/${name}`;
+    #searchPersonByNameURL = (name) => `${this.#KleiderschrankServerBaseURL}/persons-by-name/${name}`;
 
     // URLs für Kleiderschrank (Wardrobe)
     #getKleiderschrankURL = (id) => `${this.#KleiderschrankServerBaseURL}/wardrobes/${id}`;
