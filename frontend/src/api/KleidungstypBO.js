@@ -73,13 +73,13 @@ export default class KleidungstypBO extends BusinessObject {
  /**
   * Konvertiert eine JSON-Antwort in ein KleidungstypBO Objekt bzw. Array von KleidungstypBO Objekten.
   *
-  * @param {*} kleidungstypen - JSON-Daten aus dem Backend
+  * @param {*} clothingTypes - JSON-Daten aus dem Backend
   */
- static fromJSON(kleidungstypen) {
+ static fromJSON(clothingTypes) {
    let result = [];
 
-   if (Array.isArray(kleidungstypen)) {
-     kleidungstypen.forEach((k) => {
+   if (Array.isArray(clothingTypes)) {
+     clothingTypes.forEach((k) => {
        let kleidungstyp = new KleidungstypBO();
        kleidungstyp.setId(k.id);
        kleidungstyp.setBezeichnung(k.bezeichnung);
@@ -94,13 +94,13 @@ export default class KleidungstypBO extends BusinessObject {
 
        result.push(kleidungstyp);
      });
-   } else if (kleidungstypen) {
+   } else if (clothingTypes) {
      let kleidungstyp = new KleidungstypBO();
      kleidungstyp.setId(json.id);
-     kleidungstyp.setBezeichnung(kleidungstypen.bezeichnung);
+     kleidungstyp.setBezeichnung(clothingTypes.bezeichnung);
 
-     if (kleidungstypen.verwendungen && Array.isArray(kleidungstypen.verwendungen)) {
-       kleidungstypen.verwendungen.forEach(style => {
+     if (clothingTypes.verwendungen && Array.isArray(clothingTypes.verwendungen)) {
+       clothingTypes.verwendungen.forEach(style => {
          const styleBO = StyleBO.fromJSON([style])[0];
          kleidungstyp.addVerwendung(styleBO);
        });

@@ -83,15 +83,15 @@ export default class KleiderschrankBO extends BusinessObject {
   /**
    * Gibt ein Array von KleiderschrankBO Objekten aus einer gegebenen JSON-Struktur zurück.
    *
-   * @param {*} kleiderschraenke - JSON-Daten, die in KleiderschrankBO Objekte umgewandelt werden sollen
+   * @param {*} wardrobes - JSON-Daten, die in KleiderschrankBO Objekte umgewandelt werden sollen
    */
-  static fromJSON(kleiderschraenke) {
+  static fromJSON(wardrobes) {
     let result = [];
 
-    if (Array.isArray(kleiderschraenke)) {
-      kleiderschraenke.forEach((k) => {
+    if (Array.isArray(wardrobes)) {
+      wardrobes.forEach((k) => {
         let kleiderschrank = new KleiderschrankBO();
-        kleiderschrank.setId(k.id);
+        kleiderschrank.setID(k.id);
         kleiderschrank.setName(k.name);
 
         if (k.eigentuemer) {
@@ -107,17 +107,17 @@ export default class KleiderschrankBO extends BusinessObject {
 
         result.push(kleiderschrank);
       })
-    } else if (kleiderschraenke) {
+    } else if (wardrobes) {
       let kleiderschrank = new KleiderschrankBO();
-      kleiderschrank.setId(kleiderschraenke.id);
-      kleiderschrank.setName(kleiderschraenke.name);
+      kleiderschrank.setID(wardrobes.id);
+      kleiderschrank.setName(wardrobes.name);
 
-      if (kleiderschraenke.eigentuemer) {
-        kleiderschrank.setEigentuemer(PersonBO.fromJSON([kleiderschraenke.eigentuemer])[0]);
+      if (wardrobes.eigentuemer) {
+        kleiderschrank.setEigentuemer(PersonBO.fromJSON([wardrobes.eigentuemer])[0]);
       }
 
-      if (kleiderschraenke.inhalt && Array.isArray(kleiderschraenke.inhalt)) {
-        kleiderschraenke.inhalt.forEach(item => {
+      if (wardrobes.inhalt && Array.isArray(wardrobes.inhalt)) {
+        wardrobes.inhalt.forEach(item => {
           const kleidungsstueck = KleidungsstueckBO.fromJSON([item])[0];
           kleiderschrank.addKleidungsstueck(kleidungsstueck);
         });
