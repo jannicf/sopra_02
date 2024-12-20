@@ -27,7 +27,7 @@ class Header extends Component {
               {user ? <>Mein digitaler Kleiderschrank</> : <>Es ist kein User eingeloggt</>}
             </Typography>
             <Typography variant='h4' component='h2' align='center'>
-                {user ? <>SoPra 24/25 - Gruppe 02</> : <>Bitte melden Sie sich an oder regsitrieren Sie sich</>}
+                {user ? <>SoPra 24/25 - Gruppe 02</> : <>Bitte melden Sie sich an oder registrieren Sie sich</>}
             </Typography>
             {
               user ?
