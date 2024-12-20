@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Grid, Typography, Button, Card, CardContent, List, ListItem, ListItemText } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import KleidungsstueckForm from './dialogs/KleidungsstueckForm';
+import KleidungsstueckCard from './components/KleidungsstueckCard';
 
 class KleiderschrankView extends Component {
     constructor(props) {
@@ -14,5 +14,16 @@ class KleiderschrankView extends Component {
 
 
         }
+    }
+
+
+
+     // Handler für Updates und Löschungen implementieren
+    handleUpdate = (updatedKleidungsstueck) => {
+    // API-Call zum Aktualisieren
+    }
+
+    handleDelete = (deletedKleidungsstueck) => {
+    // API-Call zum Löschen
     }
 }
