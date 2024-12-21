@@ -13,9 +13,10 @@ class Login extends Component {
 		super(props)
 	}
 
-	/*
-	Rendert Login Page
-	*/
+	handleLoginButtonClicked = () => {
+        this.props.onSignIn();
+    }
+	// rendert die Login Page
 	render() {
 		return (
 			<div>
@@ -24,7 +25,9 @@ class Login extends Component {
 				<Typography align='center' variant='h6'>Bitte loggen Sie sich zur Nutzung der App ein</Typography>
 				<br />
 				<Grid container justify='center'>
-					<Button variant='contained' color='primary' onClick={this.props.google}>Mit Google einloggen</Button>
+					<Button variant='contained' color='primary'
+							onClick={this.props.handleLoginButtonClicked}>Mit Google einloggen
+					</Button>
 				</Grid>
 				<br/>
 			</div>

@@ -27,3 +27,6 @@ class KleiderschrankView extends Component {
     // API-Call zum Löschen
     }
 }
+
+
+export default KleiderschrankView;
