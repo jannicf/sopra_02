@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { KleiderschrankAPI } from '../api';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+        FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class KleidungsstueckForm extends Component {
  constructor(props) {
