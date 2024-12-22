@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { List, ListItem, Button, Box, Typography, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { KleiderschrankAPI } from '../api';
-import OutfitListEntry from './OutfitList';
+import OutfitList from './OutfitList';
 import ErrorAlert from './ErrorAlert';
 
 class OutfitUebersicht extends Component {
@@ -76,7 +76,7 @@ class OutfitUebersicht extends Component {
             ) : (
               <List sx={{ marginBottom: 2 }}>
                 {outfits.map(outfit => (
-                  <OutfitListEntry
+                  <OutfitList
                     key={outfit.getID()}
                     outfit={outfit}
                     onOutfitDeleted={this.deleteOutfitHandler}
