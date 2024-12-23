@@ -16,5 +16,13 @@
     "@mui/material": "^6.2.1",
     "firebase": "^10.0.0",
     "firebaseui": "^6.1.0"
+  },
+  "devDependencies": {
+    "msw": "^2.7.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
