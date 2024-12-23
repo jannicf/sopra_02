@@ -1,0 +1,1 @@
+// Brauchen wir nicht, da OutfitList.js dasselbe abbildet wie OutfitCard nur als eine Liste.
