@@ -1,65 +1,89 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { ListItem, ListItemText, IconButton, Typography, Box } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { List, Typography, Button, Box } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import OutfitCard from './OutfitCard.js';
+import { KleiderschrankAPI } from '../api';
 
 class OutfitList extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      outfit: props.outfit,
-      showDeleteDialog: false
+      outfits: [],
+      error: null,
+      loading: false
     };
   }
 
-  handleDelete = () => {
-    this.props.onOutfitDeleted(this.state.outfit);
+  componentDidMount() {
+    this.loadOutfits();
   }
 
+  loadOutfits = async () => {
+    try {
+      this.setState({ loading: true });
+      const outfits = await KleiderschrankAPI.getAPI().getOutfits();
+      this.setState({
+        outfits: outfits,
+        error: null,
+        loading: false
+      });
+    } catch (error) {
+      this.setState({
+        error: error.message,
+        outfits: [],
+        loading: false
+      });
+    }
+  };
+
+  handleOutfitDelete = async (deletedOutfit) => {
+    const updatedOutfits = this.state.outfits.filter(
+      outfit => outfit.getID() !== deletedOutfit.getID()
+    );
+    this.setState({
+      outfits: updatedOutfits
+    });
+  };
+
+  handleCreateClick = () => {
+    this.props.onNavigateToCreate();
+  };
+
   render() {
-    const { outfit } = this.state;
+    const { outfits, error, loading } = this.state;
+
+    if (loading) {
+      return <Typography>Lade Outfits...</Typography>;
+    }
+
+    if (error) {
+      return <Typography color="error">Fehler beim Laden der Outfits: {error}</Typography>;
+    }
 
     return (
-      <ListItem
-        sx={{
-          border: '1px solid #e0e0e0',
-          borderRadius: '4px',
-          mb: 1,
-          '&:hover': {
-            backgroundColor: '#f5f5f5'
-          }
-        }}
-      >
-        <Box sx={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-          <ListItemText
-            primary={
-              <Typography variant="h6" component="div">
-                {outfit.getStyle().getName()}
-              </Typography>
-            }
-            secondary={
-              <Typography variant="body2" color="text.secondary">
-                {`Enthält ${outfit.getBausteine().length} Kleidungsstücke`}
-              </Typography>
-            }
-          />
-          <IconButton
-            edge="end"
-            aria-label="delete"
-            onClick={this.handleDelete}
-            sx={{ color: 'error.main' }}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      </ListItem>
+      <Box>
+        <List>
+          {outfits.map(outfit => (
+            <OutfitCard
+              key={outfit.getID()}
+              outfit={outfit}
+              onDelete={this.handleOutfitDelete}
+            />
+          ))}
+        </List>
+
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={this.handleCreateClick}
+          sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
+        >
+          Neues Outfit erstellen
+        </Button>
+      </Box>
     );
   }
 }
-
-OutfitList.propTypes = {
-  outfit: PropTypes.object.isRequired,
-  onOutfitDeleted: PropTypes.func.isRequired
-};
 
 export default OutfitList;
