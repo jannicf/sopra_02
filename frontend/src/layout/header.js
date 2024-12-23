@@ -24,10 +24,10 @@ class Header extends Component {
           <Paper variant='outlined' >
             <ProfileDropDown user={user} />
             <Typography variant='h3' component='h1' align='center'>
-              {user ? <>Mein digitaler Kleiderschrank</> : <>Es ist kein User eingeloggt</>}
+            Mein digitaler Kleiderschrank
             </Typography>
             <Typography variant='h4' component='h2' align='center'>
-                {user ? <>SoPra 24/25 - Gruppe 02</> : <>Bitte melden Sie sich an oder registrieren Sie sich</>}
+                SoPra 24/25 - Gruppe 02
             </Typography>
             {
               user ?
