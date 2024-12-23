@@ -1,113 +1,208 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button,
-         FormControl, InputLabel, Select, MenuItem, Chip, Box } from '@mui/material';
-import { KleiderschrankAPI } from '../api';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+         Select, MenuItem, FormControl, InputLabel, List, ListItem,
+         ListItemText, IconButton, Typography } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import StyleBO from '../api/StyleBO';
+import KleidungstypBO from '../api/KleidungstypBO';
+import KardinalitaetBO from '../api/KardinalitaetBO';
+import MutexBO from '../api/MutexBO';
+import ImplikationBO from '../api/ImplikationBO';
 
 class StyleForm extends Component {
   constructor(props) {
     super(props);
+
+    // Wenn ein Style zum Bearbeiten übergeben wurde, nutzen wir diesen,
+    // ansonsten erstellen wir ein neues Style-Objekt
     this.state = {
-      style: props.style || {
-        name: '',
-        features: [], // ausgewählte Kleidungstypen
-        constraints: [] // Style-Constraints
-      },
-      kleidungstypen: [],
-      loading: false,
+      style: props.style ? props.style : new StyleBO(),
+      alleKleidungstypen: [],
       error: null
     };
   }
 
-  componentDidMount() {
-    this.loadKleidungstypen();
-  }
-
-  loadKleidungstypen = async () => {
-    try {
-      const kleidungstypen = await KleiderschrankAPI.getAPI().getKleidungstypen();
-      this.setState({ kleidungstypen });
-    } catch (error) {
-      this.setState({ error: 'Fehler beim Laden der Kleidungstypen' });
+  // Wenn sich die Props ändern (zb anderer Style wird bearbeitet)
+  componentDidUpdate(prevProps) {
+    if (this.props.style !== prevProps.style) {
+      this.setState({
+        style: this.props.style ? this.props.style : new StyleBO()
+      });
     }
   }
 
+  // Name des Styles ändern
   handleNameChange = (event) => {
-    this.setState({
-      style: { ...this.state.style, name: event.target.value }
-    });
+    const style = this.state.style;
+    // event.target.value referenziert das Objekt an welches das Ereignis gesendet wurde
+    style.setName(event.target.value);
+    this.setState({ style: style });
   }
 
-  handleKleidungstypChange = (event) => {
-    this.setState({
-      style: { ...this.state.style, features: event.target.value }
-    });
-  }
+  // Kleidungstypen hinzufügen/entfernen
+  handleKleidungstypenChange = (event) => {
+    const style = this.state.style;
+    const selectedIds = event.target.value;
 
-  handleSubmit = async () => {
-    const { style } = this.state;
-    try {
-      this.setState({ loading: true });
-      if (style.id) {
-        await KleiderschrankAPI.getAPI().updateStyle(style);
-      } else {
-        await KleiderschrankAPI.getAPI().addStyle(style);
+    // Aktuelle Features löschen
+    style.getFeatures().length = 0;
+
+    // Neue Features hinzufügen
+    selectedIds.forEach(id => {
+      const kleidungstyp = this.state.alleKleidungstypen.find(kt => kt.getID() === id);
+      if (kleidungstyp) {
+        style.addFeature(kleidungstyp);
       }
-      this.props.onClose(style);
-    } catch (error) {
-      this.setState({ error: 'Fehler beim Speichern des Styles' });
-    } finally {
-      this.setState({ loading: false });
+    });
+
+    this.setState({ style: style });
+  }
+
+  // Einen neuen Constraint hinzufügen
+  handleAddConstraint = (type) => {
+    const style = this.state.style;
+
+    switch(type) {
+      case 'kardinalitaet':
+        const kardinalitaet = new KardinalitaetBO();
+        kardinalitaet.setStyle(style);
+        style.addConstraint(kardinalitaet);
+        break;
+
+      case 'mutex':
+        const mutex = new MutexBO();
+        mutex.setStyle(style);
+        style.addConstraint(mutex);
+        break;
+
+      case 'implikation':
+        const implikation = new ImplikationBO();
+        implikation.setStyle(style);
+        style.addConstraint(implikation);
+        break;
     }
+
+    this.setState({ style: style });
+  }
+
+  // Einen Constraint entfernen
+  handleRemoveConstraint = (type, index) => {
+    const style = this.state.style;
+    const constraints = style.getConstraints();
+
+    // Finde den richtigen Constraint anhand von Typ und Index
+    const constraintsOfType = constraints.filter(c => {
+      switch(type) {
+        case 'kardinalitaet': return c instanceof KardinalitaetBO;
+        case 'mutex': return c instanceof MutexBO;
+        case 'implikation': return c instanceof ImplikationBO;
+        default: return false;
+      }
+    });
+
+    if (constraintsOfType[index]) {
+      style.removeConstraint(constraintsOfType[index]);
+      this.setState({ style: style });
+    }
+  }
+
+  // Style speichern
+  handleSave = () => {
+    // Hier können wir direkt das StyleBO-Objekt übergeben
+    this.props.onClose(this.state.style);
   }
 
   render() {
-    const { style, kleidungstypen, error, loading } = this.state;
-    const { show, onClose } = this.props;
+    const { style } = this.state;
 
     return (
-      <Dialog open={show} onClose={() => onClose(null)} maxWidth="sm" fullWidth>
+      <Dialog open={this.props.show}>
         <DialogTitle>
-          {style.id ? 'Style bearbeiten' : 'Neuen Style erstellen'}
+          Style {style.getID() ? 'bearbeiten' : 'erstellen'}
         </DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
-            margin="dense"
             label="Style Name"
-            type="text"
-            fullWidth
-            value={style.name}
+            value={style.getName()}
             onChange={this.handleNameChange}
+            fullWidth
+            margin="normal"
           />
-          <FormControl fullWidth margin="dense">
-            <InputLabel>Kleidungstypen</InputLabel>
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Erlaubte Kleidungstypen</InputLabel>
             <Select
+              // Mehrfachauswahl
               multiple
-              value={style.features}
-              onChange={this.handleKleidungstypChange}
-              renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selected.map((value) => (
-                    <Chip key={value.id} label={value.bezeichnung} />
-                  ))}
-                </Box>
-              )}
+              // aktuell ausgewählte Kleidungstypen
+              value={style.getFeatures().map(kt => kt.getID())}
+              onChange={this.handleKleidungstypenChange}
             >
-              {kleidungstypen.map((typ) => (
-                <MenuItem key={typ.id} value={typ}>
-                  {typ.bezeichnung}
+              // alle möglichen Kleidungstypen zur Auswahl geben, jeden als einzelnes MenuItem
+              {this.state.alleKleidungstypen.map(typ => (
+                <MenuItem key={typ.getID()} value={typ.getID()}>
+                  {typ.getBezeichnung()}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-          {error && <Box color="error.main" mt={2}>{error}</Box>}
+
+          <Typography variant="h6" sx={{mt: 2}}>Constraints</Typography>
+
+          <List>
+            {/* Kardinalitäts-Constraints */}
+            {/* nach jeweiliger Constraint-Art filtern und diese dann mappen und in einer Liste darstellen */}
+            {style.getConstraints()
+              .filter(c => c instanceof KardinalitaetBO)
+              .map((k, index) => (
+                <ListItem key={`kardinalitaet-${index}`}>
+                  <ListItemText
+                    primary={`Kardinalität für ${k.getBezugsobjekt().getBezeichnung()}`}
+                    secondary={`Minimum: ${k.getMinAnzahl()}, Maximum: ${k.getMaxAnzahl()}`}
+                  />
+                  <IconButton onClick={() => this.handleRemoveConstraint('kardinalitaet', index)}>
+                    <DeleteIcon/>
+                  </IconButton>
+                </ListItem>
+            ))}
+          </List>
+          <List>
+            {/* Mutex-Constraints */}
+            {style.getConstraints()
+              .filter(c => c instanceof MutexBO)
+              .map((k, index) => (
+                <ListItem key={`mutex-${index}`}>
+                  <ListItemText
+                    primary={`Mutex für ${k.getBezugsobjekt1().getBezeichnung()} und ${k.getBezugsobjekt2().getBezeichnung()}`}
+                    secondary={`Wenn ${k.getBezugsobjekt1().getBezeichnung()}, dann nicht ${k.getBezugsobjekt2().getBezeichnung()}`}
+                  />
+                  <IconButton onClick={() => this.handleRemoveConstraint('mutex', index)}>
+                    <DeleteIcon/>
+                  </IconButton>
+                </ListItem>
+            ))}
+          </List>
+          <List>
+            {/* Implikations-Constraints */}
+            {style.getConstraints()
+              .filter(c => c instanceof ImplikationBO)
+              .map((k, index) => (
+                <ListItem key={`implikation-${index}`}>
+                  <ListItemText
+                    primary={`Implikation für ${k.getBezugsobjekt1().getBezeichnung()} und ${k.getBezugsobjekt2().getBezeichnung()}`}
+                    secondary={`Wenn ${k.getBezugsobjekt1().getBezeichnung()}, dann auch ${k.getBezugsobjekt2().getBezeichnung()}`}
+                  />
+                  <IconButton onClick={() => this.handleRemoveConstraint('implikation', index)}>
+                    <DeleteIcon/>
+                  </IconButton>
+                </ListItem>
+            ))}
+          </List>
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => onClose(null)}>Abbrechen</Button>
-          <Button
-            onClick={this.handleSubmit}
-            disabled={loading || !style.name || style.features.length === 0}
-          >
+          <Button onClick={() => this.props.onClose(null)}>Abbrechen</Button>
+          <Button onClick={this.handleSave} variant="contained">
             Speichern
           </Button>
         </DialogActions>
@@ -117,5 +212,3 @@ class StyleForm extends Component {
 }
 
 export default StyleForm;
-
-// Brauche ich nicht, da Style beim Hinzufügen eines Kleidungsstücks über seinen Typen festgelegt wird.
