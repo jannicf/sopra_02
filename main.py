@@ -149,10 +149,15 @@ class PersonOperations(Resource):
 
         Das zu löschende Objekt wird durch die ```id``` in dem URI bestimmt.
         """
-        adm = KleiderschrankAdministration()
-        pers = adm.get_person_by_id(id)
-        adm.delete_person(pers)
-        return '', 200
+        try:
+            adm = KleiderschrankAdministration()
+            pers = adm.get_person_by_id(id)
+            if pers is None:
+                return {'message': 'Person nicht gefunden'}, 404
+            adm.delete_person(pers)
+            return '', 204  # Standardmäßiger Status-Code für erfolgreiche DELETE-Operation
+        except Exception as e:
+            return {'message': str(e)}, 500
 
     @wardrobe_ns.marshal_with(person)
     @wardrobe_ns.expect(person, validate=True)
@@ -241,16 +246,34 @@ class WardrobeOperations(Resource):
         verwendet wird. Dieser Parameter überschreibt das ID-Attribut des im Payload der Anfrage übermittelten
         Kleiderschrank-Objekts.
         """
-        adm = KleiderschrankAdministration()
-        w = Kleiderschrank.from_dict(api.payload)
+        try:
+            adm = KleiderschrankAdministration()
 
-        if w is not None:
-            """Hierdurch wird die id des zu überschreibenden Kleiderschrank-Objekts gesetzt."""
-            w.set_id(id)
-            adm.save_kleiderschrank(w)
-            return '', 200
-        else:
-            return '', 500
+            # Prüfen ob der Kleiderschrank existiert
+            existing_wardrobe = adm.get_kleiderschrank_by_id(id)
+            if not existing_wardrobe:
+                return {'message': f'Kleiderschrank mit ID {id} nicht gefunden'}, 404
+
+            # Payload in Kleiderschrank-Objekt umwandeln
+            wardrobe = Kleiderschrank()
+            wardrobe.set_id(id)
+            wardrobe.set_name(api.payload.get('name'))
+
+            # Eigentümer setzen
+            eigentuemer_id = api.payload.get('eigentuemer_id')
+            if eigentuemer_id:
+                eigentuemer = adm.get_person_by_id(eigentuemer_id)
+                if eigentuemer:
+                    wardrobe.set_eigentuemer(eigentuemer)
+                else:
+                    return {'message': f'Person mit ID {eigentuemer_id} nicht gefunden'}, 404
+
+            # Kleiderschrank speichern
+            adm.save_kleiderschrank(wardrobe)
+            return wardrobe, 200
+
+        except Exception as e:
+            return {'message': f'Server error: {str(e)}'}, 500
 
 @wardrobe_ns.route('/clothes')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -289,7 +312,7 @@ class ClothesListOperations(Resource):
                 proposal.get_name(),
                 proposal.get_typ(),
                 proposal.get_kleiderschrank_id()
-                )
+            )
             return clothing, 201
         else:
             # Wenn etwas schiefgeht, werfen wir einen Server-Fehler.
