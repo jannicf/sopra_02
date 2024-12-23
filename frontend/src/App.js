@@ -3,15 +3,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { ThemeProvider, Container, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import ErrorAlert from 'src/dialogs/ErrorAlert';
-import LoadingProgress from 'src/dialogs/LoadingProgress';
-import Header from 'src/layout/header';
-import Login from 'src/pages/Login';
-import KleiderschrankView from 'src/pages/KleiderschrankView';
-import OutfitsView from 'src/pages/OutfitsView';
-import StylesView from 'src/pages/StylesView';
-import About from 'src/pages/About';
-import firebaseConfig from 'src/firebase/firebaseconfig';
+import ErrorAlert from 'frontend/src/dialogs/ErrorAlert';
+import LoadingProgress from 'frontend/src/dialogs/LoadingProgress';
+import Header from 'frontend/src/layout/header';
+import Login from 'frontend/src/pages/Login';
+import KleiderschrankView from 'frontend/src/pages/KleiderschrankView';
+import OutfitsView from 'frontend/src/pages/OutfitsView';
+import StylesView from 'frontend/src/pages/StylesView';
+import About from 'frontend/src/pages/About';
+import firebaseConfig from 'frontend/src/firebase/firebaseconfig';
 
 class App extends React.Component {
     constructor(props) {
@@ -150,3 +150,5 @@ class App extends React.Component {
     );
     }
 }
+
+export default App;
