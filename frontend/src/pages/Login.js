@@ -20,13 +20,12 @@ class Login extends Component {
 	render() {
 		return (
 			<div>
-				<Typography align='center' variant='h2'>Wilkommen beim digitalen Kleiderschrank</Typography>
-				<br />
-				<Typography align='center' variant='h6'>Bitte loggen Sie sich zur Nutzung der App ein</Typography>
-				<br />
-				<Grid container justify='center'>
+				<Typography sx={{margin: 2}} align='center' variant='h2'>Wilkommen beim digitalen Kleiderschrank</Typography>
+				<Typography sx={{margin: 2}} align='center' variant='h6'>Bitte loggen Sie sich zur Nutzung der App ein</Typography>
+				<br/>
+				<Grid container justifyContent='center'>
 					<Button variant='contained' color='primary'
-							onClick={this.props.handleLoginButtonClicked}>Mit Google einloggen
+							onClick={this.handleLoginButtonClicked}>Mit Google einloggen
 					</Button>
 				</Grid>
 				<br/>
