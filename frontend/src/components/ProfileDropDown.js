@@ -18,6 +18,11 @@ class ProfileDropDown extends Component {
         this.setState({ anchorEl: null });
     };
 
+    handleLogout = () => {
+    this.handleClose();  // Menü schließen
+    this.props.onLogout();  // Logout-Funktion aufrufen
+    };
+
     render() {
         const { user } = this.props;
         const { anchorEl } = this.state;
@@ -33,7 +38,7 @@ class ProfileDropDown extends Component {
                     onClose={this.handleClose}
                 >
                     <MenuItem onClick={this.handleClose}>Profil</MenuItem>
-                    <MenuItem onClick={this.handleClose}>Ausloggen</MenuItem>
+                    <MenuItem onClick={this.handleLogout}>Ausloggen</MenuItem>
                 </Menu>
             </div>
         );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { ThemeProvider, Container, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Theme from './Theme';
@@ -49,6 +49,21 @@ class App extends React.Component {
             });
         });
     }
+
+    handleSignOut = () => {
+    const auth = getAuth();
+    signOut(auth).then(() => {
+        // Logout erfolgreich
+        document.cookie = 'token=;path=/';  // Token löschen
+        this.setState({
+            currentUser: null
+        });
+    }).catch((error) => {
+        this.setState({
+            authError: error
+        });
+    });
+}
     // Diese Methode wird beim Start der Anwendung ausgeführt
     componentDidMount() {
         // Firebase initialisieren
@@ -101,8 +116,7 @@ class App extends React.Component {
             <CssBaseline />
             <Router>
                 <Container maxWidth='md'>
-                    <Header user={currentUser} />
-
+                    <Header user={currentUser} onLogout={this.handleSignOut} />
                     <Routes>
                         {/* Startseite mit Login */}
                         <Route path="/" element={

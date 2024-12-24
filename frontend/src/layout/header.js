@@ -22,7 +22,7 @@ class Header extends Component {
 
         return (
           <Paper variant='outlined' >
-            <ProfileDropDown user={user} />
+            <ProfileDropDown user={user} onLogout={this.props.onLogout} />
             <Typography variant='h3' component='h1' align='center'>
             Mein digitaler Kleiderschrank
             </Typography>
