@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { List, Typography, Button, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import OutfitCard from './OutfitCard.js';
-import { KleiderschrankAPI } from '../api';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitList extends Component {
   constructor(props) {

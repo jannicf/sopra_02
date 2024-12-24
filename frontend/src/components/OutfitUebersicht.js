@@ -3,9 +3,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { List, ListItem, Button, Box, Typography, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import { KleiderschrankAPI } from '../api';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import OutfitList from './OutfitList';
-import ErrorAlert from './ErrorAlert';
+import ErrorAlert from '../dialogs/ErrorAlert';
 
 class OutfitUebersicht extends Component {
   constructor(props) {

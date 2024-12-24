@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Typography, Card, CardContent, Grid, Button, ButtonGroup, Dialog } from '@mui/material';
-import KleidungsstueckForm from './dialogs/KleidungsstueckForm';
-import KleidungsstueckDeleteDialog from './dialogs/KleidungsstueckDeleteDialog';
+import KleidungsstueckForm from '../dialogs/KleidungsstueckForm';
+import KleidungsstueckDeleteDialog from '../dialogs/KleidungsstueckDeleteDialog';
 
 /**
  * Rendert ein KleidungsstueckBO-Objekt in einer Card-Ansicht.

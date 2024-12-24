@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Card, CardContent, Typography, IconButton, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { KleiderschrankAPI } from '../api';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitCard extends Component {
   constructor(props) {

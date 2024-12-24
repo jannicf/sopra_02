@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types'; // bezieht sich auf onDelete
 import { Card, CardContent, Typography, IconButton, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { KleiderschrankAPI } from '../api';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import ErrorAlert from '../dialogs/ErrorAlert';
 
 class StyleCard extends Component {

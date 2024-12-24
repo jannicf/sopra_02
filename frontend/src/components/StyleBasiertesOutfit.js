@@ -1,7 +1,7 @@
 // StyleBasiertesOutfit.js
 import React, { Component } from 'react';
 import { Card, CardContent, List, ListItem, ListItemText, Button, Typography } from '@mui/material';
-import { KleiderschrankAPI } from '../api';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class StyleBasiertesOutfit extends Component {
     constructor(props) {
