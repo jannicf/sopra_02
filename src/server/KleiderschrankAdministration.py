@@ -371,16 +371,28 @@ class KleiderschrankAdministration(object):
         """Ein Kleidungsstück anlegen."""
         kleidungsstueck = Kleidungsstueck()
         kleidungsstueck.set_name(name)
+
+        # Wenn typ nur eine ID ist, laden wir den vollständigen Typ
+        if isinstance(typ, int):
+            typ = self.get_kleidungstyp_by_id(typ)
+
         kleidungsstueck.set_typ(typ)
         kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
         kleidungsstueck.set_id(1)
 
-        kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
-        kleiderschrank.add_kstueck(kleidungsstueck)
-        self.save_kleiderschrank(kleiderschrank)
-
+        # Erst das Kleidungsstück in die Datenbank einfügen
         with KleidungsstueckMapper() as mapper:
-            return mapper.insert(kleidungsstueck)
+            result = mapper.insert(kleidungsstueck)
+
+        # Wenn das Einfügen erfolgreich war, dem Kleiderschrank hinzufügen
+        if result:
+            kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+            if kleiderschrank:
+                kleiderschrank.add_kstueck(result)
+                with KleiderschrankMapper() as mapper:
+                    mapper.update(kleiderschrank)
+
+        return result
 
     def get_kleidungsstueck_by_id(self, number):
         """Das Kleidungsstück mit der gegebenen ID auslesen."""
@@ -420,13 +432,8 @@ class KleiderschrankAdministration(object):
             for outfit in outfits:
                 outfit.remove_baustein(kleidungsstueck)
                 self.save_outfit(outfit)
-            # Aus dem Kleiderschrank entfernen
-            if kleidungsstueck.get_kleiderschrank_id():
-                update_command = "UPDATE kleidungsstueck SET kleiderschrank_id=NULL WHERE id=%s"
-                cursor = mapper._cnx.cursor()
-                cursor.execute(update_command, (kleidungsstueck.get_id(),))
-                cursor.close()
 
+            # Kleidungsstück direkt löschen ohne vorher die kleiderschrank_id zu ändern
             mapper.delete(kleidungsstueck)
 
 

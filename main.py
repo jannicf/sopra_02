@@ -300,14 +300,16 @@ class ClothesListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Kleidungsstück-Objekt aus den übertragenen Daten
-        proposal = Kleidungsstueck.from_dict(api.payload)
+        # Hole zuerst den Typ als vollständiges Objekt
+        typ = adm.get_kleidungstyp_by_id(api.payload['typ'])
+
+        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        modified_payload = api.payload.copy()
+        modified_payload['typ'] = typ
+
+        proposal = Kleidungsstueck.from_dict(modified_payload)
 
         if proposal is not None:
-            """ Wir erstellen ein Kleidungsstück-Objekt basierend auf den Vorschlagsdaten.
-            Das serverseitig erzeugte Objekt ist das maßgebliche und 
-            wird dem Client zurückgegeben. 
-            """
             clothing = adm.create_kleidungsstueck(
                 proposal.get_name(),
                 proposal.get_typ(),
@@ -315,7 +317,6 @@ class ClothesListOperations(Resource):
             )
             return clothing, 201
         else:
-            # Wenn etwas schiefgeht, werfen wir einen Server-Fehler.
             return '', 500
 
 
@@ -345,7 +346,6 @@ class ClothingItemOperations(Resource):
         adm.delete_kleidungsstueck(clothing_item)
         return '', 200
 
-    @wardrobe_ns.marshal_with(kleidungsstueck)
     @wardrobe_ns.expect(kleidungsstueck, validate=True)
     #@secured
     def put(self, id):
@@ -354,13 +354,21 @@ class ClothingItemOperations(Resource):
         Die Objekt-ID wird durch den URI-Parameter überschrieben.
         """
         adm = KleiderschrankAdministration()
-        c = Kleidungsstueck.from_dict(api.payload)
+
+        # Hole zuerst den Typ als vollständiges Objekt
+        typ = adm.get_kleidungstyp_by_id(api.payload['typ'])
+
+        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        modified_payload = api.payload.copy()
+        modified_payload['typ'] = typ
+
+        c = Kleidungsstueck.from_dict(modified_payload)
 
         if c is not None:
             """Setze die ID des zu überschreibenden Kleidungsstück-Objekts."""
             c.set_id(id)
             adm.save_kleidungsstueck(c)
-            return '', 200
+            return '', 204  # 204 bedeutet "No Content" - erfolgreich aber keine Rückgabe
         else:
             return '', 500
 

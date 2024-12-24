@@ -51,24 +51,22 @@ class KleiderschrankMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
 
+        # Hauptobjekt aktualisieren
         command = "UPDATE kleiderschrank SET eigentuemer_id=%s, name=%s WHERE id=%s"
         data = (kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name(), kleiderschrank.get_id())
         cursor.execute(command, data)
 
-        # Alle bestehenden Zuordnungen auf NULL setzen
-        delete_command = """UPDATE kleidungsstueck 
-                           SET kleiderschrank_id=NULL 
-                           WHERE kleiderschrank_id=%s"""
-        cursor.execute(delete_command, (kleiderschrank.get_id(),))
+        # Statt alle auf NULL zu setzen, aktualisieren wir nur die tatsächlichen Zuordnungen
+        # Wir holen uns die IDs der aktuell zugeordneten Kleidungsstücke
+        current_items = [k.get_id() for k in kleiderschrank.get_inhalt()]
 
-        # Neue Zuordnungen erstellen
-        for kleidungsstueck in kleiderschrank.get_inhalt():
-            update_command = """UPDATE kleidungsstueck 
-                               SET kleiderschrank_id=%s 
-                               WHERE id=%s"""
-            cursor.execute(update_command,
-                          (kleiderschrank.get_id(),
-                           kleidungsstueck.get_id()))
+        if current_items:
+            # Setze die Zuordnung für die aktuellen Kleidungsstücke
+            items_str = ','.join(['%s'] * len(current_items))
+            update_command = f"""UPDATE kleidungsstueck 
+                                   SET kleiderschrank_id=%s 
+                                   WHERE id IN ({items_str})"""
+            cursor.execute(update_command, (kleiderschrank.get_id(), *current_items))
 
         self._cnx.commit()
         cursor.close()
