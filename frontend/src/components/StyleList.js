@@ -1,23 +1,22 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ListItem, ListItemText, IconButton, Typography, Box } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
+/**
+ * Stellt einen einzelnen Style in einer Liste dar.
+ * Zeigt grundlegende Styleinformationen an und bietet eine Benutzungsschnittstelle zum Bearbeiten.
+ */
 class StyleList extends Component {
   constructor(props) {
     super(props);
     this.state = {
       style: props.style,
-      showDeleteDialog: false,
       showEditDialog: false
     };
   }
 
-  handleDelete = () => {
-    this.props.onStyleDeleted(this.state.style);
-  }
-
+  // Handler für den Edit-Button
   handleEdit = () => {
     this.props.onStyleEdit(this.state.style);
   }
@@ -54,17 +53,9 @@ class StyleList extends Component {
               edge="end"
               aria-label="edit"
               onClick={this.handleEdit}
-              sx={{ color: 'primary.main', mr: 1 }}
+              sx={{ color: 'primary.main' }}
             >
               <EditIcon />
-            </IconButton>
-            <IconButton
-              edge="end"
-              aria-label="delete"
-              onClick={this.handleDelete}
-              sx={{ color: 'error.main' }}
-            >
-              <DeleteIcon />
             </IconButton>
           </Box>
         </Box>
@@ -75,7 +66,6 @@ class StyleList extends Component {
 
 StyleList.propTypes = {
   style: PropTypes.object.isRequired,
-  onStyleDeleted: PropTypes.func.isRequired,
   onStyleEdit: PropTypes.func.isRequired
 };
 
