@@ -13,7 +13,7 @@ import ImplikationBO from './ImplikationBO';
  * Abstrakte Schnittstelle für die REST API des Python Backends mit komfortablen Zugriffsmethoden.
  * Die Klasse ist als Singleton implementiert.
  */
-export default class KleiderschrankAPI {
+class KleiderschrankAPI {
     // Singleton Instanz
     static #api = null;
 
@@ -153,6 +153,16 @@ export default class KleiderschrankAPI {
             method: 'DELETE'
         })
     }
+
+    // Methode für Person API calls
+  async getPersonen() {
+    // Der Name sollte mit dem Backend übereinstimmen - get_all_personen
+    return this.#fetchAdvanced('/wardrobe/persons').then((responseJSON) => {
+      return new Promise((resolve) => {
+        resolve(responseJSON);
+      })
+    })
+  }
 
     // Kleiderschrank-bezogene Methoden
     getKleiderschrank(id) {
@@ -624,3 +634,5 @@ export default class KleiderschrankAPI {
         })
     }
 }
+
+export default KleiderschrankAPI;

@@ -60,8 +60,8 @@ style = api.inherit('Style', bo, {
 })
 
 outfit = api.inherit('Outfit', bo, {
-    'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if x.get_style() else None, description='Style des Outfits'),
-    'bausteine': fields.List(fields.Integer(attribute=lambda x: x.get_bausteine().get_id() if x.get_bausteine() else None), description='Kleidungsstücke im Outfit')
+    'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if x.get_style() else None),
+    'bausteine': fields.List(fields.Integer, attribute=lambda x: x.get_baustein_ids())
 })
 
 constraint = api.inherit('Constraint', bo, {
@@ -572,10 +572,10 @@ class OutfitListOperations(Resource):
 
         # Kleidungsstücke laden
         kleidungsstuecke = [adm.get_kleidungsstueck_by_id(k_id)
-                            for k_id in data['kleidungsstueck_ids']]
+                            for k_id in data['bausteine']]
 
         # Outfit erstellen
-        outfit = adm.create_outfit_from_selection(kleidungsstuecke, data['style_id'])
+        outfit = adm.create_outfit_from_selection(kleidungsstuecke, data['style'])
 
         if outfit:
             return outfit, 201

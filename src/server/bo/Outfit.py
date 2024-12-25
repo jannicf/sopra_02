@@ -21,6 +21,10 @@ class Outfit(bo.BusinessObject):
         """Gibt alle Kleidungsstücke des Outfits zurück"""
         return self.__bausteine
 
+    def get_baustein_ids(self):
+        """Gibt alle IDs der Kleidungsstücke des Outfits zurück"""
+        return [baustein.get_id() for baustein in self.__bausteine]
+
     def set_style(self, style):
         """Setzen des Outfit-Styles"""
         self.__style = style

@@ -545,12 +545,18 @@ class KleiderschrankAdministration(object):
             if not constraint.check_constraint(ausgewaehlte_kleidungsstuecke):
                 return None  # Wenn auch nur ein Constraint verletzt ist, kein Outfit erstellen
 
-        outfit = self.create_outfit(style_id)
+        outfit = Outfit()
+        outfit.set_style(style)
+
+        # Kleidungsstücke hinzufügen
         for kleidungsstueck in ausgewaehlte_kleidungsstuecke:
             outfit.add_baustein(kleidungsstueck)
 
+        # Nochmal final prüfen ob alle Constraints erfüllt sind
         if self.check_outfit_constraints(outfit):
-            return outfit
+            # Nur wenn alle Checks bestanden wurden, in DB speichern
+            with OutfitMapper() as mapper:
+                return mapper.insert(outfit)
         else:
             return None
 
