@@ -1,0 +1,2 @@
+#zeigt welche Python-Version wir verwenden für die Google App Engine
+runtime: python39
