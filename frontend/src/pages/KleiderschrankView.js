@@ -1,32 +1,63 @@
-import React, { Component } from 'react';
-import { Grid, Typography, Button, Card, CardContent, List, ListItem, ListItemText } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import KleidungsstueckCard from './components/KleidungsstueckCard';
+// KleiderschrankView.js
+import { Component } from 'react';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class KleiderschrankView extends Component {
     constructor(props) {
         super(props);
-        // empty state initialisieren
         this.state = {
-            kleidungsstuecke: [],
-            showKleidungsstueckForm: false,
-            selectedKleidungsstueck: null,
-
-
-        }
+            personen: [],
+            error: null,
+            loadingInProgress: false
+        };
     }
 
+    componentDidMount() {
+        this.setState({
+            loadingInProgress: true
+        });
 
+        // Erst Personen laden
+        KleiderschrankAPI.getAPI().getPersonen()
+            .then(personen => {
+                this.setState({
+                    personen: personen,
+                    error: null,
+                    loadingInProgress: false
+                });
 
-     // Handler für Updates und Löschungen implementieren
-    handleUpdate = (updatedKleidungsstueck) => {
-    // API-Call zum Aktualisieren
+                // Dann direkt das Update für die erste Person ausführen
+                if (personen.length > 0) {
+                    const updatedPerson = {
+                        id: personen[0].id,
+                        vorname: "Max",
+                        nachname: "Musterstadt",
+                        nickname: "maxi",
+                        google_id: "123"
+                    };
+
+                    return KleiderschrankAPI.getAPI().updatePerson(personen[0].id, updatedPerson);
+                }
+            })
+            .then(updatedPerson => {
+                if (updatedPerson) {
+                    this.setState(prevState => ({
+                        personen: prevState.personen.map(person =>
+                            person.id === updatedPerson.id ? updatedPerson : person
+                        )
+                    }));
+                }
+            })
+            .catch(e => {
+                this.setState({
+                    personen: [],
+                    error: e,
+                    loadingInProgress: false
+                });
+                console.error("Fehler:", e);
+            });
     }
 
-    handleDelete = (deletedKleidungsstueck) => {
-    // API-Call zum Löschen
-    }
 }
-
 
 export default KleiderschrankView;

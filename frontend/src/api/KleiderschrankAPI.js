@@ -154,16 +154,6 @@ class KleiderschrankAPI {
         })
     }
 
-    // Methode für Person API calls
-  async getPersonen() {
-    // Der Name sollte mit dem Backend übereinstimmen - get_all_personen
-    return this.#fetchAdvanced('/wardrobe/persons').then((responseJSON) => {
-      return new Promise((resolve) => {
-        resolve(responseJSON);
-      })
-    })
-  }
-
     // Kleiderschrank-bezogene Methoden
     getKleiderschrank(id) {
         return this.#fetchAdvanced(this.#getKleiderschrankURL(id))
