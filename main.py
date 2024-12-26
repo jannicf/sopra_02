@@ -65,16 +65,16 @@ outfit = api.inherit('Outfit', bo, {
 })
 
 constraint = api.inherit('Constraint', bo, {
-    'style': fields.String(attribute='_Constraint__style', description='Style des Constraints')
+    'style': fields.Integer(attribute=lambda x: x.get_style().get_id()),
 })
 
 unary_constraint = api.inherit('UnaryConstraint', constraint, {
-    'bezugsobjekt': fields.Integer(attribute='_UnaryConstraint__bezugsobjekt', description='Das Bezugsobjekt für den Unary Constraint')
+    'bezugsobjekt': fields.Integer(attribute=lambda x: x.get_bezugsobjekt().get_id()),
 })
 
 binary_constraint = api.inherit('BinaryConstraint', constraint, {
-    'bezugsobjekt1': fields.Integer(attribute='_BinaryConstraint__bezugsobjekt1', description='Das erste Bezugsobjekt'),
-    'bezugsobjekt2': fields.Integer(attribute='_BinaryConstraint__bezugsobjekt2', description='Das zweite Bezugsobjekt')
+    'bezugsobjekt1': fields.Integer(attribute=lambda x: x.get_bezugsobjekt1().get_id()),
+    'bezugsobjekt2': fields.Integer(attribute=lambda x: x.get_bezugsobjekt2().get_id()),
 })
 
 mutex = api.inherit('MutexConstraint', binary_constraint, {})
@@ -82,8 +82,8 @@ mutex = api.inherit('MutexConstraint', binary_constraint, {})
 implikation = api.inherit('ImplicationConstraint', binary_constraint, {})
 
 kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
-    'min_anzahl': fields.Integer(attribute='_CardinalityConstraint__min_anzahl', description='Minimaler Wert der Kardinalität'),
-    'max_anzahl': fields.Integer(attribute='_CardinalityConstraint__max_anzahl', description='Maximaler Wert der Kardinalität')
+    'min_anzahl': fields.Integer(attribute=lambda x: x.get_min_anzahl()),
+    'max_anzahl': fields.Integer(attribute=lambda x: x.get_max_anzahl()),
 })
 
 
@@ -648,17 +648,17 @@ class CardinalityConstraintListOperations(Resource):
     def post(self):
         """Erstellen eines neuen Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
-        proposal = Kardinalitaet.from_dict(api.payload)
-        if proposal is not None:
-            constraint = adm.create_kardinalitaet(
-                proposal.get_min_anzahl(),
-                proposal.get_max_anzahl(),
-                proposal.get_bezugsobjekt(),
-                proposal.get_style()
-            )
-            return constraint, 201
-        else:
-            return '', 500
+        payload = api.payload
+
+        # Logik zur Verarbeitung und Rückgabe eines Kardinalitaet-Objekts
+        proposal = Kardinalitaet.from_dict(payload)
+        created_constraint = adm.create_kardinalitaet(
+            proposal.get_min_anzahl(),
+            proposal.get_max_anzahl(),
+            proposal.get_bezugsobjekt(),
+            proposal.get_style()
+        )
+        return created_constraint, 201
 
 
 @wardrobe_ns.route('/cardinalityconstraints/<int:id>')
@@ -683,16 +683,37 @@ class CardinalityConstraintOperations(Resource):
 
     @wardrobe_ns.marshal_with(kardinalitaet)
     @wardrobe_ns.expect(kardinalitaet, validate=True)
-    #@secured
+    # @secured
     def put(self, id):
         """Updaten eines Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
-        cc = Kardinalitaet.from_dict(api.payload)
-        if cc is not None:
+        try:
+            # Payload verarbeiten
+            payload = api.payload
+
+            cc = Kardinalitaet.from_dict(payload)
+            if not cc:
+                return '', 400
+
             cc.set_id(id)
+
+            # Style laden und setzen
+            style = adm.get_style_by_id(payload.get('style'))
+            if not style:
+                return '', 400
+            cc.set_style(style)
+
+            # Bezugsobjekt laden und setzen
+            bezugsobjekt = adm.get_kleidungstyp_by_id(payload.get('bezugsobjekt'))
+            if not bezugsobjekt:
+                return '', 400
+            cc.set_bezugsobjekt(bezugsobjekt)
+
+            # Constraint speichern
             adm.save_kardinalitaet(cc)
-            return '', 200
-        else:
+
+            return cc, 200
+        except Exception as e:
             return '', 500
 
 
@@ -747,17 +768,37 @@ class ImplicationConstraintOperations(Resource):
 
     @wardrobe_ns.marshal_with(implikation)
     @wardrobe_ns.expect(implikation, validate=True)
-    #@secured
+    # @secured
     def put(self, id):
         """Updaten eines Implikations-Constraints"""
         adm = KleiderschrankAdministration()
-        ic = Implikation.from_dict(api.payload)
+
+        # Payload in ein Implikation-Objekt umwandeln
+        payload = api.payload
+        ic = Implikation.from_dict(payload)
+
         if ic is not None:
+            # Setze die ID des Constraints
             ic.set_id(id)
+
+            # Lade den Style basierend auf der Style-ID aus dem Payload
+            style_id = payload.get('style')
+            style = adm.get_style_by_id(style_id)
+
+            if not style:
+                return '', 404
+
+            # Setze den Style in der Implikation
+            ic.set_style(style)
+
+            # Speichere die aktualisierte Implikation
             adm.save_implikation(ic)
-            return '', 200
+
+            # Erfolgreiche Antwort
+            return ic, 200
         else:
-            return '', 500
+            # Fehler beim Verarbeiten des Payloads
+            return '', 400
 
 
 @wardrobe_ns.route('/mutexconstraints')
@@ -818,7 +859,7 @@ class MutexConstraintOperations(Resource):
         if mc is not None:
             mc.set_id(id)
             adm.save_mutex(mc)
-            return '', 200
+            return mc, 200
         else:
             return '', 500
 

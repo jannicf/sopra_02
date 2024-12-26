@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from src.server.bo.Constraint import Constraint
-from src.server.bo import Kleidungstyp
 
 
 class UnaryConstraint(Constraint):

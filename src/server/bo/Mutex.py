@@ -1,6 +1,7 @@
 from src.server.bo.BinaryConstraint import BinaryConstraint
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
-# Kleidungsstueck importieren um die Methode get_typ() zu verwenden
+from src.server.bo.Kleidungstyp import Kleidungstyp
+from src.server.bo.Style import Style
+
 
 class Mutex(BinaryConstraint):
 
@@ -42,9 +43,35 @@ class Mutex(BinaryConstraint):
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        """Umwandeln eines Python dict() in ein Mutex()."""
         obj = Mutex()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
-        obj.set_bezugsobjekt1(dictionary["bezugsobjekt1"])
-        obj.set_bezugsobjekt2(dictionary["bezugsobjekt2"])
+        obj.set_id(dictionary.get("id"))
+
+        if "bezugsobjekt1" in dictionary:
+            if isinstance(dictionary["bezugsobjekt1"], int):
+                bezugsobjekt1 = Kleidungstyp()
+                bezugsobjekt1.set_id(dictionary["bezugsobjekt1"])
+                obj.set_bezugsobjekt1(bezugsobjekt1)
+            else:
+                print("bezugsobjekt1 ist kein int:", dictionary["bezugsobjekt1"])  # Debugging
+                obj.set_bezugsobjekt1(dictionary["bezugsobjekt1"])
+
+        if "bezugsobjekt2" in dictionary:
+            if isinstance(dictionary["bezugsobjekt2"], int):
+                bezugsobjekt2 = Kleidungstyp()
+                bezugsobjekt2.set_id(dictionary["bezugsobjekt2"])
+                obj.set_bezugsobjekt2(bezugsobjekt2)
+            else:
+                print("bezugsobjekt2 ist kein int:", dictionary["bezugsobjekt2"])  # Debugging
+                obj.set_bezugsobjekt2(dictionary["bezugsobjekt2"])
+
+        if "style" in dictionary:
+            if isinstance(dictionary["style"], int):
+                style = Style()
+                style.set_id(dictionary["style"])
+                obj.set_style(style)
+            else:
+                print("style ist kein int:", dictionary["style"])  # Debugging
+                obj.set_style(dictionary["style"])
+
         return obj
+

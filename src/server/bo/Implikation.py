@@ -1,6 +1,6 @@
 from src.server.bo.BinaryConstraint import BinaryConstraint
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
-# Kleidungsstueck importieren um die Methode get_typ() zu verwenden
+from src.server.bo.Kleidungstyp import Kleidungstyp
+from src.server.bo.Style import Style
 
 class Implikation(BinaryConstraint):
 
@@ -41,13 +41,26 @@ class Implikation(BinaryConstraint):
         return "Implikation: {}, {}, {}".format(self.get_id(), self.get_bezugsobjekt1().get_bezeichnung(),
                                           self.get_bezugsobjekt2().get_bezeichnung())
 
-
     @staticmethod
     def from_dict(dictionary=dict()):
-        """Umwandeln eines Python dict() in eine Implikation()."""
         obj = Implikation()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
-        obj.set_bezugsobjekt1(dictionary["bezugsobjekt1"])
-        obj.set_bezugsobjekt2(dictionary["bezugsobjekt2"])
+        obj.set_id(dictionary.get("id"))
+
+        if "bezugsobjekt1" in dictionary:
+            bezugsobjekt1 = Kleidungstyp()
+            bezugsobjekt1.set_id(dictionary["bezugsobjekt1"])
+            obj.set_bezugsobjekt1(bezugsobjekt1)
+
+        if "bezugsobjekt2" in dictionary:
+            bezugsobjekt2 = Kleidungstyp()
+            bezugsobjekt2.set_id(dictionary["bezugsobjekt2"])
+            obj.set_bezugsobjekt2(bezugsobjekt2)
+
+        if "style" in dictionary:
+            style = Style()
+            style.set_id(dictionary["style"])
+            obj.set_style(style)
+
         return obj
+
 

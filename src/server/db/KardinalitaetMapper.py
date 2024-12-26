@@ -195,8 +195,17 @@ class KardinalitaetMapper(Mapper):
             kardinalitaet.set_id(id)
             kardinalitaet.set_min_anzahl(min_anzahl)
             kardinalitaet.set_max_anzahl(max_anzahl)
-            kardinalitaet.set_bezugsobjekt(bezugsobjekt_id)
-            kardinalitaet.set_style(style_id)
+
+            # Bezugsobjekt laden
+            with KleidungstypMapper() as kleidungstyp_mapper:
+                bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
+                kardinalitaet.set_bezugsobjekt(bezugsobjekt)
+
+            # Style laden
+            with StyleMapper() as style_mapper:
+                style = style_mapper.find_by_id(style_id)
+                kardinalitaet.set_style(style)
+
             result.append(kardinalitaet)
 
         self._cnx.commit()

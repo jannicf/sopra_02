@@ -2,6 +2,8 @@ from src.server.db.Mapper import Mapper
 from src.server.bo.Mutex import Mutex
 from src.server.db.KleidungstypMapper import KleidungstypMapper
 from src.server.db.StyleMapper import StyleMapper
+from src.server.bo.Kleidungstyp import Kleidungstyp
+from src.server.bo.Style import Style
 
 class MutexMapper(Mapper):
 
@@ -178,33 +180,34 @@ class MutexMapper(Mapper):
         return result
 
     def find_all(self):
-        """Auslesen aller Mutex-Objekte unseres Systems.
-
-                :return Eine Sammlung mit Mutex-Objekten, die sämtliche Mutex-Constraints
-                        des Systems repräsentieren.
-                """
         result = []
         cursor = self._cnx.cursor()
-        cursor.execute("SELECT * from mutex")
-        tuples = cursor.fetchall()
+        command = "SELECT id, bezugsobjekt1_id, bezugsobjekt2_id, style_id FROM mutex"
+        cursor.execute(command)
 
+        tuples = cursor.fetchall()
         for (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) in tuples:
             mutex = Mutex()
             mutex.set_id(id)
-            # Lade die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
-            with KleidungstypMapper() as kleidungstyp_mapper:
-                bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
-                bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)
-            mutex.set_bezugsobjekt1(bezugsobjekt1_id)
-            mutex.set_bezugsobjekt2(bezugsobjekt2_id)
 
-            # Lade das zugehörige Style-Objekt separat aus der Datenbank
-            with StyleMapper() as style_mapper:
-                style = style_mapper.find_by_id(style_id)
+            # Wandelt bezugsobjekt1 in Kleidungstyp um
+            bezugsobjekt1 = Kleidungstyp()
+            bezugsobjekt1.set_id(bezugsobjekt1_id)
+            mutex.set_bezugsobjekt1(bezugsobjekt1)
+
+            # Wandelt bezugsobjekt2 in Kleidungstyp um
+            bezugsobjekt2 = Kleidungstyp()
+            bezugsobjekt2.set_id(bezugsobjekt2_id)
+            mutex.set_bezugsobjekt2(bezugsobjekt2)
+
+            # Wandelt style in Style um
+            style = Style()
+            style.set_id(style_id)
             mutex.set_style(style)
+
             result.append(mutex)
 
         self._cnx.commit()
         cursor.close()
-
         return result
+

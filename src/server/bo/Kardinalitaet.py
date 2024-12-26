@@ -59,10 +59,25 @@ class Kardinalitaet(UnaryConstraint):
 
     @staticmethod
     def from_dict(dictionary=dict()):
+        from src.server.KleiderschrankAdministration import KleiderschrankAdministration
         """Umwandeln eines Python dict() in eine Kardinalitaet()."""
         obj = Kardinalitaet()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
+        obj.set_id(dictionary.get("id", None))
         obj.set_min_anzahl(dictionary["min_anzahl"])
         obj.set_max_anzahl(dictionary["max_anzahl"])
-        obj.set_bezugsobjekt(dictionary["bezugsobjekt"])
+
+        # Bezugsobjekt korrekt erstellen (falls es ein ID-Wert ist)
+        bezugsobjekt_id = dictionary["bezugsobjekt"]
+        if isinstance(bezugsobjekt_id, int):
+            obj.set_bezugsobjekt(KleiderschrankAdministration().get_kleidungstyp_by_id(bezugsobjekt_id))
+        else:
+            obj.set_bezugsobjekt(bezugsobjekt_id)
+
+        # Style korrekt setzen
+        style_id = dictionary["style"]
+        if isinstance(style_id, int):
+            obj.set_style(KleiderschrankAdministration().get_style_by_id(style_id))
+        else:
+            obj.set_style(style_id)
+
         return obj

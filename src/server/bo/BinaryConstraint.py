@@ -1,6 +1,5 @@
 from abc import abstractmethod
 from src.server.bo.Constraint import Constraint
-from src.server.bo import Kleidungstyp
 
 
 class BinaryConstraint(Constraint):
@@ -17,7 +16,7 @@ class BinaryConstraint(Constraint):
         self.__bezugsobjekt1 = bezugsobjekt1
 
     def get_bezugsobjekt1(self):
-        """Auslesen des Bezugsobjekts"""
+        """Gibt das erste Bezugsobjekt zurück."""
         return self.__bezugsobjekt1
 
     def set_bezugsobjekt2(self, bezugsobjekt2):
@@ -25,7 +24,7 @@ class BinaryConstraint(Constraint):
         self.__bezugsobjekt2 = bezugsobjekt2
 
     def get_bezugsobjekt2(self):
-        """Auslesen des Bezugsobjekts"""
+        """Gibt das zweite Bezugsobjekt zurück."""
         return self.__bezugsobjekt2
 
     @abstractmethod

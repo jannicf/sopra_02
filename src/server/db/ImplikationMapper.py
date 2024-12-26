@@ -199,8 +199,11 @@ class ImplikationMapper(Mapper):
             implikation.set_bezugsobjekt2(bezugsobjekt2)
 
             # Lade das zugehörige Style-Objekt separat aus der Datenbank
-            with StyleMapper() as style_mapper:
-                style = style_mapper.find_by_id(style_id)
+            if style_id:
+                with StyleMapper() as style_mapper:
+                    style = style_mapper.find_by_id(style_id)
+                    if style:
+                        implikation.set_style(style)
             implikation.set_style(style)
             result.append(implikation)
 
