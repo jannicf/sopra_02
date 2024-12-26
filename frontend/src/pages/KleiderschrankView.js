@@ -1,63 +1,36 @@
 // KleiderschrankView.js
-import { Component } from 'react';
-import KleiderschrankAPI from '../api/KleiderschrankAPI';
+import React, { Component } from 'react';
+import { Grid, Typography, Button } from '@mui/material';
+import KleidungsstueckCard from '../components/KleidungsstueckCard';
 
 class KleiderschrankView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            personen: [],
-            error: null,
-            loadingInProgress: false
+            kleidungsstuecke: [],
+            showKleidungsstueckForm: false,
+            selectedKleidungsstueck: null,
         };
     }
 
-    componentDidMount() {
-        this.setState({
-            loadingInProgress: true
-        });
-
-        // Erst Personen laden
-        KleiderschrankAPI.getAPI().getPersonen()
-            .then(personen => {
-                this.setState({
-                    personen: personen,
-                    error: null,
-                    loadingInProgress: false
-                });
-
-                // Dann direkt das Update für die erste Person ausführen
-                if (personen.length > 0) {
-                    const updatedPerson = {
-                        id: personen[0].id,
-                        vorname: "Max",
-                        nachname: "Musterstadt",
-                        nickname: "maxi",
-                        google_id: "123"
-                    };
-
-                    return KleiderschrankAPI.getAPI().updatePerson(personen[0].id, updatedPerson);
-                }
-            })
-            .then(updatedPerson => {
-                if (updatedPerson) {
-                    this.setState(prevState => ({
-                        personen: prevState.personen.map(person =>
-                            person.id === updatedPerson.id ? updatedPerson : person
-                        )
-                    }));
-                }
-            })
-            .catch(e => {
-                this.setState({
-                    personen: [],
-                    error: e,
-                    loadingInProgress: false
-                });
-                console.error("Fehler:", e);
-            });
+    render() {
+        return (
+            <div>
+                <Typography variant="h4">Mein Kleiderschrank</Typography>
+                <Grid container spacing={2}>
+                    {this.state.kleidungsstuecke.map((kleidungsstueck) => (
+                        <Grid item xs={12} sm={6} md={4} key={kleidungsstueck.id}>
+                            <KleidungsstueckCard
+                                kleidungsstueck={kleidungsstueck}
+                                onUpdate={this.handleUpdate}
+                                onDelete={this.handleDelete}
+                            />
+                        </Grid>
+                    ))}
+                </Grid>
+            </div>
+        );
     }
-
 }
 
 export default KleiderschrankView;
