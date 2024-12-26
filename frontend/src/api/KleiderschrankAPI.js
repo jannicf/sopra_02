@@ -34,7 +34,7 @@ class KleiderschrankAPI {
 
     // URLs für Person
     #getPersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
-    #addPersonURL = () => `${this.#KleiderschrankServerBaseURL}/person`;
+    #addPersonURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
     #getPersonsURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
     #updatePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #deletePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
@@ -107,8 +107,9 @@ class KleiderschrankAPI {
 
     // Person-bezogene Methoden
     getPerson(id) {
-        return this.#fetchAdvanced(this.#getPersonURL(id))
-            .then(responseJSON => {
+        return this.#fetchAdvanced(this.#getPersonURL(id), {
+            method: 'GET'
+        }).then(responseJSON => {
                 let personBO = PersonBO.fromJSON(responseJSON)[0];
                 return new Promise(function (resolve) {
                     resolve(personBO);
