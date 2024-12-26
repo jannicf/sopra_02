@@ -42,7 +42,7 @@ export default class StyleBO extends BusinessObject {
     if (aKleidungstyp instanceof KleidungstypBO) {
       this.features.push(aKleidungstyp);
       // Auch dem Kleidungstyp den Style hinzufügen, wenn er nicht schon im Array ist
-      if (!aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getId() === this.getId())) {
+      if (!aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getID() === this.getID())) {
         aKleidungstyp.addVerwendung(this);
       }
     }
@@ -55,11 +55,11 @@ export default class StyleBO extends BusinessObject {
    * @param {KleidungstypBO} aKleidungstyp - Der zu entfernende Kleidungstyp
    */
   removeFeature(aKleidungstyp) {
-    const index = this.features.findIndex(f => f.getId() === aKleidungstyp.getId());
+    const index = this.features.findIndex(f => f.getID() === aKleidungstyp.getID());
     if (index > -1) {
       this.features.splice(index, 1);
       // Auch aus der anderen Richtung löschen
-      if (aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getId() === this.getId())) {
+      if (aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getId() === this.getID())) {
         aKleidungstyp.deleteVerwendung(this);
       }
     }
@@ -89,7 +89,7 @@ export default class StyleBO extends BusinessObject {
    * @param {ConstraintBO} aConstraint - Der zu entfernende Constraint
    */
   removeConstraint(aConstraint) {
-    const index = this.constraints.findIndex(c => c.getId() === aConstraint.getId());
+    const index = this.constraints.findIndex(c => c.getID() === aConstraint.getId());
     if (index > -1) {
       this.features.splice(index, 1);
     }
@@ -113,7 +113,7 @@ export default class StyleBO extends BusinessObject {
     if (Array.isArray(styles)) {
       styles.forEach((s) => {
         let style = new StyleBO();
-        style.setId(s.id);
+        style.setID(s.id);
         style.setName(s.name);
 
         // Features (Kleidungstypen) konvertieren wenn vorhanden
@@ -138,7 +138,7 @@ export default class StyleBO extends BusinessObject {
       });
     } else if (styles) {
       let style = new StyleBO();
-      style.setId(styles.id);
+      style.setID(styles.id);
       style.setName(styles.name);
 
       if (styles.features && Array.isArray(styles.features)) {

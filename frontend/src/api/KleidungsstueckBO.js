@@ -76,7 +76,7 @@ export default class KleidungsstueckBO extends BusinessObject {
     if (Array.isArray(clothes)) {
       clothes.forEach((k) => {
         let kleidungsstueck = new KleidungsstueckBO();
-        kleidungsstueck.setId(k.id);
+        kleidungsstueck.setID(k.id);
         kleidungsstueck.setName(k.name);
 
         if (k.typ) {
@@ -88,7 +88,7 @@ export default class KleidungsstueckBO extends BusinessObject {
       })
     } else if (clothes) {
       let kleidungsstueck = new KleidungsstueckBO();
-      kleidungsstueck.setId(clothes.id);
+      kleidungsstueck.setID(clothes.id);
       kleidungsstueck.setName(clothes.name);
 
       if (clothes.typ) {

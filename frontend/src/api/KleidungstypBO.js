@@ -40,7 +40,7 @@ export default class KleidungstypBO extends BusinessObject {
    if (aStyle instanceof StyleBO) {
      this.verwendungen.push(aStyle);
      // Auch dem Style den Kleidungstyp hinzufügen, wenn er nicht schon in der Liste ist
-     if (!aStyle.getFeatures().some(feature => feature.getId() === this.getId())) {
+     if (!aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
        aStyle.addFeature(this);
      }
    }
@@ -53,11 +53,11 @@ export default class KleidungstypBO extends BusinessObject {
   * @param {StyleBO} aStyle - Der zu entfernende Style
   */
  deleteVerwendung(aStyle) {
-   const index = this.verwendungen.findIndex(v => v.getId() === aStyle.getId());
+   const index = this.verwendungen.findIndex(v => v.getID() === aStyle.getId());
    if (index > -1) {
      this.verwendungen.splice(index, 1);
      // Auch aus der anderen Richtung löschen
-     if (aStyle.getFeatures().some(feature => feature.getId() === this.getId())) {
+     if (aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
        aStyle.removeFeature(this);
      }
    }
@@ -81,7 +81,7 @@ export default class KleidungstypBO extends BusinessObject {
    if (Array.isArray(clothingTypes)) {
      clothingTypes.forEach((k) => {
        let kleidungstyp = new KleidungstypBO();
-       kleidungstyp.setId(k.id);
+       kleidungstyp.setID(k.id);
        kleidungstyp.setBezeichnung(k.bezeichnung);
 
        // Verwendungen (Styles) konvertieren wenn vorhanden
@@ -96,7 +96,7 @@ export default class KleidungstypBO extends BusinessObject {
      });
    } else if (clothingTypes) {
      let kleidungstyp = new KleidungstypBO();
-     kleidungstyp.setId(json.id);
+     kleidungstyp.setID(clothingTypes.id);
      kleidungstyp.setBezeichnung(clothingTypes.bezeichnung);
 
      if (clothingTypes.verwendungen && Array.isArray(clothingTypes.verwendungen)) {
