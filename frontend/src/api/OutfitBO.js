@@ -72,43 +72,45 @@ export default class OutfitBO extends BusinessObject {
     let result = [];
 
     if (Array.isArray(outfits)) {
-      outfits.forEach((o) => {
+        outfits.forEach((o) => {
+            let outfit = new OutfitBO();
+            outfit.setID(o.id);
+            if (o.style && o.style.id) {
+                let style = StyleBO.fromJSON([o.style])[0];
+                outfit.setStyle(style);
+            }
+            if (o.bausteine && Array.isArray(o.bausteine)) {
+                o.bausteine.forEach(baustein => {
+                    if (baustein && baustein.id) {
+                        let kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
+                        if (kleidungsstueck) {
+                            outfit.addBaustein(kleidungsstueck);
+                        }
+                    }
+                });
+            }
+            result.push(outfit);
+        });
+    } else if (outfits) {
+        let o = outfits;
         let outfit = new OutfitBO();
         outfit.setID(o.id);
-
-        // Style konvertieren wenn vorhanden
-        if (o.style) {
-          outfit.setStyle(StyleBO.fromJSON([o.style])[0]);
+        if (o.style && o.style.id) {
+            let style = StyleBO.fromJSON([o.style])[0];
+            outfit.setStyle(style);
         }
-
-        // Bausteine (Kleidungsstücke) konvertieren wenn vorhanden
         if (o.bausteine && Array.isArray(o.bausteine)) {
-          o.bausteine.forEach(baustein => {
-            const kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
-            outfit.addBaustein(kleidungsstueck);
-          });
+            o.bausteine.forEach(baustein => {
+                if (baustein && baustein.id) {
+                    let kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
+                    if (kleidungsstueck) {
+                        outfit.addBaustein(kleidungsstueck);
+                    }
+                }
+            });
         }
-
         result.push(outfit);
-      });
-    } else if (outfits) {
-      let outfit = new OutfitBO();
-      outfit.setID(outfits.id);
-
-      if (outfits.style) {
-        outfit.setStyle(StyleBO.fromJSON([outfits.style])[0]);
-      }
-
-      if (outfits.bausteine && Array.isArray(outfits.bausteine)) {
-        outfits.bausteine.forEach(baustein => {
-          const kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
-          outfit.addBaustein(kleidungsstueck);
-        });
-      }
-
-      result.push(outfit);
     }
-
     return result;
-  }
+}
 }
