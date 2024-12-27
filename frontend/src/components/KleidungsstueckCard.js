@@ -61,6 +61,8 @@ class KleidungsstueckCard extends Component {
   }
   render() {
     const { kleidungsstueck, showKleidungsstueckForm, showDeleteDialog } = this.state;
+    // Sicherer Zugriff auf die Typ-Bezeichnung mit Fallback-Parameter für den Fall dass noch nichts zugewiesn wurde
+    const typBezeichnung = kleidungsstueck?.typ?.bezeichnung || 'Kein Typ zugewiesen';
 
     return (
       <div>
@@ -72,7 +74,7 @@ class KleidungsstueckCard extends Component {
                   {kleidungsstueck.name}
                 </Typography>
                 <Typography color='textSecondary'>
-                  Typ: {kleidungsstueck.typ}
+                  Typ: {typBezeichnung}
                 </Typography>
               </Grid>
               <Grid item>
