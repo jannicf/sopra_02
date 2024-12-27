@@ -53,40 +53,41 @@ export default class MutexBO extends BinaryConstraintBO {
     let result = [];
 
     if (Array.isArray(mutexconstraints)) {
-      mutexconstraints.forEach((m) => {
+        mutexconstraints.forEach((m) => {
+            let mutex = new MutexBO();
+            mutex.setID(m.id);
+            if (m.style && m.style.id) {
+                let style = StyleBO.fromJSON([m.style])[0];
+                mutex.setStyle(style);
+            }
+            if (m.bezugsobjekt1 && m.bezugsobjekt1.id) {
+                let bezugsobjekt1 = KleidungstypBO.fromJSON([m.bezugsobjekt1])[0];
+                mutex.setBezugsobjekt1(bezugsobjekt1);
+            }
+            if (m.bezugsobjekt2 && m.bezugsobjekt2.id) {
+                let bezugsobjekt2 = KleidungstypBO.fromJSON([m.bezugsobjekt2])[0];
+                mutex.setBezugsobjekt2(bezugsobjekt2);
+            }
+            result.push(mutex);
+        });
+    } else if (mutexconstraints) {
+        let m = mutexconstraints;
         let mutex = new MutexBO();
         mutex.setID(m.id);
-
-        // Bezugsobjekte setzen wenn vorhanden
-        if (m.bezugsobjekt1) {
-          mutex.setBezugsobjekt1(KleidungstypBO.fromJSON([m.bezugsobjekt1])[0]);
+        if (m.style && m.style.id) {
+            let style = StyleBO.fromJSON([m.style])[0];
+            mutex.setStyle(style);
         }
-        if (m.bezugsobjekt2) {
-          mutex.setBezugsobjekt2(KleidungstypBO.fromJSON([m.bezugsobjekt2])[0]);
+        if (m.bezugsobjekt1 && m.bezugsobjekt1.id) {
+            let bezugsobjekt1 = KleidungstypBO.fromJSON([m.bezugsobjekt1])[0];
+            mutex.setBezugsobjekt1(bezugsobjekt1);
         }
-
-        // Style setzen wenn vorhanden
-        if (m.style) {
-          mutex.setStyle(StyleBO.fromJSON([m.style])[0]);
+        if (m.bezugsobjekt2 && m.bezugsobjekt2.id) {
+            let bezugsobjekt2 = KleidungstypBO.fromJSON([m.bezugsobjekt2])[0];
+            mutex.setBezugsobjekt2(bezugsobjekt2);
         }
         result.push(mutex);
-      });
-    } else if (mutexconstraints) {
-      let mutex = new MutexBO();
-      mutex.setID(mutexconstraints.id);
-
-      if (mutexconstraints.bezugsobjekt1) {
-        mutex.setBezugsobjekt1(KleidungstypBO.fromJSON([mutexconstraints.bezugsobjekt1])[0]);
-      }
-      if (mutexconstraints.bezugsobjekt2) {
-        mutex.setBezugsobjekt2(KleidungstypBO.fromJSON([mutexconstraints.bezugsobjekt2])[0]);
-      }
-
-      if (mutexconstraints.style) {
-        mutex.setStyle(StyleBO.fromJSON([mutexconstraints.style])[0]);
-      }
-      result.push(mutex);
     }
     return result;
-  }
+}
 }

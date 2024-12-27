@@ -1,6 +1,10 @@
+// Alle benötigten Imports im Zusammenhang mit Style importieren
 import BusinessObject from './BusinessObject.js';
 import KleidungstypBO from "./KleidungstypBO.js";
-import ConstraintBO from "./ConstraintBO.js"; // Basis-Klasse für Constraints
+import ConstraintBO from "./ConstraintBO.js";
+import MutexBO from "./MutexBO.js";
+import KardinalitaetBO from "./KardinalitaetBO.js";
+import ImplikationBO from "./ImplikationBO.js";
 
 /**
  * Repräsentiert einen Style im digitalen Kleiderschranksystem.
@@ -42,7 +46,7 @@ export default class StyleBO extends BusinessObject {
     if (aKleidungstyp instanceof KleidungstypBO) {
       this.features.push(aKleidungstyp);
       // Auch dem Kleidungstyp den Style hinzufügen, wenn er nicht schon im Array ist
-      if (!aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getId() === this.getId())) {
+      if (!aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getID() === this.getID())) {
         aKleidungstyp.addVerwendung(this);
       }
     }
@@ -55,11 +59,11 @@ export default class StyleBO extends BusinessObject {
    * @param {KleidungstypBO} aKleidungstyp - Der zu entfernende Kleidungstyp
    */
   removeFeature(aKleidungstyp) {
-    const index = this.features.findIndex(f => f.getId() === aKleidungstyp.getId());
+    const index = this.features.findIndex(f => f.getID() === aKleidungstyp.getID());
     if (index > -1) {
       this.features.splice(index, 1);
       // Auch aus der anderen Richtung löschen
-      if (aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getId() === this.getId())) {
+      if (aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getId() === this.getID())) {
         aKleidungstyp.deleteVerwendung(this);
       }
     }
@@ -89,7 +93,7 @@ export default class StyleBO extends BusinessObject {
    * @param {ConstraintBO} aConstraint - Der zu entfernende Constraint
    */
   removeConstraint(aConstraint) {
-    const index = this.constraints.findIndex(c => c.getId() === aConstraint.getId());
+    const index = this.constraints.findIndex(c => c.getID() === aConstraint.getId());
     if (index > -1) {
       this.features.splice(index, 1);
     }
@@ -111,53 +115,77 @@ export default class StyleBO extends BusinessObject {
     let result = [];
 
     if (Array.isArray(styles)) {
-      styles.forEach((s) => {
-        let style = new StyleBO();
-        style.setId(s.id);
-        style.setName(s.name);
+        styles.forEach((s) => {
+            let style = new StyleBO();
+            style.setID(s.id);
+            style.setName(s.name);
 
-        // Features (Kleidungstypen) konvertieren wenn vorhanden
-        if (s.features && Array.isArray(s.features)) {
-          s.features.forEach(feature => {
-            const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
-            style.addFeature(kleidungstyp);
-          });
+            // Features sicher hinzufügen
+            if (s.features && Array.isArray(s.features)) {
+                s.features.forEach(feature => {
+                    const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
+                    style.addFeature(kleidungstyp);
+                });
+            }
+
+            // Constraints sicher hinzufügen
+            if (s.constraints && Array.isArray(s.constraints)) {
+                s.constraints.forEach(constraint => {
+                    if (constraint) {
+                        // Der Constraint-Typ muss aus den Daten kommen, nicht als type-Feld
+                        if ('min_anzahl' in constraint) {
+                            let kardinalitaet = KardinalitaetBO.fromJSON([constraint])[0];
+                            style.addConstraint(kardinalitaet);
+                        } else if ('bezugsobjekt1_id' in constraint && 'bezugsobjekt2_id' in constraint) {
+                            if (constraint.constructor.name === 'Mutex') {
+                                let mutex = MutexBO.fromJSON([constraint])[0];
+                                style.addConstraint(mutex);
+                            } else {
+                                let implikation = ImplikationBO.fromJSON([constraint])[0];
+                                style.addConstraint(implikation);
+                            }
+                        }
+                    }
+                });
+            }
+
+            result.push(style);
+        });
+    } else if (styles) {
+        // Ein einzelnes Style-Objekt verarbeiten
+        let style = new StyleBO();
+        style.set_id(styles.id);
+        style.set_name(styles.name);
+
+        // Features hinzufügen
+        if (styles.features && Array.isArray(styles.features)) {
+            styles.features.forEach(feature => {
+                const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
+                style.addFeature(kleidungstyp);
+            });
         }
 
-        // Constraints konvertieren wenn vorhanden
-        if (s.constraints && Array.isArray(s.constraints)) {
-          s.constraints.forEach(constraint => {
-            let constraintBO = ConstraintBO.fromJSON([constraint])[0];
-            if (constraintBO) {
-              style.addConstraint(constraintBO);
-            }
-          });
+        // Constraints hinzufügen
+        if (styles.constraints && Array.isArray(styles.constraints)) {
+            styles.constraints.forEach(constraint => {
+                if (constraint) {
+                    if ('min_anzahl' in constraint) {
+                        let kardinalitaet = KardinalitaetBO.fromJSON([constraint])[0];
+                        style.addConstraint(kardinalitaet);
+                    } else if ('bezugsobjekt1_id' in constraint && 'bezugsobjekt2_id' in constraint) {
+                        if (constraint.constructor.name === 'Mutex') {
+                            let mutex = MutexBO.fromJSON([constraint])[0];
+                            style.addConstraint(mutex);
+                        } else {
+                            let implikation = ImplikationBO.fromJSON([constraint])[0];
+                            style.addConstraint(implikation);
+                        }
+                    }
+                }
+            });
         }
 
         result.push(style);
-      });
-    } else if (styles) {
-      let style = new StyleBO();
-      style.setId(styles.id);
-      style.setName(styles.name);
-
-      if (styles.features && Array.isArray(styles.features)) {
-        styles.features.forEach(feature => {
-          const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
-          style.addFeature(kleidungstyp);
-        });
-      }
-
-      if (styles.constraints && Array.isArray(styles.constraints)) {
-        styles.constraints.forEach(constraint => {
-          let constraintBO = ConstraintBO.fromJSON([constraint])[0];
-          if (constraintBO) {
-            style.addConstraint(constraintBO);
-          }
-        });
-      }
-
-      result.push(style);
     }
 
     return result;

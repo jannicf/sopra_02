@@ -26,9 +26,6 @@ class Header extends Component {
             <Typography variant='h3' component='h1' align='center'>
             Mein digitaler Kleiderschrank
             </Typography>
-            <Typography variant='h4' component='h2' align='center'>
-                SoPra 24/25 - Gruppe 02
-            </Typography>
             {
               user ?
                 <Tabs indicatorColor='primary' textColor='primary' centered value={this.state.tabindex} onChange={this.handleTabChange} >

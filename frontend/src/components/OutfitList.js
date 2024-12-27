@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { List, Typography, Button, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import OutfitCard from './OutfitCard.js';
+import OutfitCard from './OutfitCard';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitList extends Component {
