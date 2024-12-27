@@ -7,6 +7,7 @@ import Theme from './Theme';
 import ErrorAlert from './dialogs/ErrorAlert';
 import LoadingProgress from './dialogs/LoadingProgress';
 import Header from './layout/header';
+import Footer from './layout/footer';
 import Login from './pages/Login';
 import KleiderschrankView from './pages/KleiderschrankView';
 import OutfitsView from './pages/OutfitsView';
@@ -140,7 +141,9 @@ class App extends React.Component {
                         } />
 
                         {/* Öffentliche Seite */}
-                        <Route path="/about" element={<About />} />
+                        <Route path="/about" element={
+                            currentUser ? <About /> : <Navigate to="/" />
+                        } />
                     </Routes>
 
                     {authLoading && <LoadingProgress />}
@@ -159,6 +162,7 @@ class App extends React.Component {
                                 onClose={() => this.setState({ authError: null })}
                             />
                         )}
+                    <Footer user={currentUser} />
                 </Container>
             </Router>
         </ThemeProvider>
