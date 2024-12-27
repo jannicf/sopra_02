@@ -105,7 +105,7 @@ class KleiderschrankAPI {
             return res.json();
         })
 
-    // Person-bezogene Methoden
+// Person Methoden
     getPerson(id) {
         return this.#fetchAdvanced(this.#getPersonURL(id), {
             method: 'GET'
@@ -214,7 +214,7 @@ class KleiderschrankAPI {
         })
     }
 
-    // Kleidungsstück-bezogene Methoden
+// Kleidungsstück Methoden
     addKleidungsstueck(kleidungsstueckBO) {
         return this.#fetchAdvanced(this.#addKleidungsstueckURL(), {
             method: 'POST',
@@ -273,7 +273,7 @@ class KleiderschrankAPI {
         })
     }
 
-    // Kleidungstyp-Methoden
+// Kleidungstyp Methoden
     getKleidungstyp(id) {
         return this.#fetchAdvanced(this.#getKleidungstypURL(id))
             .then(responseJSON => {
@@ -331,7 +331,8 @@ class KleiderschrankAPI {
             method: 'DELETE'
         })
     }
-    //Style Methoden
+
+// Style Methoden
     getStyles() {
     // Fetch mit den standardGetOptions
     return this.#fetchAdvanced(this.#getStylesURL(), {
