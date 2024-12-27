@@ -105,7 +105,7 @@ class KleiderschrankAPI {
             return res.json();
         })
 
-    // Person-bezogene Methoden
+// Person Methoden
     getPerson(id) {
         return this.#fetchAdvanced(this.#getPersonURL(id), {
             method: 'GET'
@@ -214,7 +214,7 @@ class KleiderschrankAPI {
         })
     }
 
-    // Kleidungsstück-bezogene Methoden
+// Kleidungsstück Methoden
     addKleidungsstueck(kleidungsstueckBO) {
         return this.#fetchAdvanced(this.#addKleidungsstueckURL(), {
             method: 'POST',
@@ -273,7 +273,7 @@ class KleiderschrankAPI {
         })
     }
 
-    // Kleidungstyp-Methoden
+// Kleidungstyp Methoden
     getKleidungstyp(id) {
         return this.#fetchAdvanced(this.#getKleidungstypURL(id))
             .then(responseJSON => {
@@ -332,37 +332,51 @@ class KleiderschrankAPI {
         })
     }
 
-    // Style-Methoden
+// Style Methoden
     getStyles() {
-        return this.#fetchAdvanced(this.#getStylesURL())
-            .then(responseJSON => {
-                let styleBOs = StyleBO.fromJSON(responseJSON);
-                return new Promise(function (resolve) {
-                    resolve(styleBOs);
-                })
-            })
-    }
+    // Fetch mit den standardGetOptions
+    return this.#fetchAdvanced(this.#getStylesURL(), {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json, text/plain'
+        }
+    }).then(responseJSON => {
+        // Array von Style-Objekten erstellen
+        let styleBOs = StyleBO.fromJSON(responseJSON);
+        return new Promise(function (resolve) {
+            resolve(styleBOs);
+        })
+    })
+}
 
     getStyle(id) {
-        return this.#fetchAdvanced(this.#getStyleURL(id))
-            .then(responseJSON => {
-                let styleBO = StyleBO.fromJSON(responseJSON)[0];
-                return new Promise(function (resolve) {
-                    resolve(styleBO);
-                })
+        // Fetch mit den standardGetOptions
+        return this.#fetchAdvanced(this.#getStyleURL(id), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain'
+            }
+        }).then(responseJSON => {
+            // Ein einzelnes Style-Objekt erstellen
+            let styleBO = StyleBO.fromJSON([responseJSON])[0];
+            return new Promise(function (resolve) {
+                resolve(styleBO);
             })
+        })
     }
 
     addStyle(styleBO) {
+        // POST Request mit den erwarteten Headers
         return this.#fetchAdvanced(this.#addStyleURL(), {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
+                'Content-type': 'application/json'
             },
-            body: JSON.stringify(styleBO)
+            body: JSON.stringify(styleBO.toJSON())
         }).then(responseJSON => {
-            let responseStyleBO = StyleBO.fromJSON(responseJSON)[0];
+            // Neues Style-Objekt aus der Antwort erstellen
+            let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
             return new Promise(function (resolve) {
                 resolve(responseStyleBO);
             })
@@ -370,15 +384,16 @@ class KleiderschrankAPI {
     }
 
     updateStyle(styleBO) {
+        // PUT Request mit den erwarteten Headers
         return this.#fetchAdvanced(this.#updateStyleURL(styleBO.getID()), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
+                'Content-type': 'application/json'
             },
-            body: JSON.stringify(styleBO)
+            body: JSON.stringify(styleBO.toJSON())
         }).then(responseJSON => {
-            let responseStyleBO = StyleBO.fromJSON(responseJSON)[0];
+            let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
             return new Promise(function (resolve) {
                 resolve(responseStyleBO);
             })
