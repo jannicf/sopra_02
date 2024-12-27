@@ -5,17 +5,16 @@ import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class KleidungsstueckForm extends Component {
  constructor(props) {
-   super(props);
-   this.state = {
-     kleidungsstueck: props.kleidungsstueck || {
+    super(props);
+    this.state = {
+     kleidungsstueck: props.kleidungsstueck ? props.kleidungsstueck : {
        name: '',
        typ: null,
-       kleiderschrank_id: props.kleiderschrankId
      },
      kleidungstypen: [],
-     loading: false,
-     error: null
-   };
+     error: null,
+     loading: false
+    };
  }
 
  componentDidMount() {

@@ -1,13 +1,18 @@
-// KleiderschrankView.js
 import React, { Component } from 'react';
-import { Grid, Typography, Card, CardContent } from '@mui/material';
+import { Typography, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import KleidungsstueckList from "../components/KleidungsstueckList";
+import KleidungsstueckForm from "../dialogs/KleidungsstueckForm";
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class KleiderschrankView extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            kleidungsstuecke: []
+            kleidungsstuecke: [],
+            showCreateDialog: false,
+            loadingInProgress: false,
+            error: null
         };
     }
 
@@ -16,39 +21,69 @@ class KleiderschrankView extends Component {
     }
 
     loadKleidungsstuecke = () => {
+         this.setState({
+            loadingInProgress: true,
+            error: null
+        });
+
         KleiderschrankAPI.getAPI().getKleidungsstuecke()
             .then(kleidungsstuecke => {
                 this.setState({
-                    kleidungsstuecke: kleidungsstuecke
+                    kleidungsstuecke: kleidungsstuecke,
+                    loadingInProgress: false
                 });
             })
-            .catch(error => console.log(error));
+            .catch(error => {
+                console.error('Error:', error);
+                this.setState({
+                    error: error.message,
+                    loadingInProgress: false
+                });
+            });
     }
 
+    handleCreateClick = () => {
+        this.setState({ showCreateDialog: true });
+    }
+
+    handleCreateDialogClosed = (newKleidungsstueck) => {
+        if (newKleidungsstueck) {
+            // Neues Kleidungsstück wurde erstellt
+            this.loadKleidungsstuecke(); // Liste neu laden
+        }
+        this.setState({ showCreateDialog: false });
+    }
+
+
     render() {
-        const { kleidungsstuecke } = this.state;
+        const { kleidungsstuecke, showCreateDialog } = this.state;
 
         return (
             <div>
                 <Typography variant="h4" gutterBottom>
                     Mein Kleiderschrank
                 </Typography>
-                <Grid container spacing={2} marginBottom={8}>
-                    {kleidungsstuecke.map((kleidungsstueck) => (
-                        <Grid item xs={4} sm={6} md={4} key={kleidungsstueck.getID()}>
-                            <Card>
-                                <CardContent>
-                                    <Typography variant="h6">
-                                        {kleidungsstueck.getName()}
-                                    </Typography>
-                                    <Typography color="textSecondary">
-                                        Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Nicht zugewiesen'}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
-                        </Grid>
-                    ))}
-                </Grid>
+                {/* Inhalt des Kleiderschranks */}
+                <KleidungsstueckList
+                    kleidungsstuecke={kleidungsstuecke}
+                    onUpdate={this.loadKleidungsstuecke}
+                />
+                {/* Create-Button */}
+                <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={this.handleCreateClick}
+                    sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
+                >
+                    Neues Kleidungsstück
+                </Button>
+                {/* Erstellungsdialog */}
+                <KleidungsstueckForm
+                    show={showCreateDialog}
+                    onClose={this.handleCreateDialogClosed}
+                />
+
             </div>
         );
     }

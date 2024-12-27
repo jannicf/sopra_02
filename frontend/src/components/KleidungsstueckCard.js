@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Typography, Card, CardContent, Grid, Button, ButtonGroup, Dialog } from '@mui/material';
+import { Typography, Card, CardContent, Grid, Button, ButtonGroup } from '@mui/material';
 import KleidungsstueckForm from '../dialogs/KleidungsstueckForm';
 import KleidungsstueckDeleteDialog from '../dialogs/KleidungsstueckDeleteDialog';
 
@@ -10,68 +10,48 @@ import KleidungsstueckDeleteDialog from '../dialogs/KleidungsstueckDeleteDialog'
 class KleidungsstueckCard extends Component {
   constructor(props) {
     super(props);
-    // Initialisierung des States
     this.state = {
-      kleidungsstueck: props.kleidungsstueck,
-      showKleidungsstueckForm: false,
+      showEditDialog: false,
       showDeleteDialog: false,
     };
   }
 
-  /** Behandelt den Klick auf den Bearbeiten-Button */
-  handleEditButtonClicked = (event) => {
-    event.stopPropagation();
-    this.setState({
-      showKleidungsstueckForm: true
-    });
-  }
-   /** Behandelt das Schließen des KleidungsstueckForm-Dialogs */
-  handleKleidungsstueckFormClosed = (kleidungsstueck) => {
-    // Wenn kleidungsstueck nicht null ist, wurde es geändert
-    if (kleidungsstueck) {
-      this.setState({
-        kleidungsstueck: kleidungsstueck,
-        showKleidungsstueckForm: false
-      });
-      // Informiere die Elternkomponente über die Änderung
-      this.props.onUpdate(kleidungsstueck);
-    } else {
-      this.setState({
-        showKleidungsstueckForm: false
-      });
-    }
-  }
-  /** Behandelt den Klick auf den Löschen-Button */
-  handleDeleteButtonClicked = (event) => {
-    event.stopPropagation();
-    this.setState({
-      showDeleteDialog: true
-    });
-  }
-
-  /** Behandelt das Schließen des Lösch-Dialogs */
-  handleDeleteDialogClosed = (kleidungsstueck) => {
-    if (kleidungsstueck) {
-      this.props.onDelete(kleidungsstueck);
+  handleEditClick = () => {
+        this.setState({ showEditDialog: true });
     }
 
-    this.setState({
-      showDeleteDialog: false
-    });
-  }
+    handleDeleteClick = () => {
+        this.setState({ showDeleteDialog: true });
+    }
+
+    handleEditDialogClosed = (editedKleidungsstueck) => {
+        if (editedKleidungsstueck) {
+            this.props.onUpdate();
+        }
+        this.setState({ showEditDialog: false });
+    }
+
+    handleDeleteDialogClosed = (deletedKleidungsstueck) => {
+        if (deletedKleidungsstueck) {
+            this.props.onDelete(deletedKleidungsstueck);
+        }
+        this.setState({ showDeleteDialog: false });
+    }
+
   render() {
-    const { kleidungsstueck, showKleidungsstueckForm, showDeleteDialog } = this.state;
+    const { kleidungsstueck } = this.props;
+    const { showEditDialog, showDeleteDialog } = this.state;
     // Sicherer Zugriff auf die Typ-Bezeichnung mit Fallback-Parameter für den Fall dass noch nichts zugewiesn wurde
     const typBezeichnung = kleidungsstueck?.typ?.bezeichnung || 'Kein Typ zugewiesen';
 
     return (
-      <div>
+
         <Card>
           <CardContent>
             <Grid container spacing={2} alignItems='center'>
               <Grid item>
                 <Typography variant='h6'>
-                  {kleidungsstueck.name}
+                  {kleidungsstueck.getName()}
                 </Typography>
                 <Typography color='textSecondary'>
                   Typ: {typBezeichnung}
@@ -79,31 +59,31 @@ class KleidungsstueckCard extends Component {
               </Grid>
               <Grid item>
                 <ButtonGroup variant='text' size='small'>
-                  <Button color='primary' onClick={this.handleEditButtonClicked}>
-                    bearbeiten
+                  <Button color='primary' onClick={this.handleEditClick}>
+                    Bearbeiten
                   </Button>
-                  <Button color='secondary' onClick={this.handleDeleteButtonClicked}>
-                    löschen
+                  <Button color='secondary' onClick={this.handleDeleteClick}>
+                    Löschen
                   </Button>
                 </ButtonGroup>
               </Grid>
             </Grid>
           </CardContent>
-        </Card>
 
         {/* Die Dialoge werden als separate Komponenten eingebunden */}
         <KleidungsstueckForm
-          show={showKleidungsstueckForm}
+          show={showEditDialog}
           kleidungsstueck={kleidungsstueck}
-          onClose={this.handleKleidungsstueckFormClosed}
+          onClose={this.handleEditDialogClosed}
         />
         <KleidungsstueckDeleteDialog
           show={showDeleteDialog}
           kleidungsstueck={kleidungsstueck}
           onClose={this.handleDeleteDialogClosed}
         />
-      </div>
+        </Card>
     );
+
   }
 }
 
