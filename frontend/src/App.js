@@ -1,7 +1,7 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { ThemeProvider, Container, CssBaseline } from '@mui/material';
+import { Box, ThemeProvider, Container, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Theme from './Theme';
 import ErrorAlert from './dialogs/ErrorAlert';
@@ -116,8 +116,16 @@ class App extends React.Component {
         <ThemeProvider theme={Theme}>
             <CssBaseline />
             <Router>
-                <Container maxWidth='md'>
+                <Container maxWidth='md' sx={{
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}>>
                     <Header user={currentUser} onLogout={this.handleSignOut} />
+                    {/* Anzeige des gesamten Seiteninhalts in der Box */}
+                    <Box sx={{
+                            flex: 1,
+                            paddingBottom: '64px'  // reservierter Platz für Footer
+                    }}>
                     <Routes>
                         {/* Startseite mit Login */}
                         <Route path="/" element={
@@ -145,7 +153,7 @@ class App extends React.Component {
                             currentUser ? <About /> : <Navigate to="/" />
                         } />
                     </Routes>
-
+                    </Box>
                     {authLoading && <LoadingProgress />}
                     {/* Fehlerbehandlung für allgemeine App-Fehler */}
                         {appError && (
