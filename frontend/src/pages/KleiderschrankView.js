@@ -60,7 +60,7 @@ class KleiderschrankView extends Component {
 
         return (
             <div>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4">
                     Mein Kleiderschrank
                 </Typography>
                 {/* Inhalt des Kleiderschranks */}
@@ -74,7 +74,7 @@ class KleiderschrankView extends Component {
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={this.handleCreateClick}
-                    sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
+                    sx={{ position: 'fixed', bottom: '4.5rem', right: '2rem' }}
                 >
                     Neues Kleidungsstück
                 </Button>
