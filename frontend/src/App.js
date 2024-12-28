@@ -119,7 +119,7 @@ class App extends React.Component {
                 <Container maxWidth='md' sx={{
                       display: 'flex',
                       flexDirection: 'column'
-                    }}>>
+                    }}>
                     <Header user={currentUser} onLogout={this.handleSignOut} />
                     {/* Anzeige des gesamten Seiteninhalts in der Box */}
                     <Box sx={{

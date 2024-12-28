@@ -35,9 +35,14 @@ class Footer extends Component {
                     px: 2
                 }}
             >
+                {/* Footer erst Anzeigen wenn User eingeloggt ist */}
+                {
+                user ?
                 <Typography variant='h6' align='center'>
                     SoPra WS 24/25 - Gruppe 02
                 </Typography>
+                : null
+                }
             {
               user ?
                 <Tabs indicatorColor='primary' textColor='primary' value={this.state.tabindex} onChange={this.handleTabChange} >
