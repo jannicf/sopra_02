@@ -10,7 +10,7 @@ import Header from './layout/header';
 import Footer from './layout/footer';
 import Login from './pages/Login';
 import KleiderschrankView from './pages/KleiderschrankView';
-import OutfitsView from './pages/OutfitsView';
+import OutfitView from './pages/OutfitView';
 import StylesView from './pages/StylesView';
 import About from './pages/About';
 import firebaseConfig from './firebase/firebaseconfig';
@@ -133,7 +133,7 @@ class App extends React.Component {
                         } />
 
                         <Route path="/outfits" element={
-                            currentUser ? <OutfitsView /> : <Navigate to="/" />
+                            currentUser ? <OutfitView /> : <Navigate to="/" />
                         } />
 
                         <Route path="/styles" element={
