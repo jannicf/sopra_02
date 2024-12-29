@@ -11,6 +11,7 @@ import Footer from './layout/footer';
 import Login from './pages/Login';
 import KleiderschrankView from './pages/KleiderschrankView';
 import OutfitView from './pages/OutfitView';
+import KleidungsstueckBasiertesOutfitView from './pages/KleidungsstueckBasiertesOutfitView';
 import StylesView from './pages/StylesView';
 import About from './pages/About';
 import firebaseConfig from './firebase/firebaseconfig';
@@ -142,6 +143,10 @@ class App extends React.Component {
 
                         <Route path="/outfits" element={
                             currentUser ? <OutfitView /> : <Navigate to="/" />
+                        } />
+
+                        <Route path="/outfits/create-by-item" element={
+                        currentUser ? <KleidungsstueckBasiertesOutfitView /> : <Navigate to="/" />
                         } />
 
                         <Route path="/styles" element={
