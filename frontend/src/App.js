@@ -13,6 +13,7 @@ import KleiderschrankView from './pages/KleiderschrankView';
 import OutfitView from './pages/OutfitView';
 import KleidungsstueckBasiertesOutfitView from './pages/KleidungsstueckBasiertesOutfitView';
 import StylesView from './pages/StylesView';
+import ProfilView from "./pages/ProfilView";
 import About from './pages/About';
 import firebaseConfig from './firebase/firebaseconfig';
 
@@ -156,6 +157,10 @@ class App extends React.Component {
                         {/* Öffentliche Seite */}
                         <Route path="/about" element={
                             currentUser ? <About /> : <Navigate to="/" />
+                        } />
+
+                        <Route path="/profile" element={
+                            currentUser ? <ProfilView user={currentUser} /> : <Navigate to="/" />
                         } />
                     </Routes>
                     </Box>
