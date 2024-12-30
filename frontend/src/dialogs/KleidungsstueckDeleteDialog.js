@@ -27,7 +27,7 @@ class KleidungsstueckDeleteDialog extends Component {
       // Finde alle Outfits, die das Kleidungsstück enthalten
       const affected = outfits.filter(outfit =>
         outfit.bausteine.some(baustein =>
-          baustein.id === this.props.kleidungsstueck.id
+          baustein === this.props.kleidungsstueck.id
         )
       );
 
