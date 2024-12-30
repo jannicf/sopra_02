@@ -209,6 +209,31 @@ class WardrobeListOperations(Resource):
         wardrobe_list = adm.get_all_kleiderschraenke()
         return wardrobe_list
 
+    @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
+    @wardrobe_ns.expect(kleiderschrank_model)
+    # @secured
+    def post(self):
+        """Anlegen eines neuen Kleiderschrank-Objekts."""
+        adm = KleiderschrankAdministration()
+
+        # Hole zuerst den Eigentümer als vollständiges Objekt
+        eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
+
+        # Modifiziere das payload so dass es ein Eigentümer-Objekt enthält
+        modified_payload = api.payload.copy()
+        modified_payload['eigentuemer'] = eigentuemer
+
+        proposal = Kleiderschrank.from_dict(modified_payload)
+
+        if proposal is not None:
+            kleiderschrank = adm.create_kleiderschrank(
+                proposal.get_name(),
+                proposal.get_eigentuemer()
+            )
+            return kleiderschrank, 201
+        else:
+            return '', 500
+
 
 @wardrobe_ns.route('/wardrobes/<int:id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
