@@ -21,7 +21,11 @@
 .idea/
 mysql/
 postman/
-frontend/
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/build/
+frontend/coverage/
 
 # Python pycache:
 __pycache__/
