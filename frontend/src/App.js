@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import KleiderschrankView from './pages/KleiderschrankView';
 import OutfitView from './pages/OutfitView';
 import KleidungsstueckBasiertesOutfitView from './pages/KleidungsstueckBasiertesOutfitView';
+import StyleBasiertesOutfitView from './pages/StyleBasiertesOutfitView';
 import StylesView from './pages/StylesView';
 import ProfilView from "./pages/ProfilView";
 import About from './pages/About';
@@ -144,6 +145,10 @@ class App extends React.Component {
 
                         <Route path="/outfits" element={
                             currentUser ? <OutfitView /> : <Navigate to="/" />
+                        } />
+
+                        <Route path="/outfits/erstellen-nach-style" element={
+                            currentUser ? <StyleBasiertesOutfitView /> : <Navigate to="/" />
                         } />
 
                         <Route path="/outfits/create-by-item" element={
