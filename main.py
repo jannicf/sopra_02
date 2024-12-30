@@ -100,32 +100,32 @@ class PersonListOperations(Resource):
         personen = adm.get_all_personen()
         return personen
 
-@wardrobe_ns.marshal_with(person, code=200)
-@wardrobe_ns.expect(person)
-# @secured
-def post(self):
-    """Anlegen eines neuen Personen-Objekts."""
+    @wardrobe_ns.marshal_with(person, code=200)
+    @wardrobe_ns.expect(person)
+    # @secured
+    def post(self):
+        """Anlegen eines neuen Personen-Objekts."""
 
 
-    adm = KleiderschrankAdministration()
+        adm = KleiderschrankAdministration()
 
-    proposal = Person.from_dict(api.payload)
+        proposal = Person.from_dict(api.payload)
 
-    if proposal is not None:
-        """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
-        eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
-        wird auch dem Client zurückgegeben. 
-        """
-        p = adm.create_person(
-            proposal.get_first_name(),
-            proposal.get_last_name(),
-            proposal.get_nickname(),
-            proposal.get_google_id(),
-        )
-        return p, 200
-    else:
-        # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
-        return '', 500
+        if proposal is not None:
+            """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
+            eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
+            wird auch dem Client zurückgegeben. 
+            """
+            p = adm.create_person(
+                proposal.get_vorname(),
+                proposal.get_nachname(),
+                proposal.get_nickname(),
+                proposal.get_google_id(),
+            )
+            return p, 200
+        else:
+            # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
+            return '', 500
 
 
 @wardrobe_ns.route('/persons/<int:id>')

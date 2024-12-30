@@ -1,6 +1,6 @@
-// ProfileDropDown.js
 import React, { Component } from 'react';
 import { Button, Menu, MenuItem, Avatar } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 class ProfileDropDown extends Component {
     constructor(props) {
@@ -19,8 +19,13 @@ class ProfileDropDown extends Component {
     };
 
     handleLogout = () => {
-    this.handleClose();  // Menü schließen
-    this.props.onLogout();  // Logout-Funktion aufrufen
+        this.handleClose();
+        this.props.onLogout();
+    };
+
+    handleProfileClick = () => {
+        this.handleClose(); // Menü schließen
+        this.props.navigate('/profile'); // Zur Profilseite navigieren
     };
 
     render() {
@@ -37,7 +42,7 @@ class ProfileDropDown extends Component {
                     open={Boolean(anchorEl)}
                     onClose={this.handleClose}
                 >
-                    <MenuItem onClick={this.handleClose}>Profil</MenuItem>
+                    <MenuItem onClick={this.handleProfileClick}>Profil</MenuItem>
                     <MenuItem onClick={this.handleLogout}>Ausloggen</MenuItem>
                 </Menu>
             </div>
@@ -45,4 +50,10 @@ class ProfileDropDown extends Component {
     }
 }
 
-export default ProfileDropDown;
+// Wrapper für den Router-Hook
+function ProfileDropDownWithRouter(props) {
+    const navigate = useNavigate();
+    return <ProfileDropDown {...props} navigate={navigate} />;
+}
+
+export default ProfileDropDownWithRouter;
