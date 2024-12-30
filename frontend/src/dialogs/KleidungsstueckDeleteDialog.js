@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 
+import KleiderschrankAPI from "../api/KleiderschrankAPI";
+
 class KleidungsstueckDeleteDialog extends Component {
   constructor(props) {
     super(props);
@@ -61,19 +63,19 @@ class KleidungsstueckDeleteDialog extends Component {
           <Button
             color="secondary"
             onClick={async () => {
-              // Erst die betroffenen Outfits löschen
-              for (const outfit of affectedOutfits) {
-                try {
-                  await fetch(`/wardrobe/outfits/${outfit.id}`, {
-                    method: 'DELETE'
-                  });
-                } catch (error) {
-                  console.error(`Fehler beim Löschen des Outfits ${outfit.id}:`, error);
+              try {
+                // Erst die betroffenen Outfits löschen
+                for (const outfit of affectedOutfits) {
+                  await KleiderschrankAPI.getAPI().deleteOutfit(outfit.id);
                 }
-              }
 
-              // Dann das Kleidungsstück löschen
-              onClose(kleidungsstueck);
+                // Dann das Kleidungsstück löschen
+                await KleiderschrankAPI.getAPI().deleteKleidungsstueck(kleidungsstueck.getID());
+
+                onClose(kleidungsstueck);
+              } catch (error) {
+                console.error("Fehler beim Löschen:", error);
+              }
             }}
           >
             Löschen

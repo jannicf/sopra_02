@@ -1,0 +1,273 @@
+import React, { Component } from 'react';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Typography,
+    Grid,
+    Box,
+    Card,
+    CardContent,
+    Checkbox,
+    Paper
+} from '@mui/material';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
+
+class KleidungsstueckBasiertesOutfitDialog extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            ausgewaehlteKleidungsstuecke: [],
+            passendeKleidungsstuecke: [],
+            loading: false,
+            error: null
+        };
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.basisKleidungsstueck !== prevProps.basisKleidungsstueck && this.props.basisKleidungsstueck) {
+            this.updatePassendeKleidungsstuecke();
+        }
+    }
+
+    updatePassendeKleidungsstuecke = async () => {
+    const { basisKleidungsstueck } = this.props;
+
+    try {
+        // Hole die Style ID vom Basis-Kleidungsstück
+        const styleId = basisKleidungsstueck.getTyp()?.getVerwendungen()?.[0]?.getID();
+
+        if (!styleId) {
+            this.setState({
+                passendeKleidungsstuecke: [],
+                error: "Dem Basis-Kleidungsstück ist kein Style zugeordnet."
+            });
+            return;
+        }
+
+        // Nutze die existierende Backend-Methode
+        const vervollstaendigungen = await KleiderschrankAPI.getAPI()
+            .getPossibleOutfitCompletions(basisKleidungsstueck.getID(), styleId);
+
+        this.setState({
+            passendeKleidungsstuecke: vervollstaendigungen || [],
+            error: null
+        });
+
+    } catch (error) {
+        console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
+        this.setState({
+            passendeKleidungsstuecke: [],
+            error: "Fehler beim Laden der passenden Kleidungsstücke"
+        });
+    }
+};
+
+    handleKleidungsstueckToggle = (kleidungsstueck) => {
+        const { ausgewaehlteKleidungsstuecke } = this.state;
+        const currentIndex = ausgewaehlteKleidungsstuecke.findIndex(
+            item => item.getID() === kleidungsstueck.getID()
+        );
+        const newAusgewaehlte = [...ausgewaehlteKleidungsstuecke];
+
+        if (currentIndex === -1) {
+            newAusgewaehlte.push(kleidungsstueck);
+        } else {
+            newAusgewaehlte.splice(currentIndex, 1);
+        }
+
+        this.setState({ ausgewaehlteKleidungsstuecke: newAusgewaehlte });
+    };
+
+    handleOutfitErstellen = async () => {
+        try {
+            const { basisKleidungsstueck } = this.props;
+            const { ausgewaehlteKleidungsstuecke } = this.state;
+
+            await KleiderschrankAPI.getAPI().createOutfitFromBaseItem(
+                basisKleidungsstueck.getID(),
+                ausgewaehlteKleidungsstuecke.map(k => k.getID())
+            );
+
+            this.setState({ ausgewaehlteKleidungsstuecke: [] });
+            alert('Outfit wurde erfolgreich erstellt!');
+            this.props.onClose();
+
+        } catch (error) {
+            console.error('Fehler beim Erstellen des Outfits:', error);
+            this.setState({ error: error.message });
+            alert('Fehler beim Erstellen des Outfits: ' + error.message);
+        }
+    };
+
+    handleClose = () => {
+        this.setState({ ausgewaehlteKleidungsstuecke: [] });
+        this.props.onClose();
+    };
+
+    render() {
+        const { show, basisKleidungsstueck } = this.props;
+        const { ausgewaehlteKleidungsstuecke, passendeKleidungsstuecke } = this.state;
+
+        return (
+            <Dialog
+                open={show}
+                onClose={this.handleClose}
+                maxWidth="lg"
+                fullWidth
+            >
+                <DialogTitle>
+                    <Typography variant="h6">Wähle passende Kleidungsstücke aus</Typography>
+                </DialogTitle>
+                <DialogContent>
+                    {/* Basis-Kleidungsstück Anzeige */}
+                    {basisKleidungsstueck && (
+                        <Paper
+                            elevation={3}
+                            sx={{
+                                p: 2,
+                                mb: 3,
+                                backgroundColor: 'primary.light',
+                                color: 'primary.contrastText'
+                            }}
+                        >
+                            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                                Ausgewähltes Basis-Kleidungsstück:
+                            </Typography>
+                            <Box sx={{ backgroundColor: 'white', p: 2, borderRadius: 1 }}>
+                                <Typography variant="h6" color="primary">
+                                    {basisKleidungsstueck.getName()}
+                                </Typography>
+                                <Typography color="textSecondary">
+                                    Typ: {basisKleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
+                                </Typography>
+                                <Typography color="textSecondary">
+                                    Style: {basisKleidungsstueck.getTyp()?.getVerwendungen()?.map(style => style.getName()).join(', ') || 'Kein Style'}
+                                </Typography>
+                            </Box>
+                        </Paper>
+                    )}
+
+                    <Grid container spacing={2}>
+                        {/* Linke Spalte: Verfügbare Kleidungsstücke */}
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                                Verfügbare Kleidungsstücke
+                            </Typography>
+                            <Box sx={{ maxHeight: '60vh', overflow: 'auto' }}>
+                                <Grid container spacing={1}>
+                                    {passendeKleidungsstuecke.map((kleidungsstueck) => (
+                                        <Grid item xs={12} key={kleidungsstueck.getID()}>
+                                            <Card
+                                                onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
+                                                sx={{
+                                                    cursor: 'pointer',
+                                                    backgroundColor: ausgewaehlteKleidungsstuecke.some(
+                                                        item => item.getID() === kleidungsstueck.getID()
+                                                    ) ? 'action.selected' : 'background.paper',
+                                                    '&:hover': {
+                                                        boxShadow: 2,
+                                                        transform: 'scale(1.01)',
+                                                        transition: 'all 0.2s'
+                                                    }
+                                                }}
+                                            >
+                                                <CardContent>
+                                                    <Box display="flex" alignItems="center">
+                                                        <Checkbox
+                                                            checked={ausgewaehlteKleidungsstuecke.some(
+                                                                item => item.getID() === kleidungsstueck.getID()
+                                                            )}
+                                                        />
+                                                        <Box>
+                                                            <Typography variant="h6">
+                                                                {kleidungsstueck.getName()}
+                                                            </Typography>
+                                                            <Typography color="textSecondary">
+                                                                Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
+                                                            </Typography>
+                                                            <Typography color="textSecondary">
+                                                                Style: {kleidungsstueck.getTyp()?.getVerwendungen()?.map(style => style.getName()).join(', ') || 'Kein Style'}
+                                                            </Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </CardContent>
+                                            </Card>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </Box>
+                        </Grid>
+
+                        {/* Rechte Spalte: Ausgewählte Kleidungsstücke */}
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                                Ausgewählte Kleidungsstücke ({ausgewaehlteKleidungsstuecke.length})
+                            </Typography>
+                            <Box sx={{
+                                maxHeight: '60vh',
+                                overflow: 'auto',
+                                backgroundColor: 'grey.100',
+                                borderRadius: 1,
+                                p: 2
+                            }}>
+                                {ausgewaehlteKleidungsstuecke.length === 0 ? (
+                                    <Typography color="textSecondary" align="center" sx={{ py: 4 }}>
+                                        Noch keine Kleidungsstücke ausgewählt
+                                    </Typography>
+                                ) : (
+                                    <Grid container spacing={1}>
+                                        {ausgewaehlteKleidungsstuecke.map((kleidungsstueck) => (
+                                            <Grid item xs={12} key={kleidungsstueck.getID()}>
+                                                <Card>
+                                                    <CardContent>
+                                                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                                                            <Box>
+                                                                <Typography variant="h6">
+                                                                    {kleidungsstueck.getName()}
+                                                                </Typography>
+                                                                <Typography color="textSecondary">
+                                                                    Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
+                                                                </Typography>
+                                                                <Typography color="textSecondary">
+                                                                    Style: {kleidungsstueck.getTyp()?.getVerwendungen()?.map(style => style.getName()).join(', ') || 'Kein Style'}
+                                                                </Typography>
+                                                            </Box>
+                                                            <Button
+                                                                color="error"
+                                                                onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
+                                                            >
+                                                                Entfernen
+                                                            </Button>
+                                                        </Box>
+                                                    </CardContent>
+                                                </Card>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                )}
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={this.handleClose}>
+                        Abbrechen
+                    </Button>
+                    <Button
+                        onClick={this.handleOutfitErstellen}
+                        variant="contained"
+                        color="primary"
+                        disabled={ausgewaehlteKleidungsstuecke.length === 0}
+                    >
+                        Outfit erstellen ({ausgewaehlteKleidungsstuecke.length} Teile)
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        );
+    }
+}
+
+export default KleidungsstueckBasiertesOutfitDialog;
