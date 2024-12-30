@@ -33,13 +33,15 @@ class OutfitView extends Component {
      * Lädt alle vorhandenen Outfits über die API
      */
     loadOutfits = async () => {
-        try {
-            const outfits = await KleiderschrankAPI.getAPI().getOutfits();
-            this.setState({ outfits });
-        } catch (error) {
-            this.setState({ error: error.message });
-        }
-    };
+    try {
+        const outfits = await KleiderschrankAPI.getAPI().getOutfits();
+        // Nur Outfits mit gültigem Style filtern
+        const validOutfits = outfits.filter(outfit => outfit && outfit.getStyle());
+        this.setState({ outfits: validOutfits });
+    } catch (error) {
+        this.setState({ error: error.message });
+    }
+};
 
     /**
      * Lädt alle verfügbaren Kleidungsstücke über die API

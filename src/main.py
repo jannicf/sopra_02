@@ -42,7 +42,7 @@ person = api.inherit('Person', bo, {
 
 kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
     'name': fields.String(attribute='_Kleiderschrank__name', description='Name des Kleiderschranks'),
-    'eigentuemer_id': fields.Integer(attribute=lambda x: x.get_eigentuemer().get_id() if x.get_eigentuemer() else None, description='ID des Eigentümers')
+    'eigentuemer_id': fields.Integer(description='ID des Eigentümers')
 })
 
 kleidungstyp = api.inherit('Kleidungstyp', bo, {
@@ -209,6 +209,41 @@ class WardrobeListOperations(Resource):
         wardrobe_list = adm.get_all_kleiderschraenke()
         return wardrobe_list
 
+    @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
+    @wardrobe_ns.expect(kleiderschrank_model)
+    # @secured
+    @wardrobe_ns.route('/wardrobes')
+    class WardrobeListOperations(Resource):
+        @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
+        @wardrobe_ns.expect(kleiderschrank_model)
+        # @secured
+        def post(self):
+            try:
+                print("Empfangene Payload:", api.payload)  # Debug
+
+                adm = KleiderschrankAdministration()
+
+                # Erstelle ein neues Kleiderschrank-Objekt
+                kleiderschrank = Kleiderschrank()
+                kleiderschrank.set_name(api.payload['name'])
+
+                # Hole den Eigentümer und setze ihn
+                if 'eigentuemer_id' in api.payload:
+                    eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
+                    kleiderschrank.set_eigentuemer(eigentuemer)
+
+                # Erstelle den Kleiderschrank
+                result = adm.create_kleiderschrank(
+                    kleiderschrank.get_name(),
+                    kleiderschrank.get_eigentuemer()
+                )
+
+                return result, 201
+
+            except Exception as e:
+                print(f"Fehler beim Erstellen des Kleiderschranks: {str(e)}")
+                return {'message': str(e)}, 500
+
 
 @wardrobe_ns.route('/wardrobes/<int:id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -301,7 +336,7 @@ class ClothesListOperations(Resource):
         adm = KleiderschrankAdministration()
 
         # Hole zuerst den Typ als vollständiges Objekt
-        typ = adm.get_kleidungstyp_by_id(api.payload['typ'])
+        typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
         # Modifiziere das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()

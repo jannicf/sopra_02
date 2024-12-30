@@ -252,25 +252,27 @@ class KleiderschrankAPI {
     }
 
     updateKleidungsstueck(kleidungsstueck) {
-        return this.#fetchAdvanced(this.#updateKleidungsstueckURL(kleidungsstueck.id), {
+    const requestBody = {
+        id: kleidungsstueck.getID(),
+        name: kleidungsstueck.getName(),
+        typ_id: kleidungsstueck.getTyp().getID(),
+        kleiderschrank_id: kleidungsstueck.getKleiderschrankId()
+    };
+
+    return this.#fetchAdvanced(this.#updateKleidungsstueckURL(kleidungsstueck.getID()), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify({
-                id: kleidungsstueck.id,
-                name: kleidungsstueck.name,
-                typ: kleidungsstueck.typ_id,
-                kleiderschrank_id: kleidungsstueck.kleiderschrank_id
-            })
+            body: JSON.stringify(requestBody)
         }).then(responseJSON => {
             let responseKleidungsstueckBO = KleidungsstueckBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
                 resolve(responseKleidungsstueckBO);
             })
         })
-    }
+}
 
     deleteKleidungsstueck(id) {
         return this.#fetchAdvanced(this.#deleteKleidungsstueckURL(id), {
@@ -371,39 +373,36 @@ class KleiderschrankAPI {
     }
 
     addStyle(styleBO) {
-        // POST Request mit den erwarteten Headers
-        return this.#fetchAdvanced(this.#addStyleURL(), {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify(styleBO.toJSON())
-        }).then(responseJSON => {
-            // Neues Style-Objekt aus der Antwort erstellen
-            let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
-            return new Promise(function (resolve) {
-                resolve(responseStyleBO);
-            })
+    return this.#fetchAdvanced(this.#addStyleURL(), {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify(styleBO)  // Direktes Stringifizieren wie bei anderen Methoden
+    }).then(responseJSON => {
+        let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
+        return new Promise(function (resolve) {
+            resolve(responseStyleBO);
         })
-    }
+    })
+}
 
     updateStyle(styleBO) {
-        // PUT Request mit den erwarteten Headers
-        return this.#fetchAdvanced(this.#updateStyleURL(styleBO.getID()), {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify(styleBO.toJSON())
-        }).then(responseJSON => {
-            let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
-            return new Promise(function (resolve) {
-                resolve(responseStyleBO);
-            })
+    return this.#fetchAdvanced(this.#updateStyleURL(styleBO.getID()), {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify(styleBO)  // Hier auch das direkte Stringifizieren
+    }).then(responseJSON => {
+        let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
+        return new Promise(function (resolve) {
+            resolve(responseStyleBO);
         })
-    }
+    })
+}
 
     deleteStyle(id) {
         return this.#fetchAdvanced(this.#deleteStyleURL(id), {

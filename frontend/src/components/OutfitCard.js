@@ -45,6 +45,18 @@ class OutfitCard extends Component {
     render() {
         const { outfit, expanded } = this.state;
 
+        if (!outfit || !outfit.getStyle()) {
+            return (
+                <Card className="mb-4">
+                    <CardContent>
+                        <Typography color="error">
+                            Fehlerhaftes Outfit (kein Style zugewiesen)
+                        </Typography>
+                    </CardContent>
+                </Card>
+            );
+        }
+
         return (
             <Card className="mb-4">
                 <CardContent>
@@ -53,7 +65,7 @@ class OutfitCard extends Component {
                         <div>
                             {/* Style-Name des Outfits */}
                             <Typography variant="h6">
-                                {outfit.getStyle().getName()}
+                                {outfit.getStyle() ? outfit.getStyle().getName() : 'Kein Style zugewiesen'}
                             </Typography>
                             {/* Anzahl der Kleidungsstücke im Outfit */}
                             <Typography color="textSecondary">

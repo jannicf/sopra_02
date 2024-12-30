@@ -12,12 +12,22 @@ class KleiderschrankView extends Component {
             kleidungsstuecke: [],
             showCreateDialog: false,
             loadingInProgress: false,
-            error: null
+            error: null,
+            kleiderschrankId: null
         };
     }
 
     componentDidMount() {
         this.loadKleidungsstuecke();
+        // Den Kleiderschrank des eingeloggten Users laden
+        KleiderschrankAPI.getAPI().getKleiderschraenke()
+            .then(kleiderschraenke => {
+                if (kleiderschraenke && kleiderschraenke.length > 0) {
+                    this.setState({
+                        kleiderschrankId: kleiderschraenke[0].getID()
+                    });
+                }
+            });
     }
 
     loadKleidungsstuecke = () => {
@@ -82,6 +92,7 @@ class KleiderschrankView extends Component {
                 <KleidungsstueckForm
                     show={showCreateDialog}
                     onClose={this.handleCreateDialogClosed}
+                    kleiderschrankId={this.state.kleiderschrankId}
                 />
 
             </div>
