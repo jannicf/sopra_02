@@ -42,7 +42,7 @@ person = api.inherit('Person', bo, {
 
 kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
     'name': fields.String(attribute='_Kleiderschrank__name', description='Name des Kleiderschranks'),
-    'eigentuemer_id': fields.Integer(attribute=lambda x: x.get_eigentuemer().get_id() if x.get_eigentuemer() else None, description='ID des Eigentümers')
+    'eigentuemer_id': fields.Integer(description='ID des Eigentümers')
 })
 
 kleidungstyp = api.inherit('Kleidungstyp', bo, {
@@ -212,27 +212,37 @@ class WardrobeListOperations(Resource):
     @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
     @wardrobe_ns.expect(kleiderschrank_model)
     # @secured
-    def post(self):
-        """Anlegen eines neuen Kleiderschrank-Objekts."""
-        adm = KleiderschrankAdministration()
+    @wardrobe_ns.route('/wardrobes')
+    class WardrobeListOperations(Resource):
+        @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
+        @wardrobe_ns.expect(kleiderschrank_model)
+        # @secured
+        def post(self):
+            try:
+                print("Empfangene Payload:", api.payload)  # Debug
 
-        # Hole zuerst den Eigentümer als vollständiges Objekt
-        eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
+                adm = KleiderschrankAdministration()
 
-        # Modifiziere das payload so dass es ein Eigentümer-Objekt enthält
-        modified_payload = api.payload.copy()
-        modified_payload['eigentuemer'] = eigentuemer
+                # Erstelle ein neues Kleiderschrank-Objekt
+                kleiderschrank = Kleiderschrank()
+                kleiderschrank.set_name(api.payload['name'])
 
-        proposal = Kleiderschrank.from_dict(modified_payload)
+                # Hole den Eigentümer und setze ihn
+                if 'eigentuemer_id' in api.payload:
+                    eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
+                    kleiderschrank.set_eigentuemer(eigentuemer)
 
-        if proposal is not None:
-            kleiderschrank = adm.create_kleiderschrank(
-                proposal.get_name(),
-                proposal.get_eigentuemer()
-            )
-            return kleiderschrank, 201
-        else:
-            return '', 500
+                # Erstelle den Kleiderschrank
+                result = adm.create_kleiderschrank(
+                    kleiderschrank.get_name(),
+                    kleiderschrank.get_eigentuemer()
+                )
+
+                return result, 201
+
+            except Exception as e:
+                print(f"Fehler beim Erstellen des Kleiderschranks: {str(e)}")
+                return {'message': str(e)}, 500
 
 
 @wardrobe_ns.route('/wardrobes/<int:id>')

@@ -62,46 +62,61 @@ class PersonForm extends Component {
     };
 
     handleSubmit = async () => {
-        if (!this.validateForm()) {
-            return;
-        }
+    if (!this.validateForm()) {
+        return;
+    }
 
-        try {
-            this.setState({ loading: true });
-            const api = KleiderschrankAPI.getAPI();
+    try {
+        this.setState({ loading: true });
+        const api = KleiderschrankAPI.getAPI();
 
-            // 1. Person erstellen mit Google ID aus den Firebase-Credentials
-            const personData = {
-                id: 0,
-                vorname: this.state.formData.vorname,
-                nachname: this.state.formData.nachname,
-                nickname: this.state.formData.nickname,
-                google_id: this.props.user?.uid // Google ID aus Firebase
-            };
+        // 1. Person erstellen
+        const personData = {
+            id: 0,
+            vorname: this.state.formData.vorname,
+            nachname: this.state.formData.nachname,
+            nickname: this.state.formData.nickname,
+            google_id: this.props.user?.uid
+        };
 
-            const createdPerson = await api.addPerson(personData);
+        console.log('Sende Personen-Daten:', personData); // NEUES LOG
+        const createdPerson = await api.addPerson(personData);
+        console.log('Erstellte Person:', createdPerson); // NEUES LOG
 
-            // 2. Kleiderschrank erstellen und der Person zuweisen
-            const kleiderschrankData = {
-                name: this.state.formData.kleiderschrankName,
-                eigentuemer_id: createdPerson.getID()
-            };
+        // 2. Kleiderschrank erstellen
+        const kleiderschrankData = {
+            id: 0,  // HINZUGEFÜGT
+            name: this.state.formData.kleiderschrankName,
+            eigentuemer_id: createdPerson.getID()
+        };
 
-            const createdKleiderschrank = await api.addKleiderschrank(kleiderschrankData);
+        console.log('Sende Kleiderschrank-Daten:', kleiderschrankData); // NEUES LOG
+        const createdKleiderschrank = await api.addKleiderschrank(kleiderschrankData);
+        console.log('Erstellter Kleiderschrank:', createdKleiderschrank); // NEUES LOG
 
-            // 3. Person aktualisieren mit dem zugewiesenen Kleiderschrank
-            createdPerson.setKleiderschrank(createdKleiderschrank);
-            await api.updatePerson(createdPerson);
+        // 3. Person aktualisieren
+        createdPerson.setKleiderschrank(createdKleiderschrank);
+        console.log('Aktualisiere Person mit Kleiderschrank'); // NEUES LOG
+        await api.updatePerson(createdPerson);
 
+        this.setState({ loading: false });
+        if (this.props.onClose) {
             this.props.onClose(createdPerson);
-
-        } catch (error) {
-            this.setState({
-                error: 'Ein Fehler ist aufgetreten: ' + error.message,
-                loading: false
-            });
         }
-    };
+
+        // Optional: Lade die Daten neu
+        if (this.props.onSuccess) {
+            this.props.onSuccess();
+        }
+
+    } catch (error) {
+        console.error('Fehler beim Erstellen:', error);
+        this.setState({
+            error: 'Ein Fehler ist aufgetreten: ' + error.message,
+            loading: false
+        });
+    }
+};
 
     render() {
         const { show, onClose } = this.props;

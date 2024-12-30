@@ -46,11 +46,17 @@ class PersonView extends Component {
         this.setState({ showEditDialog: true });
     }
 
-    handleCreateDialogClosed = async (newPerson) => {
-        if (newPerson) {
-            await this.loadPerson();
-        }
+    handleCreateDialogClosed = async (createdPerson) => {
+    if (createdPerson) {
+        console.log('Person wurde erstellt:', createdPerson);
+        await this.loadPerson();  // Daten neu laden
+        this.setState({
+            showCreateDialog: false,
+            error: null
+        });
+    } else {
         this.setState({ showCreateDialog: false });
+        }
     }
 
     handleEditDialogClosed = async (editedPerson) => {
