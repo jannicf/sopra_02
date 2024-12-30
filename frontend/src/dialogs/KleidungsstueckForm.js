@@ -7,17 +7,31 @@ import KleidungsstueckBO from "../api/KleidungsstueckBO";
 class KleidungsstueckForm extends Component {
  constructor(props) {
     super(props);
-        this.state = {
-            kleidungsstueck: props.kleidungsstueck ? props.kleidungsstueck : new KleidungsstueckBO(),
-            kleidungstypen: [],
-            selectedTypId: props.kleidungsstueck?.getTyp()?.getID() || '',  // Ausgewählte Typ-ID speichern
-            error: null,
-            loading: false
-        };
+    const initialKleidungsstueck = props.kleidungsstueck ? props.kleidungsstueck : new KleidungsstueckBO();
+    // Wenn es ein neues Kleidungsstück ist, setze die kleiderschrank_id aus den props
+    if (!props.kleidungsstueck) {
+        initialKleidungsstueck.setKleiderschrankId(props.kleiderschrankId);
+    }
+
+    this.state = {
+        kleidungsstueck: initialKleidungsstueck,
+        kleidungstypen: [],
+        error: null,
+        loading: false
+    };
  }
 
  componentDidMount() {
    this.loadKleidungstypen();
+ }
+
+ componentDidUpdate(prevProps) {
+    if (this.props.kleiderschrankId !== prevProps.kleiderschrankId && this.props.kleiderschrankId) {
+        // Wenn eine neue kleiderschrankId kommt, aktualisiere das Kleidungsstück
+        const kleidungsstueck = this.state.kleidungsstueck;
+        kleidungsstueck.setKleiderschrankId(this.props.kleiderschrankId);
+        this.setState({ kleidungsstueck });
+    }
  }
 
  loadKleidungstypen = async () => {
@@ -53,17 +67,17 @@ class KleidungsstueckForm extends Component {
  handleSubmit = async () => {
     const { kleidungsstueck } = this.state;
     try {
-        this.setState({ loading: true });
-
         // Objekt vorbereiten, das die nötigen Daten enthält
         const requestData = {
             id: kleidungsstueck.getID(),
             name: kleidungsstueck.getName(),
             typ_id: kleidungsstueck.getTyp()?.getID(),
-            kleiderschrank_id: kleidungsstueck.getKleiderschrankId()
+            // Bei neuem Kleidungsstück die ID aus den props
+            // Bei bestehendem Kleidungsstück die ID aus dem Kleidungsstück-Objekt
+            kleiderschrank_id: this.props.kleiderschrankId || kleidungsstueck.getKleiderschrankId()
         };
 
-        if (kleidungsstueck.getID()) {
+        if (requestData.id) {
             try {
                 await KleiderschrankAPI.getAPI().updateKleidungsstueck(requestData);
                 // Der Request war erfolgreich
