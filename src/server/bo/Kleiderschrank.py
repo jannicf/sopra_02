@@ -1,5 +1,5 @@
-from src.server.bo import BusinessObject as bo
-# Person und Kleidungsstueck importieren um diese Objekte speichern zu können
+from server.bo import BusinessObject as bo
+
 
 class Kleiderschrank(bo.BusinessObject):
 
@@ -23,7 +23,7 @@ class Kleiderschrank(bo.BusinessObject):
 
     def set_eigentuemer(self, eigentuemer):
         """Setzen des Eigentümers"""
-        from src.server.bo.Person import Person  # Lokaler Import
+        from server.bo.Person import Person  # Lokaler Import
         if isinstance(eigentuemer, Person):
             self.__eigentuemer = eigentuemer
 
@@ -33,7 +33,7 @@ class Kleiderschrank(bo.BusinessObject):
 
     def add_kstueck(self, kleidungsstueck):
         """Kleidungsstück in den Kleiderschrank hinzufügen"""
-        from src.server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
+        from server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
         if isinstance(kleidungsstueck, Kleidungsstueck):
             self.__inhalt.append(kleidungsstueck)
 
@@ -49,8 +49,8 @@ class Kleiderschrank(bo.BusinessObject):
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in einen Kleiderschrank()."""
-        from src.server.bo.Person import Person  # Lokaler Import
-        from src.server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
+        from server.bo.Person import Person  # Lokaler Import
+        from server.bo.Kleidungsstueck import Kleidungsstueck  # Lokaler Import
         obj = Kleiderschrank()
         obj.set_id(dictionary["id"])  # Teil von BusinessObject
         obj.set_name(dictionary["name"])

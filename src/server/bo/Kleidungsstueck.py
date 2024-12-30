@@ -1,5 +1,5 @@
-from src.server.bo import BusinessObject as bo
-from src.server.bo.Kleidungstyp import Kleidungstyp
+from server.bo import BusinessObject as bo
+from server.bo.Kleidungstyp import Kleidungstyp
 #Kleidungstyp importieren um Kleidungstyp-Objekte speichern zu können
 
 

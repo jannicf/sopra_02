@@ -1,5 +1,5 @@
-from src.server.bo import BusinessObject as bo
-from src.server.bo.Style import Style   #Style importieren um Style-Objekte speichern zu können
+from server.bo import BusinessObject as bo
+from server.bo.Style import Style   #Style importieren um Style-Objekte speichern zu können
 
 
 class Kleidungstyp(bo.BusinessObject):

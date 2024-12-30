@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from src.server.bo.BusinessObject import BusinessObject
+from server.bo.BusinessObject import BusinessObject
 
 class Constraint(BusinessObject):
 

@@ -1,5 +1,5 @@
-from src.server.bo import BusinessObject as bo
-from src.server.bo.Constraint import Constraint
+from server.bo import BusinessObject as bo
+from server.bo.Constraint import Constraint
 
 
 class Style(bo.BusinessObject):
@@ -20,7 +20,7 @@ class Style(bo.BusinessObject):
 
     def add_feature(self, kleidungstyp):
         """Fügt einen Kleidungstyp zum Style hinzu"""
-        from src.server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
+        from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
         self.__features.append(kleidungstyp)
         # auch dem Kleidungstyp den Style hinzufügen,
         # wenn er nicht schon in der Liste ist
@@ -29,7 +29,7 @@ class Style(bo.BusinessObject):
 
     def remove_feature(self, kleidungstyp):
         """Entfernt einen Kleidungstyp aus dem Style"""
-        from src.server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
+        from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
         if kleidungstyp in self.__features:
             self.__features.remove(kleidungstyp)
             # auch aus der anderen Richtung löschen
@@ -43,9 +43,9 @@ class Style(bo.BusinessObject):
     def add_constraint(self, constraint):
         """Fügt einen Constraint zum Style hinzu, sofern er ein Objekt von
            instantiierbaren Constraint-Kindklassen ist"""
-        from src.server.bo.Kardinalitaet import Kardinalitaet
-        from src.server.bo.Mutex import Mutex
-        from src.server.bo.Implikation import Implikation
+        from server.bo.Kardinalitaet import Kardinalitaet
+        from server.bo.Mutex import Mutex
+        from server.bo.Implikation import Implikation
         if isinstance(constraint, (Kardinalitaet, Mutex, Implikation)):
             if constraint not in self.__constraints:
                 self.__constraints.append(constraint)
@@ -72,10 +72,10 @@ class Style(bo.BusinessObject):
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in einen Style()."""
-        from src.server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
-        from src.server.bo.Kardinalitaet import Kardinalitaet
-        from src.server.bo.Mutex import Mutex
-        from src.server.bo.Implikation import Implikation
+        from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
+        from server.bo.Kardinalitaet import Kardinalitaet
+        from server.bo.Mutex import Mutex
+        from server.bo.Implikation import Implikation
 
         obj = Style()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject!

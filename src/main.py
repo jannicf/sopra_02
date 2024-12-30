@@ -2,21 +2,21 @@ from flask import Flask
 from flask_restx import Api, fields, Resource
 from flask_cors import CORS
 
-from src.server.KleiderschrankAdministration import KleiderschrankAdministration
-from src.server.bo.BinaryConstraint import BinaryConstraint
-from src.server.bo.Constraint import Constraint
-from src.server.bo.Implikation import Implikation
-from src.server.bo.Kardinalitaet import Kardinalitaet
-from src.server.bo.Kleiderschrank import Kleiderschrank
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
-from src.server.bo.Kleidungstyp import Kleidungstyp
-from src.server.bo.Mutex import Mutex
-from src.server.bo.Outfit import Outfit
-from src.server.bo.Person import Person
-from src.server.bo.Style import Style
-from src.server.bo.UnaryConstraint import UnaryConstraint
+from server.KleiderschrankAdministration import KleiderschrankAdministration
+from server.bo.BinaryConstraint import BinaryConstraint
+from server.bo.Constraint import Constraint
+from server.bo.Implikation import Implikation
+from server.bo.Kardinalitaet import Kardinalitaet
+from server.bo.Kleiderschrank import Kleiderschrank
+from server.bo.Kleidungsstueck import Kleidungsstueck
+from server.bo.Kleidungstyp import Kleidungstyp
+from server.bo.Mutex import Mutex
+from server.bo.Outfit import Outfit
+from server.bo.Person import Person
+from server.bo.Style import Style
+from server.bo.UnaryConstraint import UnaryConstraint
 
-from src.SecurityDecorator import secured
+from SecurityDecorator import secured
 
 app = Flask(__name__)
 CORS(app, resources=r'/wardrobe/*')  # Erlaubt CORS für alle Wardrobe-Endpoints

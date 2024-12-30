@@ -1,7 +1,7 @@
-from src.server.db.Mapper import Mapper
-from src.server.bo.Outfit import Outfit
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
-from src.server.bo.Style import Style
+from server.db.Mapper import Mapper
+from server.bo.Outfit import Outfit
+from server.bo.Kleidungsstueck import Kleidungsstueck
+from server.bo.Style import Style
 
 class OutfitMapper(Mapper):
     def insert(self, outfit):

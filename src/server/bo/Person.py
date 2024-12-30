@@ -1,4 +1,4 @@
-from src.server.bo import BusinessObject as bo
+from server.bo import BusinessObject as bo
 
 class Person(bo.BusinessObject):
 
@@ -50,7 +50,7 @@ class Person(bo.BusinessObject):
 
     def set_kleiderschrank(self, kleiderschrank):
         """Setzen des Kleiderschranks."""
-        from src.server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
+        from server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
         if isinstance(kleiderschrank, Kleiderschrank):
             self.__kleiderschrank = kleiderschrank
 

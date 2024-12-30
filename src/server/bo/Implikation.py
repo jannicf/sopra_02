@@ -1,6 +1,6 @@
-from src.server.bo.BinaryConstraint import BinaryConstraint
-from src.server.bo.Kleidungstyp import Kleidungstyp
-from src.server.bo.Style import Style
+from server.bo.BinaryConstraint import BinaryConstraint
+from server.bo.Kleidungstyp import Kleidungstyp
+from server.bo.Style import Style
 
 class Implikation(BinaryConstraint):
 

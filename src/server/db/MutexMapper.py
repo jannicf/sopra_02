@@ -1,9 +1,9 @@
-from src.server.db.Mapper import Mapper
-from src.server.bo.Mutex import Mutex
-from src.server.db.KleidungstypMapper import KleidungstypMapper
-from src.server.db.StyleMapper import StyleMapper
-from src.server.bo.Kleidungstyp import Kleidungstyp
-from src.server.bo.Style import Style
+from server.db.Mapper import Mapper
+from server.bo.Mutex import Mutex
+from server.db.KleidungstypMapper import KleidungstypMapper
+from server.db.StyleMapper import StyleMapper
+from server.bo.Kleidungstyp import Kleidungstyp
+from server.bo.Style import Style
 
 class MutexMapper(Mapper):
 

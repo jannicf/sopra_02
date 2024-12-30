@@ -1,6 +1,6 @@
-from src.server.db.Mapper import Mapper
-from src.server.bo.Kleidungstyp import Kleidungstyp
-from src.server.bo.Style import Style
+from server.db.Mapper import Mapper
+from server.bo.Kleidungstyp import Kleidungstyp
+from server.bo.Style import Style
 
 """In dieser Klasse könnte man durch die Nutzung von with-statements die jeweiligen Mapper der Attribute
 direkt aufrufen, um die benötigten Daten zu laden bzw. zu verändern. Da dies jedoch zu einem

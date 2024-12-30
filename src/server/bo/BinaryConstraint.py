@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from src.server.bo.Constraint import Constraint
+from server.bo.Constraint import Constraint
 
 
 class BinaryConstraint(Constraint):

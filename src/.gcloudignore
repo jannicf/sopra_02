@@ -22,6 +22,7 @@
 mysql/
 postman/
 frontend/
+tests/
 
 # Python pycache:
 __pycache__/

@@ -1,23 +1,22 @@
-from src.server.bo.Kardinalitaet import Kardinalitaet
-from src.server.bo.Implikation import Implikation
-from src.server.bo.Mutex import Mutex
-from src.server.bo.Person import Person
-from src.server.bo.Kleiderschrank import Kleiderschrank
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
-from src.server.bo.Style import Style
-from src.server.bo.Outfit import Outfit
-from src.server.bo.Kleidungstyp import Kleidungstyp
+from .bo.Kardinalitaet import Kardinalitaet
+from .bo.Implikation import Implikation
+from .bo.Mutex import Mutex
+from .bo.Person import Person
+from .bo.Kleiderschrank import Kleiderschrank
+from .bo.Kleidungsstueck import Kleidungsstueck
+from .bo.Style import Style
+from .bo.Outfit import Outfit
+from .bo.Kleidungstyp import Kleidungstyp
 
-
-from src.server.db.KardinalitaetMapper import KardinalitaetMapper
-from src.server.db.ImplikationMapper import ImplikationMapper
-from src.server.db.MutexMapper import MutexMapper
-from src.server.db.PersonMapper import PersonMapper
-from src.server.db.KleiderschrankMapper import KleiderschrankMapper
-from src.server.db.KleidungsstueckMapper import KleidungsstueckMapper
-from src.server.db.StyleMapper import StyleMapper
-from src.server.db.OutfitMapper import OutfitMapper
-from src.server.db.KleidungstypMapper import KleidungstypMapper
+from .db.KardinalitaetMapper import KardinalitaetMapper
+from .db.ImplikationMapper import ImplikationMapper
+from .db.MutexMapper import MutexMapper
+from .db.PersonMapper import PersonMapper
+from .db.KleiderschrankMapper import KleiderschrankMapper
+from .db.KleidungsstueckMapper import KleidungsstueckMapper
+from .db.StyleMapper import StyleMapper
+from .db.OutfitMapper import OutfitMapper
+from .db.KleidungstypMapper import KleidungstypMapper
 
 class KleiderschrankAdministration(object):
     """Diese Klasse aggregiert sämtliche Business Logik der Anwendung.

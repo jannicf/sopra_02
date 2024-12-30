@@ -1,7 +1,7 @@
-from src.server.db.Mapper import Mapper
-from src.server.bo.Implikation import Implikation
-from src.server.db.KleidungstypMapper import KleidungstypMapper
-from src.server.db.StyleMapper import StyleMapper
+from server.db.Mapper import Mapper
+from server.bo.Implikation import Implikation
+from server.db.KleidungstypMapper import KleidungstypMapper
+from server.db.StyleMapper import StyleMapper
 
 class ImplikationMapper(Mapper):
 

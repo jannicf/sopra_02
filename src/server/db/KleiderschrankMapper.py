@@ -1,7 +1,7 @@
-from src.server.bo.Kleiderschrank import Kleiderschrank
-from src.server.db.Mapper import Mapper
-from src.server.db.PersonMapper import PersonMapper
-from src.server.db.KleidungsstueckMapper import KleidungsstueckMapper
+from server.bo.Kleiderschrank import Kleiderschrank
+from server.db.Mapper import Mapper
+from server.db.PersonMapper import PersonMapper
+from server.db.KleidungsstueckMapper import KleidungsstueckMapper
 
 class KleiderschrankMapper(Mapper):
     def insert(self, kleiderschrank):

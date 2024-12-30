@@ -1,5 +1,5 @@
-from src.server.bo.UnaryConstraint import UnaryConstraint
-from src.server.bo.Kleidungstyp import Kleidungstyp
+from server.bo.UnaryConstraint import UnaryConstraint
+from server.bo.Kleidungstyp import Kleidungstyp
 
 class Kardinalitaet(UnaryConstraint):
 
@@ -59,7 +59,7 @@ class Kardinalitaet(UnaryConstraint):
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        from src.server.KleiderschrankAdministration import KleiderschrankAdministration
+        from server.KleiderschrankAdministration import KleiderschrankAdministration
         """Umwandeln eines Python dict() in eine Kardinalitaet()."""
         obj = Kardinalitaet()
         obj.set_id(dictionary.get("id", None))

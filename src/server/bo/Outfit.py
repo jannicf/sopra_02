@@ -1,5 +1,5 @@
-from src.server.bo import BusinessObject as bo
-from src.server.bo import Kleidungsstueck
+from server.bo import BusinessObject as bo
+from server.bo.Kleidungsstueck import Kleidungsstueck
 
 class Outfit(bo.BusinessObject):
 

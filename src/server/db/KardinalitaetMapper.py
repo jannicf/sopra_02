@@ -1,7 +1,7 @@
-from src.server.bo.Kardinalitaet import Kardinalitaet
-from src.server.db.Mapper import Mapper
-from src.server.db.KleidungstypMapper import KleidungstypMapper
-from src.server.db.StyleMapper import StyleMapper
+from server.bo.Kardinalitaet import Kardinalitaet
+from server.db.Mapper import Mapper
+from server.db.KleidungstypMapper import KleidungstypMapper
+from server.db.StyleMapper import StyleMapper
 
 class KardinalitaetMapper(Mapper):
 

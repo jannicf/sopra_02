@@ -1,6 +1,6 @@
-from src.server.db.Mapper import Mapper
-from src.server.bo.Kleidungsstueck import Kleidungsstueck
-from src.server.db.KleidungstypMapper import KleidungstypMapper
+from server.db.Mapper import Mapper
+from server.bo.Kleidungsstueck import Kleidungsstueck
+from server.db.KleidungstypMapper import KleidungstypMapper
 
 
 class KleidungsstueckMapper(Mapper):

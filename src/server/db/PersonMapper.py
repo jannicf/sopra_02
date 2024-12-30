@@ -1,5 +1,5 @@
-from src.server.db.Mapper import Mapper
-from src.server.bo.Person import Person
+from server.db.Mapper import Mapper
+from server.bo.Person import Person
 
 class PersonMapper(Mapper):
     def insert(self, person):
