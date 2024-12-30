@@ -251,14 +251,19 @@ class KleiderschrankAPI {
             })
     }
 
-    updateKleidungsstueck(kleidungsstueckBO) {
-        return this.#fetchAdvanced(this.#updateKleidungsstueckURL(kleidungsstueckBO.getID()), {
+    updateKleidungsstueck(kleidungsstueck) {
+        return this.#fetchAdvanced(this.#updateKleidungsstueckURL(kleidungsstueck.id), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(kleidungsstueckBO)
+            body: JSON.stringify({
+                id: kleidungsstueck.id,
+                name: kleidungsstueck.name,
+                typ: kleidungsstueck.typ_id,
+                kleiderschrank_id: kleidungsstueck.kleiderschrank_id
+            })
         }).then(responseJSON => {
             let responseKleidungsstueckBO = KleidungsstueckBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
