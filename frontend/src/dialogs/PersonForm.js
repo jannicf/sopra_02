@@ -72,6 +72,7 @@ class PersonForm extends Component {
 
             // 1. Person erstellen mit Google ID aus den Firebase-Credentials
             const personData = {
+                id: 0,
                 vorname: this.state.formData.vorname,
                 nachname: this.state.formData.nachname,
                 nickname: this.state.formData.nickname,
