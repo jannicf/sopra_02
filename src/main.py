@@ -51,7 +51,7 @@ kleidungstyp = api.inherit('Kleidungstyp', bo, {
 
 kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
     'name': fields.String(attribute='_Kleidungsstueck__name', description='Name des Kleidungsstücks'),
-    'typ': fields.Integer(attribute=lambda x: x.get_typ().get_id() if x.get_typ() else None, description='Typ des Kleidungsstücks'),
+    'typ': fields.Nested(kleidungstyp, attribute='_Kleidungsstueck__typ', description='Typ des Kleidungsstücks'),
     'kleiderschrank_id': fields.Integer(attribute='_Kleidungsstueck__kleiderschrank_id', description='ID des zugehörigen Kleiderschranks')
 })
 
