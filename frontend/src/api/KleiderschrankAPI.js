@@ -252,14 +252,19 @@ class KleiderschrankAPI {
     }
 
     updateKleidungsstueck(kleidungsstueck) {
-    const requestBody = {
-        id: kleidungsstueck.getID(),
-        name: kleidungsstueck.getName(),
-        typ_id: kleidungsstueck.getTyp().getID(),
-        kleiderschrank_id: kleidungsstueck.getKleiderschrankId()
-    };
+        // Prüfen ob es ein KleidungsstueckBO oder ein einfaches Objekt ist
+        const isBusinessObject = typeof kleidungsstueck.getID === 'function';
 
-    return this.#fetchAdvanced(this.#updateKleidungsstueckURL(kleidungsstueck.getID()), {
+        const requestBody = {
+            id: isBusinessObject ? kleidungsstueck.getID() : kleidungsstueck.id,
+            name: isBusinessObject ? kleidungsstueck.getName() : kleidungsstueck.name,
+            typ: isBusinessObject ? kleidungsstueck.getTyp().getID() : kleidungsstueck.typ_id,
+            kleiderschrank_id: isBusinessObject ? kleidungsstueck.getKleiderschrankId() : kleidungsstueck.kleiderschrank_id
+        };
+
+        const id = isBusinessObject ? kleidungsstueck.getID() : kleidungsstueck.id;
+
+        return this.#fetchAdvanced(this.#updateKleidungsstueckURL(id), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
@@ -272,7 +277,7 @@ class KleiderschrankAPI {
                 resolve(responseKleidungsstueckBO);
             })
         })
-}
+    }
 
     deleteKleidungsstueck(id) {
         return this.#fetchAdvanced(this.#deleteKleidungsstueckURL(id), {
