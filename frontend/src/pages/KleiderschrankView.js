@@ -15,24 +15,40 @@ class KleiderschrankView extends Component {
             kleidungstypen: [],
             showCreateDialog: false,
             showCreateTypDialog: false,
-            loadingInProgress: false,
+            loadingInProgress: true,
             error: null,
-            activeView: 'kleidungsstuecke'
+            activeView: 'kleidungsstuecke',
+            kleiderschrankId: null
         };
     }
 
     componentDidMount() {
-        this.loadKleidungsstuecke();
-        this.loadKleidungstypen();
-        // Den Kleiderschrank des eingeloggten Users laden
+        // Zuerst den Kleiderschrank laden
         KleiderschrankAPI.getAPI().getKleiderschraenke()
             .then(kleiderschraenke => {
                 if (kleiderschraenke && kleiderschraenke.length > 0) {
                     this.setState({
-                        kleiderschrankId: kleiderschraenke[0].getID()
+                        kleiderschrankId: kleiderschraenke[0].getID(),
+                        loadingInProgress: false
+                    }, () => {
+                        // Erst nach dem Setzen der ID die anderen Daten laden
+                        this.loadKleidungsstuecke();
+                        this.loadKleidungstypen();
+                    });
+                } else {
+                    this.setState({
+                        error: "Kein Kleiderschrank gefunden",
+                        loadingInProgress: false
                     });
                 }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.setState({
+                error: "Fehler beim Laden des Kleiderschranks",
+                loadingInProgress: false
             });
+        });
     }
 
     loadKleidungsstuecke = () => {
@@ -119,8 +135,19 @@ class KleiderschrankView extends Component {
             kleidungstypen,
             showCreateDialog,
             showCreateTypDialog,
-            activeView
+            activeView,
+            loadingInProgress,
+            error,
+            kleiderschrankId
         } = this.state;
+
+        if (loadingInProgress) {
+            return <div>Lade Kleiderschrank...</div>;
+        }
+
+        if (error) {
+            return <div>Fehler: {error}</div>;
+        }
 
         return (
             <div>
@@ -192,13 +219,17 @@ class KleiderschrankView extends Component {
                 )}
 
                 {/* Dialoge */}
-                <KleidungsstueckForm
-                    show={showCreateDialog}
-                    onClose={this.handleCreateDialogClosed}
-                />
+                {showCreateDialog && kleiderschrankId && (
+                    <KleidungsstueckForm
+                        show={showCreateDialog}
+                        onClose={this.handleCreateDialogClosed}
+                        kleiderschrankId={kleiderschrankId}
+                    />
+                )}
                 <KleidungstypForm
                     show={showCreateTypDialog}
                     onClose={this.handleCreateTypDialogClosed}
+                    kleiderschrankId={this.state.kleiderschrankId}
                 />
             </div>
         );

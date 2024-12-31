@@ -77,6 +77,9 @@ class KleidungsstueckForm extends Component {
             kleiderschrank_id: this.props.kleiderschrankId || kleidungsstueck.getKleiderschrankId()
         };
 
+        if (!requestData.kleiderschrank_id) {
+            throw new Error("Keine Kleiderschrank ID vorhanden");
+        }
         if (requestData.id) {
             try {
                 await KleiderschrankAPI.getAPI().updateKleidungsstueck(requestData);
