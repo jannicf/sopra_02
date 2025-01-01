@@ -1,5 +1,4 @@
 from server.bo import BusinessObject as bo
-
 class Person(bo.BusinessObject):
 
 
@@ -65,7 +64,7 @@ class Person(bo.BusinessObject):
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in eine Person()."""
-        from src.server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
+        from server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
         obj = Person()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject!
         obj.set_vorname(dictionary["vorname"])
