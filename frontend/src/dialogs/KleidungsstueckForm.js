@@ -103,7 +103,7 @@ class KleidungsstueckForm extends Component {
     } catch (error) {
         console.error('Error during submit:', error);
         this.setState({
-            error: 'Fehler beim Speichern des Kleidungsstücks. Kleidungstyp angegeben?',
+            error: 'Fehler beim Speichern des Kleidungsstücks',
             loading: false
         });
     } finally {
