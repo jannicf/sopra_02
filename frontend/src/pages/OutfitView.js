@@ -98,7 +98,7 @@ class OutfitView extends Component {
                         variant="contained"
                         color="primary"
                         component={Link}
-                        to="/outfits/create-by-style"
+                        to="/outfits/erstellen-nach-style"
                         size="large"
                     >
                         Outfit nach Style erstellen

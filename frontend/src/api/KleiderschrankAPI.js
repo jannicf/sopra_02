@@ -38,8 +38,9 @@ class KleiderschrankAPI {
     #getPersonsURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
     #updatePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #deletePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
-    #searchPersonByNameURL = (name) => `${this.#KleiderschrankServerBaseURL}/persons-by-name/${name}`;
 
+    #searchPersonByNameURL = (name) => `${this.#KleiderschrankServerBaseURL}/persons-by-name/${name}`;
+    #getPersonByGoogleIdURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons-by-google-id/${id}`;
     // URLs für Kleiderschrank (Wardrobe)
     #getKleiderschrankURL = (id) => `${this.#KleiderschrankServerBaseURL}/wardrobes/${id}`;
     #getKleiderschraenkeURL = () => `${this.#KleiderschrankServerBaseURL}/wardrobes`;
@@ -106,6 +107,17 @@ class KleiderschrankAPI {
         })
 
 // Person Methoden
+    getPersonByGoogleId(id) {
+        return this.#fetchAdvanced(this.#getPersonByGoogleIdURL(id))
+            .then(responseJSON => {
+                console.log("API Response:", responseJSON);
+                if (responseJSON) {
+                    return PersonBO.fromJSON(responseJSON)[0];
+                }
+                return null;
+            });
+    }
+
     getPerson(id) {
         return this.#fetchAdvanced(this.#getPersonURL(id), {
             method: 'GET'
@@ -252,14 +264,19 @@ class KleiderschrankAPI {
     }
 
     updateKleidungsstueck(kleidungsstueck) {
-    const requestBody = {
-        id: kleidungsstueck.getID(),
-        name: kleidungsstueck.getName(),
-        typ_id: kleidungsstueck.getTyp().getID(),
-        kleiderschrank_id: kleidungsstueck.getKleiderschrankId()
-    };
+        // Prüfen ob es ein KleidungsstueckBO oder ein einfaches Objekt ist
+        const isBusinessObject = typeof kleidungsstueck.getID === 'function';
 
-    return this.#fetchAdvanced(this.#updateKleidungsstueckURL(kleidungsstueck.getID()), {
+        const requestBody = {
+            id: isBusinessObject ? kleidungsstueck.getID() : kleidungsstueck.id,
+            name: isBusinessObject ? kleidungsstueck.getName() : kleidungsstueck.name,
+            typ_id: isBusinessObject ? kleidungsstueck.getTyp().getID() : kleidungsstueck.typ_id,
+            kleiderschrank_id: isBusinessObject ? kleidungsstueck.getKleiderschrankId() : kleidungsstueck.kleiderschrank_id
+        };
+
+        const id = isBusinessObject ? kleidungsstueck.getID() : kleidungsstueck.id;
+
+        return this.#fetchAdvanced(this.#updateKleidungsstueckURL(id), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
@@ -272,7 +289,7 @@ class KleiderschrankAPI {
                 resolve(responseKleidungsstueckBO);
             })
         })
-}
+    }
 
     deleteKleidungsstueck(id) {
         return this.#fetchAdvanced(this.#deleteKleidungsstueckURL(id), {

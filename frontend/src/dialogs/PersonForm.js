@@ -70,6 +70,8 @@ class PersonForm extends Component {
         this.setState({ loading: true });
         const api = KleiderschrankAPI.getAPI();
 
+        console.log('Starte Erstellung der Person...');
+
         // 1. Person erstellen
         const personData = {
             id: 0,
@@ -79,24 +81,24 @@ class PersonForm extends Component {
             google_id: this.props.user?.uid
         };
 
-        console.log('Sende Personen-Daten:', personData); // NEUES LOG
+        console.log('Sende Personen-Daten:', personData);
         const createdPerson = await api.addPerson(personData);
-        console.log('Erstellte Person:', createdPerson); // NEUES LOG
+        console.log('Person erstellt:', createdPerson);
 
         // 2. Kleiderschrank erstellen
         const kleiderschrankData = {
-            id: 0,  // HINZUGEFÜGT
+            id: 0,
             name: this.state.formData.kleiderschrankName,
             eigentuemer_id: createdPerson.getID()
         };
 
-        console.log('Sende Kleiderschrank-Daten:', kleiderschrankData); // NEUES LOG
+        console.log('Sende Kleiderschrank-Daten:', kleiderschrankData);
         const createdKleiderschrank = await api.addKleiderschrank(kleiderschrankData);
-        console.log('Erstellter Kleiderschrank:', createdKleiderschrank); // NEUES LOG
+        console.log('Kleiderschrank erstellt:', createdKleiderschrank);
 
-        // 3. Person aktualisieren
+        // 3. Person aktualisieren mit dem neuen Kleiderschrank
         createdPerson.setKleiderschrank(createdKleiderschrank);
-        console.log('Aktualisiere Person mit Kleiderschrank'); // NEUES LOG
+        console.log('Person aktualisiere mit Kleiderschrank');
         await api.updatePerson(createdPerson);
 
         this.setState({ loading: false });

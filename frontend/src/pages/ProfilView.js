@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Typography, Button, Box, Paper, IconButton } from '@mui/material';
+import { Typography, Button, Box, Paper } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/Edit'
+import IconButton from '@mui/material/IconButton';
 import PersonForm from '../dialogs/PersonForm';
 import PersonEditForm from '../dialogs/PersonEditForm';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
@@ -24,7 +25,8 @@ class PersonView extends Component {
 
     loadPerson = async () => {
         try {
-            this.setState({ loading: true });
+            this.setState({loading: true});
+            // Hier laden wir die Person anhand der Google ID des eingeloggten Users
             const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
             this.setState({
                 person: persons,
@@ -39,23 +41,22 @@ class PersonView extends Component {
     }
 
     handleCreateClick = () => {
-        this.setState({ showCreateDialog: true });
+        this.setState({showCreateDialog: true});
     }
 
     handleEditClick = () => {
-        this.setState({ showEditDialog: true });
+        this.setState({showEditDialog: true});
     }
 
     handleCreateDialogClosed = async (createdPerson) => {
-    if (createdPerson) {
-        console.log('Person wurde erstellt:', createdPerson);
-        await this.loadPerson();  // Daten neu laden
-        this.setState({
-            showCreateDialog: false,
-            error: null
-        });
-    } else {
-        this.setState({ showCreateDialog: false });
+        if (createdPerson) {
+            await this.loadPerson();
+            this.setState({
+                showCreateDialog: false,
+                error: null
+            });
+        } else {
+            this.setState({showCreateDialog: false});
         }
     }
 
@@ -63,11 +64,17 @@ class PersonView extends Component {
         if (editedPerson) {
             await this.loadPerson();
         }
-        this.setState({ showEditDialog: false });
+        this.setState({showEditDialog: false});
     }
 
     render() {
-        const { person, showCreateDialog, showEditDialog, loading } = this.state;
+        const {person, showCreateDialog, showEditDialog, loading} = this.state;
+
+        // Debug-Ausgaben
+        console.log("ProfilView: Person-Objekt:", person);
+        if (person && person.getKleiderschrank()) {
+            console.log("ProfilView: Kleiderschrank-Objekt:", person.getKleiderschrank());
+        }
 
         if (loading) {
             return <Typography>Lade Profil...</Typography>;
@@ -81,29 +88,31 @@ class PersonView extends Component {
 
                 {person ? (
                     // Wenn Person existiert, zeigen wir die Informationen an
-                    <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
+                    <Paper elevation={3} sx={{p: 3, mt: 2}}>
                         <Box display="flex" justifyContent="space-between" alignItems="start">
                             <Typography variant="h6">Persönliche Informationen</Typography>
                             <IconButton
                                 onClick={this.handleEditClick}
                                 color="primary"
                             >
-                                <EditIcon />
+                                <EditIcon/>
                             </IconButton>
                         </Box>
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{mt: 2}}>
                             <Typography>Vorname: {person.getVorname()}</Typography>
                             <Typography>Nachname: {person.getNachname()}</Typography>
                             <Typography>Nickname: {person.getNickname()}</Typography>
+
+                            {/* Kleiderschrank-Anzeige */}
                             {person.getKleiderschrank() ? (
-                                <Box sx={{ mt: 2 }}>
+                                <Box sx={{mt: 2}}>
                                     <Typography variant="subtitle1">Kleiderschrank</Typography>
                                     <Typography>
                                         Name: {person.getKleiderschrank().getName()}
                                     </Typography>
                                 </Box>
                             ) : (
-                                <Typography color="error">
+                                <Typography color="error" sx={{mt: 2}}>
                                     Kein Kleiderschrank zugewiesen
                                 </Typography>
                             )}
@@ -111,16 +120,16 @@ class PersonView extends Component {
                     </Paper>
                 ) : (
                     // Wenn keine Person existiert, zeigen wir den "Person hinzufügen" Button
-                    <Box sx={{ mt: 4, textAlign: 'center' }}>
+                    <Box sx={{mt: 4, textAlign: 'center'}}>
                         <Typography variant="h6" gutterBottom>
                             Sie haben noch kein Profil angelegt
                         </Typography>
                         <Button
                             variant="contained"
                             color="primary"
-                            startIcon={<AddIcon />}
+                            startIcon={<AddIcon/>}
                             onClick={this.handleCreateClick}
-                            sx={{ mt: 2 }}
+                            sx={{mt: 2}}
                         >
                             Person hinzufügen
                         </Button>

@@ -51,7 +51,7 @@ kleidungstyp = api.inherit('Kleidungstyp', bo, {
 
 kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
     'name': fields.String(attribute='_Kleidungsstueck__name', description='Name des Kleidungsstücks'),
-    'typ': fields.Integer(attribute=lambda x: x.get_typ().get_id() if x.get_typ() else None, description='Typ des Kleidungsstücks'),
+    'typ': fields.Nested(kleidungstyp, attribute='_Kleidungsstueck__typ', description='Typ des Kleidungsstücks'),
     'kleiderschrank_id': fields.Integer(attribute='_Kleidungsstueck__kleiderschrank_id', description='ID des zugehörigen Kleiderschranks')
 })
 
@@ -196,6 +196,18 @@ class PersonsByNameOperations(Resource):
         persons = adm.get_person_by_nachname(nachname)
         return persons
 
+@wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe_ns.param('google_id', 'Die Google ID der Person')
+class PersonByGoogleIdOperations(Resource):
+    @wardrobe_ns.marshal_with(person)
+    #@secured
+    def get(self, google_id):
+        """Auslesen einer bestimmten Person anhand ihrer Google ID."""
+        adm = KleiderschrankAdministration()
+        person = adm.get_person_by_google_id(google_id)
+        return person
+
 @wardrobe_ns.route('/wardrobes')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class WardrobeListOperations(Resource):
@@ -310,6 +322,23 @@ class WardrobeOperations(Resource):
         except Exception as e:
             return {'message': f'Server error: {str(e)}'}, 500
 
+@wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe_ns.param('google_id', 'Die Google ID der Person')
+class PersonsByGoogleIdOperations(Resource):
+    @wardrobe_ns.marshal_with(person)
+    def get(self, google_id):
+        """Auslesen einer Person anhand der Google ID"""
+        print(f"Backend: Person mit Google ID {google_id} wird gesucht")  # Debug log
+        adm = KleiderschrankAdministration()
+        person = adm.get_person_by_google_id(google_id)
+        print(f"Backend: Person gefunden: {person}")  # Debug log
+
+        if person is None:
+            # Wenn keine Person gefunden wurde, leeres Ergebnis zurückgeben
+            return '', 204
+        return person
+
 @wardrobe_ns.route('/clothes')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ClothesListOperations(Resource):
@@ -391,7 +420,7 @@ class ClothingItemOperations(Resource):
         adm = KleiderschrankAdministration()
 
         # Hole zuerst den Typ als vollständiges Objekt
-        typ = adm.get_kleidungstyp_by_id(api.payload['typ'])
+        typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
         # Modifiziere das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()

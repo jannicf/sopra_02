@@ -12,9 +12,11 @@ import Login from './pages/Login';
 import KleiderschrankView from './pages/KleiderschrankView';
 import OutfitView from './pages/OutfitView';
 import KleidungsstueckBasiertesOutfitView from './pages/KleidungsstueckBasiertesOutfitView';
+import StyleBasiertesOutfitView from './pages/StyleBasiertesOutfitView';
 import StylesView from './pages/StylesView';
 import ProfilView from "./pages/ProfilView";
 import About from './pages/About';
+import KleiderschrankAPI from "./api/KleiderschrankAPI";
 import firebaseConfig from './firebase/firebaseconfig';
 
 class App extends React.Component {
@@ -22,6 +24,7 @@ class App extends React.Component {
         super(props);
         this.state = {
             currentUser: null,
+            userHasProfile: false,
             appError: null,
             authError: null,
             authLoading: false
@@ -69,50 +72,78 @@ class App extends React.Component {
 }
     // Diese Methode wird beim Start der Anwendung ausgeführt
     componentDidMount() {
-        // Firebase initialisieren
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+    // Firebase initialisieren
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-        // Überwacht den Anmeldestatus des Nutzers
-        onAuthStateChanged(auth, (user) => {
+    // Überwacht den Anmeldestatus des Nutzers
+    onAuthStateChanged(auth, (user) => {
             if (user) {
                 // Nutzer ist eingeloggt
                 this.setState({
                     authLoading: true
                 });
-                console.log("Der Benutzer ist: " + user);
-				user.getIdToken().then(token => {
-					// Token zu den Cookies des Browsers hinzufügen
-					document.cookie = `token=${token};path=/`;
-					console.log("Token is: " + document.cookie);
+                console.log("1. Google Auth erfolgreich, User:", user.uid);
 
-					// Erst danach den Nutzer setzen
-					this.setState({
-						currentUser: user,
-						authError: null,
-						authLoading: false
-					});
-				}).catch(e => {
-					this.setState({
-						authError: e,
-						authLoading: false
-					});
-				});
-			} else {
-				// Der Nutzer ist ausgeloggt -> Token löschen
-				document.cookie = 'token=;path=/';
+                // Token generieren und setzen
+                user.getIdToken().then(token => {
+                    // Token zu den Cookies des Browsers hinzufügen
+                    document.cookie = `token=${token};path=/`;
+                    console.log("2. Token gesetzt:", token);
 
-				// Zurücksetzung des ausgeloggten Nutzers
-				this.setState({
-					currentUser: null,
-					authLoading: false
-				});
-			}
-		});
-	}
+                    // Prüfen ob ein Profil existiert
+                    return KleiderschrankAPI.getAPI().getPersonByGoogleId(user.uid)
+                        .then(person => {
+                            console.log("3. Person geladen:", person);
+                            this.setState({
+                                currentUser: user,
+                                userHasProfile: person !== null,
+                                authError: null,
+                                authLoading: false
+                            }, () => {
+                                console.log("4. State aktualisiert:", {
+                                    userHasProfile: this.state.userHasProfile,
+                                    authLoading: this.state.authLoading
+                                });
+                            });
+                        })
+                        .catch(e => {
+                            console.error("3. Fehler beim Laden der Person:", e);
+                            this.setState({
+                                currentUser: user,
+                                userHasProfile: false,
+                                authError: null,
+                                authLoading: false
+                            }, () => {
+                                console.log("4. State nach Fehler aktualisiert");
+                            });
+                        });
+                }).catch(e => {
+                    console.error("2. Token-Fehler:", e);
+                    this.setState({
+                        authError: e,
+                        authLoading: false
+                    });
+                });
+            } else {
+                console.log("1. Nutzer ausgeloggt");
+                // Der Nutzer ist ausgeloggt -> Token löschen
+                document.cookie = 'token=;path=/';
+
+                // Zurücksetzung des ausgeloggten Nutzers
+                this.setState({
+                    currentUser: null,
+                    userHasProfile: false,
+                    authLoading: false
+                }, () => {
+                    console.log("2. Logout-State aktualisiert");
+                });
+            }
+        });
+    }
 
     render() {
-    const { currentUser, appError, authError, authLoading } = this.state;
+    const { currentUser, appError, authError, authLoading, userHasProfile } = this.state;
 
     return (
         <ThemeProvider theme={Theme}>
@@ -132,35 +163,61 @@ class App extends React.Component {
                         {/* Startseite mit Login */}
                         <Route path="/" element={
                             currentUser ?
-                                <Navigate replace to="/kleiderschrank" />
+                                userHasProfile ?
+                                    <Navigate replace to="/kleiderschrank" />
+                                    :
+                                    <Navigate replace to="/profile" />
                                 :
                                 <Login onSignIn={this.handleSignIn} />
                         } />
 
-                        {/* Ihre Hauptrouten */}
+                        {/* Profilseite - als einzige auch ohne Profil zugänglich */}
+                        <Route path="/profile" element={
+                            currentUser ? <ProfilView user={currentUser} /> : <Navigate to="/" />
+                        } />
+
+                        {/* Alle anderen Routen erfordern ein Profil */}
                         <Route path="/kleiderschrank" element={
-                            currentUser ? <KleiderschrankView /> : <Navigate to="/" />
+                            currentUser && userHasProfile ?
+                                <KleiderschrankView />
+                                :
+                                <Navigate to="/profile" />
                         } />
 
                         <Route path="/outfits" element={
-                            currentUser ? <OutfitView /> : <Navigate to="/" />
+                            currentUser && userHasProfile ?
+                                <OutfitView />
+                                :
+                                <Navigate to="/profile" />
+                        } />
+
+                        <Route path="/outfits/erstellen-nach-style" element={
+                            currentUser && userHasProfile ?
+                                <StyleBasiertesOutfitView />
+                                :
+                                <Navigate to="/profile" />
                         } />
 
                         <Route path="/outfits/create-by-item" element={
-                        currentUser ? <KleidungsstueckBasiertesOutfitView /> : <Navigate to="/" />
+                            currentUser && userHasProfile ?
+                                <KleidungsstueckBasiertesOutfitView />
+                                :
+                                <Navigate to="/profile" />
                         } />
 
                         <Route path="/styles" element={
-                            currentUser ? <StylesView /> : <Navigate to="/" />
+                            currentUser && userHasProfile ?
+                                <StylesView />
+                                :
+                                <Navigate to="/profile" />
                         } />
 
-                        {/* Öffentliche Seite */}
+                        {/* About Seite bleibt öffentlich, braucht aber Login */}
                         <Route path="/about" element={
-                            currentUser ? <About /> : <Navigate to="/" />
-                        } />
-
-                        <Route path="/profile" element={
-                            currentUser ? <ProfilView user={currentUser} /> : <Navigate to="/" />
+                            currentUser ?
+                                <About />
+                                :
+                                <Navigate to="/" />
                         } />
                     </Routes>
                     </Box>
