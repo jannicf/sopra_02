@@ -88,7 +88,13 @@ class App extends React.Component {
                 // Token generieren und setzen
                 user.getIdToken().then(token => {
                     // Token zu den Cookies des Browsers hinzufügen
-                    document.cookie = `token=${token};path=/`;
+                    /** Das Cookie "token" verfügt über keinen gültigen Wert für das "SameSite"-Attribut.
+                     * Bald werden Cookies ohne das "SameSite"-Attribut oder mit einem ungültigen Wert
+                     * dafür als "Lax" behandelt. Dadurch wird das Cookie nicht länger an Kontexte gesendet,
+                     * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
+                     * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
+                     * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
+                    document.cookie = `token=${token};path=/;SameSite=None;Secure`;
                     console.log("2. Token gesetzt:", token);
 
                     // Prüfen ob ein Profil existiert
@@ -128,7 +134,13 @@ class App extends React.Component {
             } else {
                 console.log("1. Nutzer ausgeloggt");
                 // Der Nutzer ist ausgeloggt -> Token löschen
-                document.cookie = 'token=;path=/';
+                /** Das Cookie "token" verfügt über keinen gültigen Wert für das "SameSite"-Attribut.
+                 * Bald werden Cookies ohne das "SameSite"-Attribut oder mit einem ungültigen Wert
+                 * dafür als "Lax" behandelt. Dadurch wird das Cookie nicht länger an Kontexte gesendet,
+                 * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
+                 * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
+                 * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
+                document.cookie = `token=${token};path=/;SameSite=None;Secure`;
 
                 // Zurücksetzung des ausgeloggten Nutzers
                 this.setState({
