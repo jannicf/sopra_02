@@ -420,7 +420,7 @@ class ClothingItemOperations(Resource):
         adm = KleiderschrankAdministration()
 
         # Hole zuerst den Typ als vollständiges Objekt
-        typ = adm.get_kleidungstyp_by_id(api.payload['typ'])
+        typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
         # Modifiziere das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()

@@ -270,7 +270,7 @@ class KleiderschrankAPI {
         const requestBody = {
             id: isBusinessObject ? kleidungsstueck.getID() : kleidungsstueck.id,
             name: isBusinessObject ? kleidungsstueck.getName() : kleidungsstueck.name,
-            typ: isBusinessObject ? kleidungsstueck.getTyp().getID() : kleidungsstueck.typ_id,
+            typ_id: isBusinessObject ? kleidungsstueck.getTyp().getID() : kleidungsstueck.typ_id,
             kleiderschrank_id: isBusinessObject ? kleidungsstueck.getKleiderschrankId() : kleidungsstueck.kleiderschrank_id
         };
 
