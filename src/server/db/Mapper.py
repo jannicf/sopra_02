@@ -15,7 +15,7 @@ class Mapper(AbstractContextManager, ABC):
             Hierbei handelt es sich also um die Verbindung zwischen Google App Engine und Cloud SQL."""
 
             self._cnx = connector.connect(user='root', password='peterthies',
-                                          unix_socket='#hier kommt google cloud verbindung hin#',
+                                          unix_socket='/cloudsql/civil-array-440815-m3:europe-west3:sopra-db-instanz',
                                           database='sopra_db')
         else:
             """Wenn wir hier ankommen, dann handelt sich offenbar um die Ausführung des Codes in einer lokalen Umgebung,
