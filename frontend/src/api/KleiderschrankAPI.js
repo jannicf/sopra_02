@@ -513,6 +513,27 @@ class KleiderschrankAPI {
         })
     }
 
+    createOutfitFromBaseItem(basisId, ausgewaehlteIds, styleId) {
+        const data = {
+            style: styleId,
+            bausteine: [basisId, ...ausgewaehlteIds]  // Kombiniere Basis-ID und ausgewählte IDs
+        };
+
+        return this.#fetchAdvanced(this.#addOutfitURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(responseJSON => {
+            let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseOutfitBO);
+            })
+        })
+    }
+
     getPossibleOutfitsForStyle(styleId, wardrobeId) {
         // Standardisierte GET-Anfrage mit expliziten Optionen
         return this.#fetchAdvanced(this.#getPossibleOutfitsForStyleURL(styleId, wardrobeId), {
