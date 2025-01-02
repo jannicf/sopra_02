@@ -157,12 +157,7 @@ class KleiderschrankView extends Component {
 
                 {/* Auswahlbuttons */}
                 <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: 2,
-                        my: 4
-                    }}
+                    sx={{display: 'flex', justifyContent: 'center', gap: 2, my: 4}}
                 >
                     <Button
                         variant={activeView === 'kleidungsstuecke' ? 'contained' : 'outlined'}

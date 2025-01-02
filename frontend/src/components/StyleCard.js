@@ -6,9 +6,9 @@ class StyleCard extends Component {
     const { style, onEdit, onDelete } = this.props;
 
     return (
-      <Card>
+      <Card sx={{ mb: 1 }}>
         <CardContent>
-          <Grid container spacing={2} alignItems="center">
+          <Grid container justifyContent="space-between" alignItems="center">
             <Grid item>
               <Typography variant="h6">{style?.getName() || "Unbekannter Style"}</Typography>
             </Grid>
