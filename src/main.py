@@ -196,6 +196,18 @@ class PersonsByNameOperations(Resource):
         persons = adm.get_person_by_nachname(nachname)
         return persons
 
+@wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe_ns.param('google_id', 'Die Google ID der Person')
+class PersonByGoogleIdOperations(Resource):
+    @wardrobe_ns.marshal_with(person)
+    #@secured
+    def get(self, google_id):
+        """Auslesen einer bestimmten Person anhand ihrer Google ID."""
+        adm = KleiderschrankAdministration()
+        person = adm.get_person_by_google_id(google_id)
+        return person
+
 @wardrobe_ns.route('/wardrobes')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class WardrobeListOperations(Resource):
@@ -309,6 +321,23 @@ class WardrobeOperations(Resource):
 
         except Exception as e:
             return {'message': f'Server error: {str(e)}'}, 500
+
+@wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+@wardrobe_ns.param('google_id', 'Die Google ID der Person')
+class PersonsByGoogleIdOperations(Resource):
+    @wardrobe_ns.marshal_with(person)
+    def get(self, google_id):
+        """Auslesen einer Person anhand der Google ID"""
+        print(f"Backend: Person mit Google ID {google_id} wird gesucht")  # Debug log
+        adm = KleiderschrankAdministration()
+        person = adm.get_person_by_google_id(google_id)
+        print(f"Backend: Person gefunden: {person}")  # Debug log
+
+        if person is None:
+            # Wenn keine Person gefunden wurde, leeres Ergebnis zurückgeben
+            return '', 204
+        return person
 
 @wardrobe_ns.route('/clothes')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
