@@ -45,18 +45,19 @@ kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
     'eigentuemer_id': fields.Integer(description='ID des Eigentümers')
 })
 
+style = api.inherit('Style', bo, {
+    'name': fields.String(attribute='_Style__name', description='Name des Styles')
+})
+
 kleidungstyp = api.inherit('Kleidungstyp', bo, {
-    'bezeichnung': fields.String(attribute='_Kleidungstyp__bezeichnung', description='Bezeichnung des Kleidungstyps')
+    'bezeichnung': fields.String(attribute='_Kleidungstyp__bezeichnung', description='Bezeichnung des Kleidungstyps'),
+    'verwendungen': fields.List(fields.Nested(style), attribute='_Kleidungstyp__verwendungen', description='Styles des Kleidungstyps')
 })
 
 kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
     'name': fields.String(attribute='_Kleidungsstueck__name', description='Name des Kleidungsstücks'),
     'typ': fields.Nested(kleidungstyp, attribute='_Kleidungsstueck__typ', description='Typ des Kleidungsstücks'),
     'kleiderschrank_id': fields.Integer(attribute='_Kleidungsstueck__kleiderschrank_id', description='ID des zugehörigen Kleiderschranks')
-})
-
-style = api.inherit('Style', bo, {
-    'name': fields.String(attribute='_Style__name', description='Name des Styles')
 })
 
 outfit = api.inherit('Outfit', bo, {
@@ -680,6 +681,33 @@ class OutfitCompletion(Resource):
         return adm.get_possible_outfit_completions(basis_kleidungsstueck.get_id(), style_id)
 
 
+@wardrobe_ns.route('/styles/<int:style_id>/outfits/complete/<int:kleidungsstueck_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class OutfitCompletionOperations(Resource):
+    def get(self, style_id, kleidungsstueck_id):
+        adm = KleiderschrankAdministration()
+        style = adm.get_style_by_id(style_id)  # Style explizit laden
+        passende_kleidungsstuecke = adm.get_possible_outfit_completions(kleidungsstueck_id, style_id)
+
+        # Vollständige Objekte als JSON zurückgeben
+        result = []
+        for k in passende_kleidungsstuecke:
+            result.append({
+                'id': k.get_id(),
+                'name': k.get_name(),
+                'typ': {
+                    'id': k.get_typ().get_id(),
+                    'bezeichnung': k.get_typ().get_bezeichnung(),
+                    'verwendungen': [{
+                        'id': style.get_id(),
+                        'name': style.get_name()
+                    } for style in k.get_typ().get_verwendungen()]
+                },
+                'kleiderschrank_id': k.get_kleiderschrank_id()
+            })
+        return result
+
+
 @wardrobe_ns.route('/outfits/validate/<int:id>')
 class OutfitValidation(Resource):
     #@secured
@@ -693,6 +721,18 @@ class OutfitValidation(Resource):
 
         is_valid = adm.check_outfit_constraints(outfit)
         return {'valid': is_valid}
+
+def kleidungsstueck_to_dict(kleidungsstueck):
+    """Wandelt ein Kleidungsstueck-Objekt in ein Dictionary um"""
+    return {
+        'id': kleidungsstueck.get_id(),
+        'name': kleidungsstueck.get_name(),
+        'typ': {
+            'id': kleidungsstueck.get_typ().get_id(),
+            'bezeichnung': kleidungsstueck.get_typ().get_bezeichnung()
+        } if kleidungsstueck.get_typ() else None,
+        'kleiderschrank_id': kleidungsstueck.get_kleiderschrank_id()
+    }
 
 
 @wardrobe_ns.route('/cardinalityconstraints')

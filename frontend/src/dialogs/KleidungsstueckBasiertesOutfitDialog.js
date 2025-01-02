@@ -33,37 +33,35 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
     }
 
     updatePassendeKleidungsstuecke = async () => {
-    const { basisKleidungsstueck } = this.props;
+        const { basisKleidungsstueck } = this.props;
 
-    try {
-        // Hole die Style ID vom Basis-Kleidungsstück
-        const styleId = basisKleidungsstueck.getTyp()?.getVerwendungen()?.[0]?.getID();
+        try {
+            const style = basisKleidungsstueck.getTyp()?.getVerwendungen()?.[0];
 
-        if (!styleId) {
+            if (!style) {
+                this.setState({
+                    passendeKleidungsstuecke: [],
+                    error: "Dem Basis-Kleidungsstück ist kein Style zugeordnet."
+                });
+                return;
+            }
+
+            const vervollstaendigungen = await KleiderschrankAPI.getAPI()
+                .getPossibleOutfitCompletions(basisKleidungsstueck.getID(), style.getID());
+
+            this.setState({
+                passendeKleidungsstuecke: vervollstaendigungen || [],
+                error: null
+            });
+
+        } catch (error) {
+            console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
             this.setState({
                 passendeKleidungsstuecke: [],
-                error: "Dem Basis-Kleidungsstück ist kein Style zugeordnet."
+                error: "Fehler beim Laden der passenden Kleidungsstücke"
             });
-            return;
         }
-
-        // Nutze die existierende Backend-Methode
-        const vervollstaendigungen = await KleiderschrankAPI.getAPI()
-            .getPossibleOutfitCompletions(basisKleidungsstueck.getID(), styleId);
-
-        this.setState({
-            passendeKleidungsstuecke: vervollstaendigungen || [],
-            error: null
-        });
-
-    } catch (error) {
-        console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
-        this.setState({
-            passendeKleidungsstuecke: [],
-            error: "Fehler beim Laden der passenden Kleidungsstücke"
-        });
-    }
-};
+    };
 
     handleKleidungsstueckToggle = (kleidungsstueck) => {
         const { ausgewaehlteKleidungsstuecke } = this.state;

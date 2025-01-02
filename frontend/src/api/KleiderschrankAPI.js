@@ -529,18 +529,14 @@ class KleiderschrankAPI {
     }
 
     getPossibleOutfitCompletions(kleidungsstueckId, styleId) {
-        // Standardisierte GET-Anfrage mit expliziten Optionen
-        return this.#fetchAdvanced(this.#getPossibleOutfitCompletionsURL(styleId, kleidungsstueckId), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
-            }
-        }).then(responseJSON => {
-            return new Promise(function (resolve) {
-                resolve(responseJSON);
+    return this.#fetchAdvanced(this.#getPossibleOutfitCompletionsURL(styleId, kleidungsstueckId))
+        .then(responseJSON => {
+            return new Promise((resolve) => {
+                resolve(KleidungsstueckBO.fromJSON(responseJSON));
             })
         })
     }
+
 
 // Kardinalitäts-Methoden
     getKardinalitaeten() {
