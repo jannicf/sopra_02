@@ -84,9 +84,14 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
             const { basisKleidungsstueck } = this.props;
             const { ausgewaehlteKleidungsstuecke } = this.state;
 
+            // Hole den Style vom Basis-Kleidungsstück
+            const style = basisKleidungsstueck.getTyp().getVerwendungen()[0];
+
+            // Erstelle ein Outfit mit den ausgewählten Kleidungsstücken und dem Style
             await KleiderschrankAPI.getAPI().createOutfitFromBaseItem(
                 basisKleidungsstueck.getID(),
-                ausgewaehlteKleidungsstuecke.map(k => k.getID())
+                ausgewaehlteKleidungsstuecke.map(k => k.getID()),
+                style.getID()  // Füge die Style-ID hinzu
             );
 
             this.setState({ ausgewaehlteKleidungsstuecke: [] });
