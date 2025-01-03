@@ -553,6 +553,14 @@ class ClothingTypeListOperations(Resource):
 
         # Erstelle Kleidungstyp-Objekt aus den übertragenen Daten
         proposal = Kleidungstyp.from_dict(api.payload)
+        # Erstelle eine leere Liste für die Style-IDs
+        verwendungen = []
+
+        # Gehe durch alle Verwendungen des Kleidungstyps
+        for verwendung in proposal.get_verwendungen():
+            # Hole die ID jeder Verwendung und füge sie der Liste hinzu
+            style_id = verwendung.get_id()
+            verwendungen.append(style_id)
 
         if proposal is not None:
             """ Wir erstellen ein Kleidungstyp-Objekt basierend auf den Vorschlagsdaten.
@@ -560,7 +568,8 @@ class ClothingTypeListOperations(Resource):
             wird dem Client zurückgegeben. 
             """
             clothing_type = adm.create_kleidungstyp(
-                proposal.get_bezeichnung()
+                proposal.get_bezeichnung(),
+                verwendungen
             )
             return clothing_type, 201
         else:

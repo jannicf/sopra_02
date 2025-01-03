@@ -318,14 +318,23 @@ class KleiderschrankAPI {
             })
     }
 
-    addKleidungstyp(kleidungstypBO) {
+    addKleidungstyp(kleidungstypData) {
+        // Konvertiere die Daten in ein Format, das das Backend erwartet
+        const requestData = {
+            id: 0,
+            bezeichnung: kleidungstypData.bezeichnung,
+            verwendungen: kleidungstypData.verwendungen.map(styleId => ({
+                id: styleId,
+            }))
+        };
+
         return this.#fetchAdvanced(this.#addKleidungstypURL(), {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(kleidungstypBO)
+            body: JSON.stringify(requestData)
         }).then(responseJSON => {
             let responseKleidungstypBO = KleidungstypBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
@@ -334,14 +343,23 @@ class KleiderschrankAPI {
         })
     }
 
-    updateKleidungstyp(kleidungstypBO) {
-        return this.#fetchAdvanced(this.#updateKleidungstypURL(kleidungstypBO.getID()), {
+    updateKleidungstyp(kleidungstypData) {
+        // Konvertiere die Daten in ein Format, das das Backend erwartet
+        const requestData = {
+            id: kleidungstypData.id,
+            bezeichnung: kleidungstypData.bezeichnung,
+            verwendungen: kleidungstypData.verwendungen.map(styleId => ({
+                id: styleId,
+            }))
+        };
+
+        return this.#fetchAdvanced(this.#updateKleidungstypURL(kleidungstypData.id), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(kleidungstypBO)
+            body: JSON.stringify(requestData)
         }).then(responseJSON => {
             let responseKleidungstypBO = KleidungstypBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
