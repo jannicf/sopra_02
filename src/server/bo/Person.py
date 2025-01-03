@@ -71,6 +71,9 @@ class Person(bo.BusinessObject):
         obj.set_nachname(dictionary["nachname"])
         obj.set_nickname(dictionary["nickname"])
         obj.set_google_id(dictionary["google_id"])
-        if "kleiderschrank" in dictionary and dictionary["kleiderschrank"] is not None:
-            obj.set_kleiderschrank(Kleiderschrank.from_dict(dictionary["kleiderschrank"]))
+        if "kleiderschrank" in dictionary and dictionary["kleiderschrank"]:
+            from server.bo.Kleiderschrank import Kleiderschrank
+            kleiderschrank = Kleiderschrank.from_dict(dictionary["kleiderschrank"])
+            obj.set_kleiderschrank(kleiderschrank)
+
         return obj

@@ -201,11 +201,12 @@ class PersonMapper(Mapper):
         return result
 
     def find_by_google_id(self, google_id):
-        """Auslesen aller Personen anhand der zugeordneten google_id."""
+        """Auslesen einer Person anhand der Google ID."""
         print(f"PersonMapper: Suche Person mit Google ID {google_id}")
         result = None
 
         cursor = self._cnx.cursor()
+        # Zuerst die Person-Daten laden
         command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE google_id=%s"
         cursor.execute(command, (google_id,))
         tuples = cursor.fetchall()
@@ -219,26 +220,27 @@ class PersonMapper(Mapper):
             person.set_nickname(nickname)
             person.set_google_id(google_id)
 
-            # Neuer Code zum Laden des Kleiderschranks
-            print(f"PersonMapper: Lade Kleiderschrank für Person {id}")
-            kleiderschrank_command = "SELECT id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
-            cursor.execute(kleiderschrank_command, (id,))
+            print(f"PersonMapper: Person mit ID {id} gefunden")
+
+            # Dann den zugehörigen Kleiderschrank suchen
+            command = "SELECT id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
+            cursor.execute(command, (id,))
             kleiderschrank_tuples = cursor.fetchall()
 
             if kleiderschrank_tuples:
-                print(f"PersonMapper: Kleiderschrank gefunden: {kleiderschrank_tuples[0][0]}")
-                from server.db.KleiderschrankMapper import KleiderschrankMapper
-                with KleiderschrankMapper() as kleiderschrank_mapper:
-                    kleiderschrank = kleiderschrank_mapper.find_by_id(kleiderschrank_tuples[0][0])
-                    if kleiderschrank:
-                        person.set_kleiderschrank(kleiderschrank)
-                        print(f"PersonMapper: Kleiderschrank {kleiderschrank.get_name()} zugewiesen")
-                    else:
-                        print("PersonMapper: Kleiderschrank konnte nicht geladen werden")
+                from server.bo.Kleiderschrank import Kleiderschrank
+                (kleiderschrank_id, kleiderschrank_name) = kleiderschrank_tuples[0]
+                kleiderschrank = Kleiderschrank()
+                kleiderschrank.set_id(kleiderschrank_id)
+                kleiderschrank.set_name(kleiderschrank_name)
+                kleiderschrank.set_eigentuemer(person)
+                person.set_kleiderschrank(kleiderschrank)
+                print(f"PersonMapper: Kleiderschrank {kleiderschrank_name} gefunden und zugewiesen")
             else:
-                print("PersonMapper: Kein Kleiderschrank gefunden")
+                print("PersonMapper: Kein Kleiderschrank für diese Person gefunden")
 
             result = person
+
         except IndexError:
             print("PersonMapper: Keine Person gefunden")
             result = None

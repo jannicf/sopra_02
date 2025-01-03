@@ -112,7 +112,9 @@ class KleiderschrankAPI {
             .then(responseJSON => {
                 console.log("API Response:", responseJSON);
                 if (responseJSON) {
-                    return PersonBO.fromJSON(responseJSON)[0];
+                    const person = PersonBO.fromJSON(responseJSON);
+                    console.log("KleiderschrankAPI: Erstelltes PersonBO:", person);
+                    return person;
                 }
                 return null;
             });

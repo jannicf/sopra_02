@@ -95,6 +95,15 @@ export default class PersonBO extends BusinessObject {
    * Gibt den Kleiderschrank der Person zurück.
    */
   getKleiderschrank() {
+    if (this.kleiderschrank && typeof this.kleiderschrank === 'object' && !this.kleiderschrank.getName) {
+        // Wenn der Kleiderschrank ein Objekt ist, aber keine getName-Methode hat,
+        // konvertieren wir es in ein KleiderschrankBO
+        console.log("Konvertiere Kleiderschrank zu KleiderschrankBO:", this.kleiderschrank);
+        const kleiderschrankBO = new KleiderschrankBO();
+        kleiderschrankBO.setID(this.kleiderschrank.id);
+        kleiderschrankBO.setName(this.kleiderschrank.name);
+        this.kleiderschrank = kleiderschrankBO;
+    }
     return this.kleiderschrank;
   }
 
@@ -104,22 +113,31 @@ export default class PersonBO extends BusinessObject {
    * @param {*} persons - JSON-Daten, die in PersonBO Objekte umgewandelt werden sollen
    */
   static fromJSON(persons) {
-        let result = new PersonBO();
+    let result = new PersonBO();
 
-        Object.assign(result, persons);
+    // Verwende die Setter-Methoden anstelle direkter Zuweisungen
+    result.setID(persons.id);  // Beachte: hier setID statt setId
+    result.setVorname(persons.vorname);
+    result.setNachname(persons.nachname);
+    result.setNickname(persons.nickname);
+    result.setGoogleId(persons.google_id);
 
-        // Konvertiere die Attribute vom Backend in Frontend-Repräsentation
-        result.id = persons.id;
-        result.vorname = persons.vorname;
-        result.nachname = persons.nachname;
-        result.nickname = persons.nickname;
-        result.google_id = persons.google_id;
+    // Debug-Ausgabe für die eingehenden Daten
+    console.log("PersonBO fromJSON: Eingangsdaten:", persons);
 
-        // Wichtig: Konvertiere den Kleiderschrank in ein KleiderschrankBO
-        if (persons.kleiderschrank) {
-            result.kleiderschrank = KleiderschrankBO.fromJSON(persons.kleiderschrank);
-        }
-
-        return result;
+    // Kleiderschrank-Konvertierung mit Debug-Ausgaben
+    if (persons.kleiderschrank) {
+      console.log("PersonBO fromJSON: Kleiderschrank-Daten gefunden:", persons.kleiderschrank);
+      const kleiderschrank = KleiderschrankBO.fromJSON(persons.kleiderschrank);
+      console.log("PersonBO fromJSON: Konvertierter Kleiderschrank:", kleiderschrank);
+      result.setKleiderschrank(kleiderschrank);
+    } else {
+      console.log("PersonBO fromJSON: Keine Kleiderschrank-Daten vorhanden");
     }
+
+    // Debug-Ausgabe für das resultierende Objekt
+    console.log("PersonBO fromJSON: Ergebnis-Objekt:", result);
+
+    return result;
+  }
 }

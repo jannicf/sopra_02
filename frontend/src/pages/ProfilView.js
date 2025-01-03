@@ -28,14 +28,17 @@ class PersonView extends Component {
     loadPerson = async () => {
     try {
         this.setState({loading: true});
-        // Debug vor API-Aufruf
         console.log("ProfilView: Lade Person mit Google ID:", this.props.user?.uid);
 
         const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
+        console.log("ProfilView: API Rohdaten:", persons);
 
-        // Debug nach API-Aufruf
-        console.log("ProfilView: API Response:", persons);
-        console.log("ProfilView: Kleiderschrank in Response:", persons?.getKleiderschrank());
+        // Prüfe ob die Person-Daten korrekt zurückkommen
+        if (persons) {
+            console.log("ProfilView: Person Vorname:", persons.getVorname());
+            console.log("ProfilView: Person Nachname:", persons.getNachname());
+            console.log("ProfilView: Person Kleiderschrank:", persons.getKleiderschrank());
+        }
 
         this.setState({
             person: persons,
@@ -48,7 +51,7 @@ class PersonView extends Component {
             loading: false
             });
         }
-    }
+    };
 
     handleCreateClick = () => {
         this.setState({showCreateDialog: true});
@@ -78,18 +81,31 @@ class PersonView extends Component {
     }
 
     render() {
-        const {person, showCreateDialog, showEditDialog, loading} = this.state;
+    const {person, showCreateDialog, showEditDialog, loading} = this.state;
 
-        // Debug-Ausgaben
-        console.log("ProfilView: Person-Objekt:", person);
-        // Erweiterte Debug-Ausgaben
-        console.log("ProfilView Render - Person-Objekt:", person);
-        if (person) {
-            console.log("ProfilView Render - Person ID:", person.getID());
-            console.log("ProfilView Render - Kleiderschrank:", person.getKleiderschrank());
-            if (person.getKleiderschrank()) {
-                console.log("ProfilView Render - Kleiderschrank Name:", person.getKleiderschrank().getName());
-            }
+    // Schrittweise Überprüfung
+    console.log("1. Person Objekt:", {
+        person: person,
+        isPersonDefined: person !== null && person !== undefined
+    });
+
+    if (person) {
+        console.log("2. Person Details:", {
+            id: person.getID(),
+            vorname: person.getVorname(),
+            nachname: person.getNachname(),
+            kleiderschrank: person.getKleiderschrank(),
+            isKleiderschrankDefined: person.getKleiderschrank() !== null && person.getKleiderschrank() !== undefined
+        });
+
+        // Prüfen, was der Kleiderschrank tatsächlich ist
+        const kleiderschrank = person.getKleiderschrank();
+        console.log("3. Kleiderschrank Details:", {
+            kleiderschrank: kleiderschrank,
+            type: typeof kleiderschrank,
+            prototyp: kleiderschrank ? Object.getPrototypeOf(kleiderschrank) : null,
+            methods: kleiderschrank ? Object.getOwnPropertyNames(Object.getPrototypeOf(kleiderschrank)) : null
+            });
         }
         if (loading) {
             return <Typography>Lade Profil...</Typography>;
@@ -119,11 +135,19 @@ class PersonView extends Component {
                             <Typography>Nickname: {person.getNickname()}</Typography>
 
                             {/* Kleiderschrank-Anzeige */}
-                            {person.getKleiderschrank() ? (
+                            {person && person.getKleiderschrank() ? (
                                 <Box sx={{mt: 2}}>
                                     <Typography variant="subtitle1">Kleiderschrank</Typography>
                                     <Typography>
-                                        Name: {person.getKleiderschrank().getName()}
+                                        {(() => {
+                                            const kleiderschrank = person.getKleiderschrank();
+                                            if (kleiderschrank && typeof kleiderschrank === 'object') {
+                                                return `Name: ${kleiderschrank.getName ? 
+                                                       kleiderschrank.getName() : 
+                                                       (kleiderschrank.name || 'Unbekannt')}`;
+                                            }
+                                            return 'Kleiderschrank-Details nicht verfügbar';
+                                        })()}
                                     </Typography>
                                 </Box>
                             ) : (
