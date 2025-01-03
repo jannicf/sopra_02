@@ -58,6 +58,9 @@ class Kleidungstyp(bo.BusinessObject):
         obj.set_bezeichnung(dictionary["bezeichnung"])
         # Wenn verwendungen im Dictionary vorhanden sind, diese auch setzen
         if "verwendungen" in dictionary and dictionary["verwendungen"] is not None:
-            for style in dictionary["verwendungen"]:
-                obj.add_verwendung(style)
+            for verwendung in dictionary["verwendungen"]:
+                if isinstance(verwendung, dict):
+                    style = Style()
+                    style.set_id(verwendung["id"])
+                    obj.add_verwendung(style)
         return obj

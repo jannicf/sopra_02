@@ -33,37 +33,35 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
     }
 
     updatePassendeKleidungsstuecke = async () => {
-    const { basisKleidungsstueck } = this.props;
+        const { basisKleidungsstueck } = this.props;
 
-    try {
-        // Hole die Style ID vom Basis-Kleidungsstück
-        const styleId = basisKleidungsstueck.getTyp()?.getVerwendungen()?.[0]?.getID();
+        try {
+            const style = basisKleidungsstueck.getTyp()?.getVerwendungen()?.[0];
 
-        if (!styleId) {
+            if (!style) {
+                this.setState({
+                    passendeKleidungsstuecke: [],
+                    error: "Dem Basis-Kleidungsstück ist kein Style zugeordnet."
+                });
+                return;
+            }
+
+            const vervollstaendigungen = await KleiderschrankAPI.getAPI()
+                .getPossibleOutfitCompletions(basisKleidungsstueck.getID(), style.getID());
+
+            this.setState({
+                passendeKleidungsstuecke: vervollstaendigungen || [],
+                error: null
+            });
+
+        } catch (error) {
+            console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
             this.setState({
                 passendeKleidungsstuecke: [],
-                error: "Dem Basis-Kleidungsstück ist kein Style zugeordnet."
+                error: "Fehler beim Laden der passenden Kleidungsstücke"
             });
-            return;
         }
-
-        // Nutze die existierende Backend-Methode
-        const vervollstaendigungen = await KleiderschrankAPI.getAPI()
-            .getPossibleOutfitCompletions(basisKleidungsstueck.getID(), styleId);
-
-        this.setState({
-            passendeKleidungsstuecke: vervollstaendigungen || [],
-            error: null
-        });
-
-    } catch (error) {
-        console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
-        this.setState({
-            passendeKleidungsstuecke: [],
-            error: "Fehler beim Laden der passenden Kleidungsstücke"
-        });
-    }
-};
+    };
 
     handleKleidungsstueckToggle = (kleidungsstueck) => {
         const { ausgewaehlteKleidungsstuecke } = this.state;
@@ -86,9 +84,14 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
             const { basisKleidungsstueck } = this.props;
             const { ausgewaehlteKleidungsstuecke } = this.state;
 
+            // Hole den Style vom Basis-Kleidungsstück
+            const style = basisKleidungsstueck.getTyp().getVerwendungen()[0];
+
+            // Erstelle ein Outfit mit den ausgewählten Kleidungsstücken und dem Style
             await KleiderschrankAPI.getAPI().createOutfitFromBaseItem(
                 basisKleidungsstueck.getID(),
-                ausgewaehlteKleidungsstuecke.map(k => k.getID())
+                ausgewaehlteKleidungsstuecke.map(k => k.getID()),
+                style.getID()  // Füge die Style-ID hinzu
             );
 
             this.setState({ ausgewaehlteKleidungsstuecke: [] });

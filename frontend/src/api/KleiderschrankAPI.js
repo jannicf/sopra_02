@@ -318,14 +318,23 @@ class KleiderschrankAPI {
             })
     }
 
-    addKleidungstyp(kleidungstypBO) {
+    addKleidungstyp(kleidungstypData) {
+        // Konvertiere die Daten in ein Format, das das Backend erwartet
+        const requestData = {
+            id: 0,
+            bezeichnung: kleidungstypData.bezeichnung,
+            verwendungen: kleidungstypData.verwendungen.map(styleId => ({
+                id: styleId,
+            }))
+        };
+
         return this.#fetchAdvanced(this.#addKleidungstypURL(), {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(kleidungstypBO)
+            body: JSON.stringify(requestData)
         }).then(responseJSON => {
             let responseKleidungstypBO = KleidungstypBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
@@ -334,14 +343,23 @@ class KleiderschrankAPI {
         })
     }
 
-    updateKleidungstyp(kleidungstypBO) {
-        return this.#fetchAdvanced(this.#updateKleidungstypURL(kleidungstypBO.getID()), {
+    updateKleidungstyp(kleidungstypData) {
+        // Konvertiere die Daten in ein Format, das das Backend erwartet
+        const requestData = {
+            id: kleidungstypData.id,
+            bezeichnung: kleidungstypData.bezeichnung,
+            verwendungen: kleidungstypData.verwendungen.map(styleId => ({
+                id: styleId,
+            }))
+        };
+
+        return this.#fetchAdvanced(this.#updateKleidungstypURL(kleidungstypData.id), {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(kleidungstypBO)
+            body: JSON.stringify(requestData)
         }).then(responseJSON => {
             let responseKleidungstypBO = KleidungstypBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
@@ -513,6 +531,27 @@ class KleiderschrankAPI {
         })
     }
 
+    createOutfitFromBaseItem(basisId, ausgewaehlteIds, styleId) {
+        const data = {
+            style: styleId,
+            bausteine: [basisId, ...ausgewaehlteIds]  // Kombiniere Basis-ID und ausgewählte IDs
+        };
+
+        return this.#fetchAdvanced(this.#addOutfitURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        }).then(responseJSON => {
+            let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
+            return new Promise(function (resolve) {
+                resolve(responseOutfitBO);
+            })
+        })
+    }
+
     getPossibleOutfitsForStyle(styleId, wardrobeId) {
         // Standardisierte GET-Anfrage mit expliziten Optionen
         return this.#fetchAdvanced(this.#getPossibleOutfitsForStyleURL(styleId, wardrobeId), {
@@ -529,18 +568,14 @@ class KleiderschrankAPI {
     }
 
     getPossibleOutfitCompletions(kleidungsstueckId, styleId) {
-        // Standardisierte GET-Anfrage mit expliziten Optionen
-        return this.#fetchAdvanced(this.#getPossibleOutfitCompletionsURL(styleId, kleidungsstueckId), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
-            }
-        }).then(responseJSON => {
-            return new Promise(function (resolve) {
-                resolve(responseJSON);
+    return this.#fetchAdvanced(this.#getPossibleOutfitCompletionsURL(styleId, kleidungsstueckId))
+        .then(responseJSON => {
+            return new Promise((resolve) => {
+                resolve(KleidungsstueckBO.fromJSON(responseJSON));
             })
         })
     }
+
 
 // Kardinalitäts-Methoden
     getKardinalitaeten() {

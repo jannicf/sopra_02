@@ -440,11 +440,18 @@ class KleiderschrankAdministration(object):
     Kleidungstyp-spezifische Methoden
     """
 
-    def create_kleidungstyp(self, bezeichnung):
+    def create_kleidungstyp(self, bezeichnung, verwendungen=None):
         """Einen Kleidungstyp anlegen."""
         kleidungstyp = Kleidungstyp()
         kleidungstyp.set_bezeichnung(bezeichnung)
         kleidungstyp.set_id(1)
+
+        # Wenn Verwendungen übergeben wurden, diese hinzufügen
+        if verwendungen:
+            for verwendung_id in verwendungen:
+                style = self.get_style_by_id(verwendung_id)
+                if style:
+                    kleidungstyp.add_verwendung(style)
 
         with KleidungstypMapper() as mapper:
             return mapper.insert(kleidungstyp)
@@ -532,73 +539,62 @@ class KleiderschrankAdministration(object):
 
         return passende_kleidungsstuecke
 
+    def create_outfit_from_selection(self, kleidungsstuecke, style_id):
+        """Erstellt ein Outfit aus einer Liste von Kleidungsstücken."""
+        try:
+            # Style laden
+            style = self.get_style_by_id(style_id)
+            if not style:
+                return None
 
-    def create_outfit_from_selection(self, ausgewaehlte_kleidungsstuecke, style_id):
-        """Erstellt ein Outfit aus den vom Nutzer ausgewählten Kleidungsstücken."""
-        style = self.get_style_by_id(style_id)
-        if not style:
+            # Prüfen ob die Auswahl den Style-Constraints entspricht
+            for constraint in style.get_constraints():
+                if not constraint.check_constraint(kleidungsstuecke):
+                    return None
+
+            # Neues Outfit erstellen
+            outfit = self.create_outfit(style_id)
+
+            # Kleidungsstücke hinzufügen
+            for kleidungsstueck in kleidungsstuecke:
+                outfit.add_baustein(kleidungsstueck)
+
+            # Outfit speichern
+            self.save_outfit(outfit)
+
+            return outfit
+        except Exception as e:
+            print(f"Fehler beim Erstellen des Outfits: {str(e)}")
             return None
 
-        # Prüfe ZUERST, ob die Auswahl alle Constraints erfüllt
-        for constraint in style.get_constraints():
-            if not constraint.check_constraint(ausgewaehlte_kleidungsstuecke):
-                return None  # Wenn auch nur ein Constraint verletzt ist, kein Outfit erstellen
-
-        outfit = Outfit()
-        outfit.set_style(style)
-
-        # Kleidungsstücke hinzufügen
-        for kleidungsstueck in ausgewaehlte_kleidungsstuecke:
-            outfit.add_baustein(kleidungsstueck)
-
-        # Nochmal final prüfen ob alle Constraints erfüllt sind
-        if self.check_outfit_constraints(outfit):
-            # Nur wenn alle Checks bestanden wurden, in DB speichern
-            with OutfitMapper() as mapper:
-                return mapper.insert(outfit)
-        else:
-            return None
-
-    def get_possible_outfit_completions(self, kleidungsstueck_id, kleiderschrank_id):
-        """Findet mögliche Kleidungsstücke, die das Outfit basierend auf einem gegebenen Kleidungsstück vervollständigen."""
-
+    def get_possible_outfit_completions(self, kleidungsstueck_id, style_id):
         basis_kleidungsstueck = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
-        kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+        style = self.get_style_by_id(style_id)
 
-        if not basis_kleidungsstueck or not kleiderschrank:
-            return {}
+        if not basis_kleidungsstueck or not style:
+            return []
 
-        # Ein Dictionary für unsere Ergebnisse: {Style: [Kleidungsstücke]}
-        style_komplettierungen = {}
+        # Hole alle Kleidungsstücke aus dem gleichen Kleiderschrank
+        alle_kleidungsstuecke = self.get_kleidungsstueck_by_kleiderschrank_id(
+            basis_kleidungsstueck.get_kleiderschrank_id()
+        )
 
-        # Für jeden Style des Basis-Kleidungsstücks
-        for style in basis_kleidungsstueck.get_typ().get_verwendungen():
-            # Liste für Kleidungsstücke dieses Styles
-            passende_kleidungsstuecke = []
+        passende_kleidungsstuecke = []
 
-            # Gehe durch den Kleiderschrank
-            for kleidungsstueck in kleiderschrank.get_inhalt():
-                # Überspringe das Basis-Kleidungsstück selbst
-                if kleidungsstueck.get_id() == kleidungsstueck_id:
-                    continue
+        for kleidungsstueck in alle_kleidungsstuecke:
+            # Überspringe das Basis-Kleidungsstück
+            if kleidungsstueck.get_id() == kleidungsstueck_id:
+                continue
 
-                # Prüfe, ob die Kombination alle Constraints erfüllt
-                test_kombination = [basis_kleidungsstueck, kleidungsstueck]
-                constraints_erfuellt = True
+            # Hole den vollständigen Typ mit allen Styles
+            typ = self.get_kleidungstyp_by_id(kleidungsstueck.get_typ().get_id())
+            kleidungsstueck.set_typ(typ)
 
-                for constraint in style.get_constraints():
-                    if not constraint.check_constraint(test_kombination):
-                        constraints_erfuellt = False
-                        break
+            # Wenn der Style in den Verwendungen des Typs ist
+            if any(verwendung.get_id() == style.get_id() for verwendung in typ.get_verwendungen()):
+                passende_kleidungsstuecke.append(kleidungsstueck)
 
-                if constraints_erfuellt:
-                    passende_kleidungsstuecke.append(kleidungsstueck)
-
-            # Wenn wir passende Kleidungsstücke gefunden haben
-            if passende_kleidungsstuecke:
-                style_komplettierungen[style.get_name()] = (style,passende_kleidungsstuecke)
-
-        return style_komplettierungen
+        return passende_kleidungsstuecke
 
     def create_outfit_from_base_item(self, basis_kleidungsstueck_id, ausgewaehlte_kleidungsstuecke, style_id):
         """Erstellt ein Outfit aus einer Liste von Kleidungsstücken, die zu einer bestimmten Basis gehört."""
