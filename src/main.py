@@ -33,16 +33,17 @@ bo = api.model('BusinessObject', {
 })
 
 # Vererbungshierarchie für die Kleiderschrank-Modelle
+kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
+    'name': fields.String(attribute='_Kleiderschrank__name', description='Name des Kleiderschranks'),
+    'eigentuemer_id': fields.Integer(description='ID des Eigentümers')
+})
+
 person = api.inherit('Person', bo, {
     'vorname': fields.String(attribute='_Person__vorname', description='Vorname der Person'),
     'nachname': fields.String(attribute='_Person__nachname', description='Nachname der Person'),
     'nickname': fields.String(attribute='_Person__nickname', description='Nickname der Person'),
-    'google_id': fields.String(attribute='_Person__google_id', description='Google ID der Person')
-})
-
-kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
-    'name': fields.String(attribute='_Kleiderschrank__name', description='Name des Kleiderschranks'),
-    'eigentuemer_id': fields.Integer(description='ID des Eigentümers')
+    'google_id': fields.String(attribute='_Person__google_id', description='Google ID der Person'),
+    'kleiderschrank': fields.Nested(kleiderschrank_model, attribute='_Person__kleiderschrank', description='Kleiderschrank der Person', allow_null=True)
 })
 
 kleidungstyp = api.inherit('Kleidungstyp', bo, {
@@ -322,6 +323,7 @@ class WardrobeOperations(Resource):
         except Exception as e:
             return {'message': f'Server error: {str(e)}'}, 500
 
+
 @wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 @wardrobe_ns.param('google_id', 'Die Google ID der Person')
@@ -334,8 +336,14 @@ class PersonsByGoogleIdOperations(Resource):
         person = adm.get_person_by_google_id(google_id)
         print(f"Backend: Person gefunden: {person}")  # Debug log
 
+        # Neue Debug-Ausgaben
+        if person:
+            print(f"Backend: Person hat Kleiderschrank: {person.getKleiderschrank()}")
+            if person.getKleiderschrank():
+                print(f"Backend: Kleiderschrank Name: {person.getKleiderschrank().getName()}")
+                print(f"Backend: Kleiderschrank ID: {person.getKleiderschrank().getId()}")
+
         if person is None:
-            # Wenn keine Person gefunden wurde, leeres Ergebnis zurückgeben
             return '', 204
         return person
 
