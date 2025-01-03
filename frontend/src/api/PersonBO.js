@@ -1,4 +1,5 @@
 import BusinessObject from './BusinessObject.js';
+import KleiderschrankBO from "./KleiderschrankBO";
 
 /**
  * Repräsentiert eine Person im digitalen Kleiderschranksystem.
@@ -103,20 +104,22 @@ export default class PersonBO extends BusinessObject {
    * @param {*} persons - JSON-Daten, die in PersonBO Objekte umgewandelt werden sollen
    */
   static fromJSON(persons) {
-    let result = [];
+        let result = new PersonBO();
 
-    if (Array.isArray(persons)) {
-      persons.forEach((p) => {
-        Object.setPrototypeOf(p, PersonBO.prototype);
-        result.push(p);
-      })
-    } else {
-      // Es handelt sich offenbar um ein singuläres Objekt
-      let p = persons;
-      Object.setPrototypeOf(p, PersonBO.prototype);
-      result.push(p);
+        Object.assign(result, persons);
+
+        // Konvertiere die Attribute vom Backend in Frontend-Repräsentation
+        result.id = persons.id;
+        result.vorname = persons.vorname;
+        result.nachname = persons.nachname;
+        result.nickname = persons.nickname;
+        result.google_id = persons.google_id;
+
+        // Wichtig: Konvertiere den Kleiderschrank in ein KleiderschrankBO
+        if (persons.kleiderschrank) {
+            result.kleiderschrank = KleiderschrankBO.fromJSON(persons.kleiderschrank);
+        }
+
+        return result;
     }
-
-    return result;
-  }
 }

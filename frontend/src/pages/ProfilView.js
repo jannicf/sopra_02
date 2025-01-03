@@ -6,6 +6,8 @@ import IconButton from '@mui/material/IconButton';
 import PersonForm from '../dialogs/PersonForm';
 import PersonEditForm from '../dialogs/PersonEditForm';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
+import KleiderschrankBO from "../api/KleiderschrankBO";
+import PersonBO from "../api/PersonBO";
 
 class PersonView extends Component {
     constructor(props) {
@@ -24,18 +26,26 @@ class PersonView extends Component {
     }
 
     loadPerson = async () => {
-        try {
-            this.setState({loading: true});
-            // Hier laden wir die Person anhand der Google ID des eingeloggten Users
-            const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
-            this.setState({
-                person: persons,
-                loading: false
-            });
-        } catch (error) {
-            this.setState({
-                error: error.message,
-                loading: false
+    try {
+        this.setState({loading: true});
+        // Debug vor API-Aufruf
+        console.log("ProfilView: Lade Person mit Google ID:", this.props.user?.uid);
+
+        const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
+
+        // Debug nach API-Aufruf
+        console.log("ProfilView: API Response:", persons);
+        console.log("ProfilView: Kleiderschrank in Response:", persons?.getKleiderschrank());
+
+        this.setState({
+            person: persons,
+            loading: false
+        });
+    } catch (error) {
+        console.error("ProfilView: Fehler beim Laden der Person:", error);
+        this.setState({
+            error: error.message,
+            loading: false
             });
         }
     }
@@ -72,10 +82,15 @@ class PersonView extends Component {
 
         // Debug-Ausgaben
         console.log("ProfilView: Person-Objekt:", person);
-        if (person && person.getKleiderschrank()) {
-            console.log("ProfilView: Kleiderschrank-Objekt:", person.getKleiderschrank());
+        // Erweiterte Debug-Ausgaben
+        console.log("ProfilView Render - Person-Objekt:", person);
+        if (person) {
+            console.log("ProfilView Render - Person ID:", person.getID());
+            console.log("ProfilView Render - Kleiderschrank:", person.getKleiderschrank());
+            if (person.getKleiderschrank()) {
+                console.log("ProfilView Render - Kleiderschrank Name:", person.getKleiderschrank().getName());
+            }
         }
-
         if (loading) {
             return <Typography>Lade Profil...</Typography>;
         }

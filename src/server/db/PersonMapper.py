@@ -202,8 +202,8 @@ class PersonMapper(Mapper):
 
     def find_by_google_id(self, google_id):
         """Auslesen aller Personen anhand der zugeordneten google_id."""
-        result = None
         print(f"PersonMapper: Suche Person mit Google ID {google_id}")
+        result = None
 
         cursor = self._cnx.cursor()
         command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE google_id=%s"
@@ -221,7 +221,7 @@ class PersonMapper(Mapper):
 
             # Neuer Code zum Laden des Kleiderschranks
             print(f"PersonMapper: Lade Kleiderschrank für Person {id}")
-            kleiderschrank_command = "SELECT id FROM kleiderschrank WHERE eigentuemer_id=%s"
+            kleiderschrank_command = "SELECT id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
             cursor.execute(kleiderschrank_command, (id,))
             kleiderschrank_tuples = cursor.fetchall()
 
