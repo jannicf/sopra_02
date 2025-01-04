@@ -40,8 +40,8 @@ class StyleMapper(Mapper):
 
         features = style.get_features()
         if features:
-            for feature in features:
-                command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s, %s)"
+            for feature in style.get_features():
+                command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s,%s)"
                 data = (style.get_id(), feature.get_id())
                 cursor.execute(command, data)
 
@@ -81,7 +81,7 @@ class StyleMapper(Mapper):
         return style
 
     def update(self, style):
-        """Wiederholtes Schreiben eines Objekts in die Datenbank.
+        """Wiederholtes Schreiben eines Style-Objekts in die Datenbank.
         :param style das Objekt, das in die DB geschrieben werden soll
         """
         cursor = self._cnx.cursor()
@@ -90,34 +90,26 @@ class StyleMapper(Mapper):
         data = (style.get_name(), style.get_id())
         cursor.execute(command, data)
 
-        # Features (Kleidungstypen) aktualisieren
-        # Zuerst vorhandene Verknüpfungen löschen
+        # Alte Feature löschen
         delete_command = "DELETE FROM style_kleidungstyp WHERE style_id=%s"
         cursor.execute(delete_command, (style.get_id(),))
 
-        # Neue Features einfügen
-        features = style.get_features()
-        if features:
-            for feature in features:
-                feature_command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s, %s)"
-                feature_data = (style.get_id(), feature.get_id())
-                cursor.execute(feature_command, feature_data)
+        # Neue Feature erstellen
+        for feature in style.get_features():
+            insert_command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s, %s)"
+            cursor.execute(insert_command, (style.get_id(), feature.get_id()))
 
-        # Constraints aktualisieren
-        # Zuerst vorhandene Verknüpfungen löschen
-        delete_command2 = "DELETE FROM kardinalitaet WHERE style_id=%s"
-        cursor.execute(delete_command2, (style.get_id(),))
-        delete_command3 = "DELETE FROM mutex WHERE style_id=%s"
-        cursor.execute(delete_command3, (style.get_id(),))
-        delete_command4 = "DELETE FROM implikation WHERE style_id=%s"
-        cursor.execute(delete_command4, (style.get_id(),))
+        # Alte Constraints löschen
+        cursor.execute("DELETE FROM kardinalitaet WHERE style_id=%s", (style.get_id(),))
+        cursor.execute("DELETE FROM mutex WHERE style_id=%s", (style.get_id(),))
+        cursor.execute("DELETE FROM implikation WHERE style_id=%s", (style.get_id(),))
 
         # Neue Constraints einfügen
         for constraint in style.get_constraints():
             if isinstance(constraint, Kardinalitaet):
                 command = """INSERT INTO kardinalitaet 
-                          (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
-                          VALUES (%s, %s, %s, %s, %s)"""
+                    (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
+                    VALUES (%s, %s, %s, %s, %s)"""
                 data = (constraint.get_id(), constraint.get_min_anzahl(),
                         constraint.get_max_anzahl(), constraint.get_bezugsobjekt().get_id(),
                         style.get_id())
@@ -125,16 +117,16 @@ class StyleMapper(Mapper):
 
             elif isinstance(constraint, Mutex):
                 command = """INSERT INTO mutex 
-                          (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
-                          VALUES (%s, %s, %s, %s)"""
+                    (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                    VALUES (%s, %s, %s, %s)"""
                 data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
                         constraint.get_bezugsobjekt2().get_id(), style.get_id())
                 cursor.execute(command, data)
 
             elif isinstance(constraint, Implikation):
                 command = """INSERT INTO implikation 
-                          (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
-                          VALUES (%s, %s, %s, %s)"""
+                    (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                    VALUES (%s, %s, %s, %s)"""
                 data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
                         constraint.get_bezugsobjekt2().get_id(), style.get_id())
                 cursor.execute(command, data)
@@ -169,11 +161,10 @@ class StyleMapper(Mapper):
 
     def find_by_id(self, style_id):
         """Suchen eines Styles mit vorgegebener ID. Da diese eindeutig ist,
-            wird genau ein Objekt zurückgegeben.
+        wird genau ein Objekt zurückgegeben.
 
-            :param style_id Primärschlüsselattribut (->DB)
-            :return Style-Objekt, das dem übergebenen Schlüssel entspricht, None bei
-            nicht vorhandenem DB-Tupel.
+        :param style_id Primärschlüsselattribut (->DB)
+        :return Style-Objekt, das dem übergebenen Schlüssel entspricht
         """
         result = None
         cursor = self._cnx.cursor()
@@ -189,97 +180,106 @@ class StyleMapper(Mapper):
             style.set_id(id)
             style.set_name(name)
 
-            # Kleidungstypen mit einem JOIN laden
-            feature_command = """
-                SELECT kleidungstyp.id, kleidungstyp.bezeichnung
-                FROM kleidungstyp 
-                JOIN style_kleidungstyp ON kleidungstyp.id = style_kleidungstyp.kleidungstyp_id
-                WHERE style_kleidungstyp.style_id = %s
-            """
-            cursor.execute(feature_command, (id,))
-            feature_tuples = cursor.fetchall()
+            # Features (Kleidungstypen) laden
+            cursor.execute("""
+                        SELECT kt.id, kt.bezeichnung 
+                        FROM kleidungstyp kt
+                        JOIN style_kleidungstyp sk ON kt.id = sk.kleidungstyp_id
+                        WHERE sk.style_id = %s
+                    """, (id,))
 
-            # Kleidungstypen direkt erstellen und zuweisen
-            for (kleidungstyp_id, kleidungstyp_bezeichnung) in feature_tuples:
+            for (kt_id, bezeichnung) in cursor.fetchall():
                 kleidungstyp = Kleidungstyp()
-                kleidungstyp.set_id(kleidungstyp_id)
-                kleidungstyp.set_bezeichnung(kleidungstyp_bezeichnung)
+                kleidungstyp.set_id(kt_id)
+                kleidungstyp.set_bezeichnung(bezeichnung)
                 style.add_feature(kleidungstyp)
 
             # Kardinalitäten laden
-            kardinalitaet_command = """
-                SELECT kardinalitaet.id, kardinalitaet.min_anzahl, kardinalitaet.max_anzahl, 
-                kardinalitaet.bezugsobjekt_id
-                FROM kardinalitaet 
-                WHERE kardinalitaet.style_id = %s
-            """
-            cursor.execute(kardinalitaet_command, (id,))
-            kardinalitaet_tuples = cursor.fetchall()
+            cursor.execute("""
+                        SELECT k.id, k.min_anzahl, k.max_anzahl, kt.id, kt.bezeichnung
+                        FROM kardinalitaet k
+                        JOIN kleidungstyp kt ON k.bezugsobjekt_id = kt.id
+                        WHERE k.style_id = %s
+                    """, (id,))
 
-            for (kardinalitaet_id, min_anzahl, max_anzahl, bezugsobjekt_id) in kardinalitaet_tuples:
-                kardinalitaet = Kardinalitaet()
-                kardinalitaet.set_id(kardinalitaet_id)
-                kardinalitaet.set_min_anzahl(min_anzahl)
-                kardinalitaet.set_max_anzahl(max_anzahl)
-                # Bezugsobjekt setzen
-                kleidungstyp = Kleidungstyp()
-                kleidungstyp.set_id(bezugsobjekt_id)
-                kardinalitaet.set_bezugsobjekt(kleidungstyp)
-                kardinalitaet.set_style(style)
-                style.add_constraint(kardinalitaet)
+            for (k_id, min_anzahl, max_anzahl, bezugsobjekt_id, bezeichnung) in cursor.fetchall():
+                kard = Kardinalitaet()
+                kard.set_id(k_id)
+                kard.set_min_anzahl(min_anzahl)
+                kard.set_max_anzahl(max_anzahl)
+
+                bezugsobjekt = Kleidungstyp()
+                bezugsobjekt.set_id(bezugsobjekt_id)
+                bezugsobjekt.set_bezeichnung(bezeichnung)
+                kard.set_bezugsobjekt(bezugsobjekt)
+                kard.set_style(style)
+                style.add_constraint(kard)
 
             # Mutex laden
-            mutex_command = """
-                SELECT mutex.id, mutex.bezugsobjekt1_id, mutex.bezugsobjekt2_id
-                FROM mutex 
-                WHERE mutex.style_id = %s
-            """
-            cursor.execute(mutex_command, (id,))
-            mutex_tuples = cursor.fetchall()
+            cursor.execute("""
+                        SELECT m.id, 
+                               kt1.id as kt1_id, kt1.bezeichnung as kt1_bez,
+                               kt2.id as kt2_id, kt2.bezeichnung as kt2_bez
+                        FROM mutex m
+                        JOIN kleidungstyp kt1 ON m.bezugsobjekt1_id = kt1.id
+                        JOIN kleidungstyp kt2 ON m.bezugsobjekt2_id = kt2.id
+                        WHERE m.style_id = %s
+                    """, (id,))
 
-            for (mutex_id, bezugsobjekt1_id, bezugsobjekt2_id) in mutex_tuples:
+            for (m_id, kt1_id, kt1_bez, kt2_id, kt2_bez) in cursor.fetchall():
                 mutex = Mutex()
-                mutex.set_id(mutex_id)
-                # Bezugsobjekte setzen
+                mutex.set_id(m_id)
+
                 bezugsobjekt1 = Kleidungstyp()
-                bezugsobjekt1.set_id(bezugsobjekt1_id)
-                bezugsobjekt2 = Kleidungstyp()
-                bezugsobjekt2.set_id(bezugsobjekt2_id)
+                bezugsobjekt1.set_id(kt1_id)
+                bezugsobjekt1.set_bezeichnung(kt1_bez)
                 mutex.set_bezugsobjekt1(bezugsobjekt1)
+
+                bezugsobjekt2 = Kleidungstyp()
+                bezugsobjekt2.set_id(kt2_id)
+                bezugsobjekt2.set_bezeichnung(kt2_bez)
                 mutex.set_bezugsobjekt2(bezugsobjekt2)
+
                 mutex.set_style(style)
                 style.add_constraint(mutex)
 
             # Implikationen laden
-            implikation_command = """
-                SELECT implikation.id, implikation.bezugsobjekt1_id, implikation.bezugsobjekt2_id
-                FROM implikation 
-                WHERE implikation.style_id = %s
-            """
-            cursor.execute(implikation_command, (id,))
-            implikation_tuples = cursor.fetchall()
+            cursor.execute("""
+                        SELECT i.id,
+                               kt1.id as kt1_id, kt1.bezeichnung as kt1_bez,
+                               kt2.id as kt2_id, kt2.bezeichnung as kt2_bez
+                        FROM implikation i
+                        JOIN kleidungstyp kt1 ON i.bezugsobjekt1_id = kt1.id
+                        JOIN kleidungstyp kt2 ON i.bezugsobjekt2_id = kt2.id
+                        WHERE i.style_id = %s
+                    """, (id,))
 
-            for (implikation_id, bezugsobjekt1_id, bezugsobjekt2_id) in implikation_tuples:
-                implikation = Implikation()
-                implikation.set_id(implikation_id)
-                # Bezugsobjekte setzen
+            for (i_id, kt1_id, kt1_bez, kt2_id, kt2_bez) in cursor.fetchall():
+                impl = Implikation()
+                impl.set_id(i_id)
+
                 bezugsobjekt1 = Kleidungstyp()
-                bezugsobjekt1.set_id(bezugsobjekt1_id)
+                bezugsobjekt1.set_id(kt1_id)
+                bezugsobjekt1.set_bezeichnung(kt1_bez)
+                impl.set_bezugsobjekt1(bezugsobjekt1)
+
                 bezugsobjekt2 = Kleidungstyp()
-                bezugsobjekt2.set_id(bezugsobjekt2_id)
-                implikation.set_bezugsobjekt1(bezugsobjekt1)
-                implikation.set_bezugsobjekt2(bezugsobjekt2)
-                implikation.set_style(style)
-                style.add_constraint(implikation)
+                bezugsobjekt2.set_id(kt2_id)
+                bezugsobjekt2.set_bezeichnung(kt2_bez)
+                impl.set_bezugsobjekt2(bezugsobjekt2)
+
+                impl.set_style(style)
+                style.add_constraint(impl)
 
             result = style
+
+            return result
 
         except IndexError:
             result = None
 
         self._cnx.commit()
         cursor.close()
-
         return result
 
     def find_by_name(self, name):
