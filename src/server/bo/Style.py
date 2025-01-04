@@ -53,11 +53,45 @@ class Style(bo.BusinessObject):
     def remove_constraint(self, constraint: Constraint):
         """Entfernt einen Constraint aus dem Style"""
         if constraint in self.__constraints:
-            self.__features.remove(constraint)
+            self.__constraints.remove(constraint)
 
     def get_constraints(self):
-        """Gibt alle Constraints zurück"""
-        return self.__constraints
+        from server.bo.Kardinalitaet import Kardinalitaet
+        from server.bo.Mutex import Mutex
+        from server.bo.Implikation import Implikation
+
+        """Gibt alle Constraints in einem JSON-kompatiblen Format zurück,
+        so wie es das Frontend in 'StyleBO.fromJSON()' erwartet.
+        """
+        constraints_list = []
+
+        for c in self.__constraints:
+            constraint_data = {
+                'id': c.get_id(),
+                'type': c.__class__.__name__.lower()  # z.B. 'mutex', 'implikation', 'kardinalitaet'
+            }
+
+            if isinstance(c, Kardinalitaet):
+                constraint_data.update({
+                    'min_anzahl': c.get_min_anzahl(),
+                    'max_anzahl': c.get_max_anzahl(),
+                    # Hier: Bezugsobjekt-ID statt nur Bezeichnung
+                    'bezugsobjekt_id': c.get_bezugsobjekt().get_id(),
+                })
+            elif isinstance(c, Mutex):
+                constraint_data.update({
+                    'bezugsobjekt1_id': c.get_bezugsobjekt1().get_id(),
+                    'bezugsobjekt2_id': c.get_bezugsobjekt2().get_id(),
+                })
+            elif isinstance(c, Implikation):
+                constraint_data.update({
+                    'bezugsobjekt1_id': c.get_bezugsobjekt1().get_id(),
+                    'bezugsobjekt2_id': c.get_bezugsobjekt2().get_id(),
+                })
+
+            constraints_list.append(constraint_data)
+
+        return constraints_list
 
     def __eq__(self, other):
         """Zwei Styles sind gleich, wenn sie die gleiche ID haben"""
@@ -69,23 +103,94 @@ class Style(bo.BusinessObject):
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
         return "Style: {}, {}".format(self.get_id(), self.get_name())
 
+    def get_features_as_list(self):
+        return self.__features
+
+    def get_constraints_as_list(self):
+        from server.bo.Kardinalitaet import Kardinalitaet
+        from server.bo.Mutex import Mutex
+        from server.bo.Implikation import Implikation
+
+        result = []
+        for c in self.__constraints:
+            c_dict = {
+                'id': c.get_id(),
+                'type': c.__class__.__name__.lower()  # "mutex", "implikation", "kardinalitaet"
+            }
+
+            if isinstance(c, Kardinalitaet):
+                c_dict.update({
+                    'min_anzahl': c.get_min_anzahl(),
+                    'max_anzahl': c.get_max_anzahl(),
+                    'bezugsobjekt': {
+                        'id': c.get_bezugsobjekt().get_id(),
+                        'bezeichnung': c.get_bezugsobjekt().get_bezeichnung()
+                    }
+                })
+            elif isinstance(c, Mutex):
+                c_dict.update({
+                    'bezugsobjekt1': {
+                        'id': c.get_bezugsobjekt1().get_id(),
+                        'bezeichnung': c.get_bezugsobjekt1().get_bezeichnung()
+                    },
+                    'bezugsobjekt2': {
+                        'id': c.get_bezugsobjekt2().get_id(),
+                        'bezeichnung': c.get_bezugsobjekt2().get_bezeichnung()
+                    }
+                })
+            elif isinstance(c, Implikation):
+                c_dict.update({
+                    'bezugsobjekt1': {
+                        'id': c.get_bezugsobjekt1().get_id(),
+                        'bezeichnung': c.get_bezugsobjekt1().get_bezeichnung()
+                    },
+                    'bezugsobjekt2': {
+                        'id': c.get_bezugsobjekt2().get_id(),
+                        'bezeichnung': c.get_bezugsobjekt2().get_bezeichnung()
+                    }
+                })
+
+            result.append(c_dict)
+        return result
+
     @staticmethod
     def from_dict(dictionary=dict()):
-        """Umwandeln eines Python dict() in einen Style()."""
         from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
         from server.bo.Kardinalitaet import Kardinalitaet
         from server.bo.Mutex import Mutex
         from server.bo.Implikation import Implikation
 
         obj = Style()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject!
+        if "id" in dictionary:
+            obj.set_id(dictionary["id"])
         obj.set_name(dictionary["name"])
-        # Wenn constraints im Dictionary vorhanden sind, diese auch setzen
-        if "constraints" in dictionary and dictionary["constraints"] is not None:
-            for constraint in dictionary["constraints"]:
-                obj.add_constraint(constraint)
-        # Wenn features im Dictionary vorhanden sind, diese auch setzen
-        if "features" in dictionary and dictionary["features"] is not None:
-            for kleidungstyp in dictionary["features"]:
+
+        if "features" in dictionary and dictionary["features"]:
+            for feature_id in dictionary["features"]:
+                kleidungstyp = Kleidungstyp()
+                kleidungstyp.set_id(feature_id)
                 obj.add_feature(kleidungstyp)
+
+        if "constraints" in dictionary and dictionary["constraints"]:
+            for constraint in dictionary["constraints"]:
+                if "type" not in constraint:
+                    continue
+
+                if constraint["type"] == "kardinalitaet":
+                    k = Kardinalitaet()
+                    k.set_min_anzahl(constraint["min_anzahl"])
+                    k.set_max_anzahl(constraint["max_anzahl"])
+                    k.set_bezugsobjekt(Kleidungstyp().set_id(constraint["bezugsobjekt_id"]))
+                    obj.add_constraint(k)
+                elif constraint["type"] == "mutex":
+                    m = Mutex()
+                    m.set_bezugsobjekt1(Kleidungstyp().set_id(constraint["bezugsobjekt1_id"]))
+                    m.set_bezugsobjekt2(Kleidungstyp().set_id(constraint["bezugsobjekt2_id"]))
+                    obj.add_constraint(m)
+                elif constraint["type"] == "implikation":
+                    i = Implikation()
+                    i.set_bezugsobjekt1(Kleidungstyp().set_id(constraint["bezugsobjekt1_id"]))
+                    i.set_bezugsobjekt2(Kleidungstyp().set_id(constraint["bezugsobjekt2_id"]))
+                    obj.add_constraint(i)
+
         return obj
