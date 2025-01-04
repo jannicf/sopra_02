@@ -227,15 +227,18 @@ class PersonMapper(Mapper):
             cursor.execute(command, (id,))
             kleiderschrank_tuples = cursor.fetchall()
 
+            # Im PersonMapper, find_by_google_id Methode:
             if kleiderschrank_tuples:
-                from server.bo.Kleiderschrank import Kleiderschrank
-                (kleiderschrank_id, kleiderschrank_name) = kleiderschrank_tuples[0]
-                kleiderschrank = Kleiderschrank()
-                kleiderschrank.set_id(kleiderschrank_id)
-                kleiderschrank.set_name(kleiderschrank_name)
-                kleiderschrank.set_eigentuemer(person)
-                person.set_kleiderschrank(kleiderschrank)
-                print(f"PersonMapper: Kleiderschrank {kleiderschrank_name} gefunden und zugewiesen")
+                from server.db.KleiderschrankMapper import KleiderschrankMapper
+                # Verwende den KleiderschrankMapper um den vollständigen Kleiderschrank zu laden
+                with KleiderschrankMapper() as kleiderschrank_mapper:
+                    kleiderschrank = kleiderschrank_mapper.find_by_id(kleiderschrank_tuples[0][0])
+                    if kleiderschrank:
+                        person.set_kleiderschrank(kleiderschrank)
+                        kleiderschrank.set_eigentuemer(person)  # Wichtig: Beidseitige Beziehung setzen
+                        print(f"PersonMapper: Kleiderschrank {kleiderschrank.get_name()} gefunden und zugewiesen")
+                    else:
+                        print("PersonMapper: Kleiderschrank konnte nicht vollständig geladen werden")
             else:
                 print("PersonMapper: Kein Kleiderschrank für diese Person gefunden")
 

@@ -169,15 +169,34 @@ class KleiderschrankAdministration(object):
 
     def create_person(self, vorname, nachname, nickname, google_id):
         """Eine neue Person anlegen."""
-        person = Person()
-        person.set_vorname(vorname)
-        person.set_nachname(nachname)
-        person.set_nickname(nickname)
-        person.set_google_id(google_id)
-        person.set_id(1)
+        try:
+            print(f"create_person aufgerufen mit:")
+            print(f"Vorname: {vorname}")
+            print(f"Nachname: {nachname}")
+            print(f"Nickname: {nickname}")
+            print(f"Google ID: {google_id}")
 
-        with PersonMapper() as mapper:
-            return mapper.insert(person)
+            person = Person()
+            person.set_vorname(vorname)
+            person.set_nachname(nachname)
+            person.set_nickname(nickname)
+            person.set_google_id(google_id)
+
+            print("Person-Objekt vor dem Speichern:")
+            print(f"ID: {person.get_id()}")
+            print(f"Vorname: {person.get_vorname()}")
+            print(f"Nachname: {person.get_nachname()}")
+            print(f"Nickname: {person.get_nickname()}")
+            print(f"Google ID: {person.get_google_id()}")
+
+            with PersonMapper() as mapper:
+                result = mapper.insert(person)
+                print("Person erfolgreich erstellt mit ID:", result.get_id())
+                return result
+
+        except Exception as e:
+            print(f"ERROR in create_person: {str(e)}")
+            raise e
 
     def get_person_by_id(self, number):
         """Die Person mit der gegebenen ID auslesen."""
@@ -232,13 +251,30 @@ class KleiderschrankAdministration(object):
 
     def create_kleiderschrank(self, name, eigentuemer):
         """Einen Kleiderschrank anlegen."""
-        kleiderschrank = Kleiderschrank()
-        kleiderschrank.set_name(name)
-        kleiderschrank.set_eigentuemer(eigentuemer)
-        kleiderschrank.set_id(1)
+        try:
+            print(f"create_kleiderschrank aufgerufen mit:")
+            print(f"Name: {name}")
+            print(f"Eigentuemer ID: {eigentuemer.get_id()}")
 
-        with KleiderschrankMapper() as mapper:
-            return mapper.insert(kleiderschrank)
+            kleiderschrank = Kleiderschrank()
+            kleiderschrank.set_name(name)
+            kleiderschrank.set_eigentuemer(eigentuemer)
+
+            with KleiderschrankMapper() as mapper:
+                result = mapper.insert(kleiderschrank)
+                print(f"Kleiderschrank erstellt mit ID: {result.get_id()}")
+
+                # Person mit Kleiderschrank aktualisieren
+                eigentuemer.set_kleiderschrank(result)
+                with PersonMapper() as person_mapper:
+                    person_mapper.update(eigentuemer)
+                    print(f"Person {eigentuemer.get_id()} mit Kleiderschrank {result.get_id()} aktualisiert")
+
+                return result
+
+        except Exception as e:
+            print(f"ERROR in create_kleiderschrank: {str(e)}")
+            raise e
 
     def get_kleiderschrank_by_id(self, number):
         """Den Kleiderschrank mit der gegebenen ID auslesen."""

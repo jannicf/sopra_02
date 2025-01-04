@@ -60,7 +60,6 @@ class Person(bo.BusinessObject):
                                                        self.get_nickname(), self.get_google_id(),
                                                        )
 
-
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in eine Person()."""

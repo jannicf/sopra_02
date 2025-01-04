@@ -4,44 +4,34 @@ from server.db.PersonMapper import PersonMapper
 from server.db.KleidungsstueckMapper import KleidungsstueckMapper
 
 class KleiderschrankMapper(Mapper):
+    # In KleiderschrankMapper.py
     def insert(self, kleiderschrank):
-        """Einfügen eines kleiderschrank-Objekts in die Datenbank.
-
-                Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
-                berichtigt.
-
-                :param kleiderschrank das zu speichernde Objekt
-                :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
-                """
         cursor = self._cnx.cursor()
-        cursor.execute("SELECT MAX(id) AS maxid FROM kleiderschrank ")
+        print(f"KleiderschrankMapper: Versuche Kleiderschrank einzufügen")
+        print(f"Name: {kleiderschrank.get_name()}")
+        print(f"Eigentuemer ID: {kleiderschrank.get_eigentuemer().get_id()}")
+
+        cursor.execute("SELECT MAX(id) AS maxid FROM kleiderschrank")
         tuples = cursor.fetchall()
 
         for (maxid) in tuples:
             if maxid[0] is not None:
-                """Wenn wir eine maximale ID festellen konnten, zählen wir diese
-                um 1 hoch und weisen diesen Wert als ID dem Kleiderschrank-Objekt zu."""
                 kleiderschrank.set_id(maxid[0] + 1)
             else:
-                """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
-                davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 kleiderschrank.set_id(1)
+
+        print(f"KleiderschrankMapper: Generierte ID: {kleiderschrank.get_id()}")
 
         command = "INSERT INTO kleiderschrank (id, eigentuemer_id, name) VALUES (%s,%s,%s)"
         data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name())
+        print(f"KleiderschrankMapper: SQL Command:", command)
+        print(f"KleiderschrankMapper: Data:", data)
+
         cursor.execute(command, data)
-
-        """Inhalte des Kleiderschranks speichern, um sicherzustellen, 
-        dass die einzelnen Kleidungsstücke, die zu einem Kleiderschrank gehören, 
-        ebenfalls korrekt in die Datenbank eingefügt werden."""
-        kleidungsstueck_mapper = KleidungsstueckMapper()
-        for kleidungsstueck in kleiderschrank.get_inhalt():
-            kleidungsstueck.set_kleiderschrank_id(kleiderschrank.get_id())
-            kleidungsstueck_mapper.insert(kleidungsstueck)
-
         self._cnx.commit()
         cursor.close()
 
+        print(f"KleiderschrankMapper: Kleiderschrank erfolgreich eingefügt mit ID {kleiderschrank.get_id()}")
         return kleiderschrank
 
     def update(self, kleiderschrank):
