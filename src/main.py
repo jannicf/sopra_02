@@ -55,10 +55,6 @@ kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
     'kleiderschrank_id': fields.Integer(attribute='_Kleidungsstueck__kleiderschrank_id', description='ID des zugehörigen Kleiderschranks')
 })
 
-style = api.inherit('Style', bo, {
-    'name': fields.String(attribute='_Style__name', description='Name des Styles')
-})
-
 outfit = api.inherit('Outfit', bo, {
     'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if x.get_style() else None),
     'bausteine': fields.List(fields.Integer, attribute=lambda x: x.get_baustein_ids())
@@ -77,13 +73,24 @@ binary_constraint = api.inherit('BinaryConstraint', constraint, {
     'bezugsobjekt2': fields.Integer(attribute=lambda x: x.get_bezugsobjekt2().get_id()),
 })
 
-mutex = api.inherit('MutexConstraint', binary_constraint, {})
+mutex = api.inherit('MutexConstraint', binary_constraint, {
+    'type': fields.String(default='mutex')
+})
 
-implikation = api.inherit('ImplicationConstraint', binary_constraint, {})
+implikation = api.inherit('ImplicationConstraint', binary_constraint, {
+    'type': fields.String(default='implikation')
+})
 
 kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
+    'type': fields.String(default='kardinalitaet'),
     'min_anzahl': fields.Integer(attribute=lambda x: x.get_min_anzahl()),
     'max_anzahl': fields.Integer(attribute=lambda x: x.get_max_anzahl()),
+})
+
+style = api.inherit('Style', bo, {
+    'name': fields.String(attribute='_Style__name', description='Name des Styles'),
+    'features': fields.List(fields.Nested(kleidungstyp), attribute=lambda s: s.get_features_as_list()),
+    'constraints': fields.List(fields.Raw, attribute=lambda s: s.get_constraints_as_list())
 })
 
 
@@ -212,37 +219,32 @@ class WardrobeListOperations(Resource):
     @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
     @wardrobe_ns.expect(kleiderschrank_model)
     # @secured
-    @wardrobe_ns.route('/wardrobes')
-    class WardrobeListOperations(Resource):
-        @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
-        @wardrobe_ns.expect(kleiderschrank_model)
-        # @secured
-        def post(self):
-            try:
-                print("Empfangene Payload:", api.payload)  # Debug
+    def post(self):
+        try:
+            print("Empfangene Payload:", api.payload)  # Debug
 
-                adm = KleiderschrankAdministration()
+            adm = KleiderschrankAdministration()
 
-                # Erstelle ein neues Kleiderschrank-Objekt
-                kleiderschrank = Kleiderschrank()
-                kleiderschrank.set_name(api.payload['name'])
+            # Erstelle ein neues Kleiderschrank-Objekt
+            kleiderschrank = Kleiderschrank()
+            kleiderschrank.set_name(api.payload['name'])
 
-                # Hole den Eigentümer und setze ihn
-                if 'eigentuemer_id' in api.payload:
-                    eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
-                    kleiderschrank.set_eigentuemer(eigentuemer)
+            # Hole den Eigentümer und setze ihn
+            if 'eigentuemer_id' in api.payload:
+                eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
+                kleiderschrank.set_eigentuemer(eigentuemer)
 
-                # Erstelle den Kleiderschrank
-                result = adm.create_kleiderschrank(
-                    kleiderschrank.get_name(),
-                    kleiderschrank.get_eigentuemer()
-                )
+            # Erstelle den Kleiderschrank
+            result = adm.create_kleiderschrank(
+                kleiderschrank.get_name(),
+                kleiderschrank.get_eigentuemer()
+            )
 
-                return result, 201
+            return result, 201
 
-            except Exception as e:
-                print(f"Fehler beim Erstellen des Kleiderschranks: {str(e)}")
-                return {'message': str(e)}, 500
+        except Exception as e:
+            print(f"Fehler beim Erstellen des Kleiderschranks: {str(e)}")
+            return {'message': str(e)}, 500
 
 
 @wardrobe_ns.route('/wardrobes/<int:id>')
