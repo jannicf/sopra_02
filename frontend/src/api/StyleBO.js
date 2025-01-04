@@ -15,9 +15,9 @@ export default class StyleBO extends BusinessObject {
    */
   constructor() {
     super();
-    this.name = "";
-    this.constraints = []; // Array der Constraints in diesem
-    this.features = [];    // Array der Kleidungstypen
+    this._name = "";
+    this._constraints = []; // Array der Constraints in diesem
+    this._features = [];    // Array der Kleidungstypen
   }
 
   /**
@@ -26,16 +26,15 @@ export default class StyleBO extends BusinessObject {
    * @param {String} aName - Der neue Name des Styles
    */
   setName(aName) {
-    this.name = aName;
+    this._name = aName;
   }
 
   /**
    * Gibt den Namen des Styles zurück.
    */
   getName() {
-    return this.name;
+    return this._name;
   }
-
   /**
    * Fügt einen Kleidungstyp zum Style hinzu.
    * Fügt auch diesem Kleidungstyp den Style hinzu, wenn er noch nicht enthalten ist.
@@ -43,13 +42,7 @@ export default class StyleBO extends BusinessObject {
    * @param {KleidungstypBO} aKleidungstyp - Der hinzuzufügende Kleidungstyp
    */
   addFeature(aKleidungstyp) {
-    if (aKleidungstyp instanceof KleidungstypBO) {
-      this.features.push(aKleidungstyp);
-      // Auch dem Kleidungstyp den Style hinzufügen, wenn er nicht schon im Array ist
-      if (!aKleidungstyp.getVerwendungen().some(verwendung => verwendung.getID() === this.getID())) {
-        aKleidungstyp.addVerwendung(this);
-      }
-    }
+    this._features.push(aKleidungstyp);
   }
 
   /**
@@ -73,9 +66,8 @@ export default class StyleBO extends BusinessObject {
    * Gibt alle Kleidungstypen des Styles zurück.
    */
   getFeatures() {
-    return this.features;
+    return this._features;
   }
-
   /**
    * Fügt einen Constraint zum Style hinzu.
    *
@@ -83,7 +75,7 @@ export default class StyleBO extends BusinessObject {
    */
   addConstraint(aConstraint) {
     if (aConstraint instanceof ConstraintBO) {
-      this.constraints.push(aConstraint);
+      this._constraints.push(aConstraint);
     }
   }
 
@@ -93,9 +85,9 @@ export default class StyleBO extends BusinessObject {
    * @param {ConstraintBO} aConstraint - Der zu entfernende Constraint
    */
   removeConstraint(aConstraint) {
-    const index = this.constraints.findIndex(c => c.getID() === aConstraint.getID());
+    const index = this._constraints.findIndex(c => c.getID() === aConstraint.getID());
     if (index > -1) {
-      this.constraints.splice(index, 1);
+      this._constraints.splice(index, 1);
     }
   }
 
@@ -103,91 +95,74 @@ export default class StyleBO extends BusinessObject {
    * Gibt alle Constraints des Styles zurück.
    */
   getConstraints() {
-    return this.constraints;
+    return this._constraints;
   }
-
   /**
    * Konvertiert eine JSON-Antwort in ein StyleBO Objekt bzw. Array von StyleBO Objekten.
    *
    * @param {*} styles - JSON-Daten aus dem Backend
    */
   static fromJSON(styles) {
-    let result = [];
+  let result = [];
 
-    if (Array.isArray(styles)) {
-      styles.forEach((s) => {
-        let style = new StyleBO();
-        style.setID(s.id);
-        style.setName(s.name);
-
-        // Features sicher hinzufügen
-        if (s.features && Array.isArray(s.features)) {
-          s.features.forEach(feature => {
-            const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
-            style.addFeature(kleidungstyp);
-          });
-        }
-
-        // Constraints sicher hinzufügen
-        if (s.constraints && Array.isArray(s.constraints)) {
-          s.constraints.forEach(constraint => {
-            if (constraint) {
-              // Der Constraint-Typ muss aus den Daten kommen, nicht als type-Feld
-              if ('min_anzahl' in constraint) {
-                let kardinalitaet = KardinalitaetBO.fromJSON([constraint])[0];
-                style.addConstraint(kardinalitaet);
-              } else if ('bezugsobjekt1_id' in constraint && 'bezugsobjekt2_id' in constraint) {
-                if (constraint.constructor.name === 'Mutex') {
-                  let mutex = MutexBO.fromJSON([constraint])[0];
-                  style.addConstraint(mutex);
-                } else {
-                  let implikation = ImplikationBO.fromJSON([constraint])[0];
-                  style.addConstraint(implikation);
-                }
-              }
-            }
-          });
-        }
-
-        result.push(style);
-      });
-    } else if (styles) {
-      // Ein einzelnes Style-Objekt verarbeiten
+  // Falls styles bereits ein Array ist …
+  if (Array.isArray(styles)) {
+    styles.forEach(s => {
       let style = new StyleBO();
-      style.setID(styles.id);
-      style.setName(styles.name);
+      style.setID(s.id);
+      style.setName(s.name);
 
       // Features hinzufügen
-      if (styles.features && Array.isArray(styles.features)) {
-        styles.features.forEach(feature => {
-          const kleidungstyp = KleidungstypBO.fromJSON([feature])[0];
-          style.addFeature(kleidungstyp);
-        });
-      }
+      s.features?.forEach(f => {
+        style.addFeature(KleidungstypBO.fromJSON([f])[0]);
+      });
 
       // Constraints hinzufügen
-      if (styles.constraints && Array.isArray(styles.constraints)) {
-        styles.constraints.forEach(constraint => {
-          if (constraint) {
-            if ('min_anzahl' in constraint) {
-              let kardinalitaet = KardinalitaetBO.fromJSON([constraint])[0];
-              style.addConstraint(kardinalitaet);
-            } else if ('bezugsobjekt1_id' in constraint && 'bezugsobjekt2_id' in constraint) {
-              if (constraint.constructor.name === 'Mutex') {
-                let mutex = MutexBO.fromJSON([constraint])[0];
-                style.addConstraint(mutex);
-              } else {
-                let implikation = ImplikationBO.fromJSON([constraint])[0];
-                style.addConstraint(implikation);
-              }
-            }
+      s.constraints?.forEach(c => {
+        if (c.min_anzahl) {
+          // Kardinalität
+          style.addConstraint(KardinalitaetBO.fromJSON([c])[0]);
+        } else if (c.bezugsobjekt1) {
+          // => Mutex oder Implikation
+          if (c.type === 'mutex') {
+            style.addConstraint(MutexBO.fromJSON([c])[0]);
+          } else {
+            style.addConstraint(ImplikationBO.fromJSON([c])[0]);
           }
-        });
-      }
+        }
+
+      });
 
       result.push(style);
-    }
+    });
 
-    return result;
+  } else {
+    // Falls styles nur ein einzelnes Objekt ist …
+    let s = styles;
+    let style = new StyleBO();
+    style.setID(s.id);
+    style.setName(s.name);
+
+    s.features?.forEach(f => {
+      style.addFeature(KleidungstypBO.fromJSON([f])[0]);
+    });
+
+    s.constraints?.forEach(c => {
+      if (c.min_anzahl) {
+        style.addConstraint(KardinalitaetBO.fromJSON([c])[0]);
+      } else if (c.bezugsobjekt1_id) {
+        if (c.type === 'mutex') {
+          style.addConstraint(MutexBO.fromJSON([c])[0]);
+        } else {
+          style.addConstraint(ImplikationBO.fromJSON([c])[0]);
+        }
+      }
+    });
+
+    result.push(style);
   }
+
+  // Wir geben immer ein Array zurück
+  return result;
+}
 }
