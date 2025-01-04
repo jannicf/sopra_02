@@ -132,22 +132,35 @@ class KleiderschrankAPI {
     }
 
     addPerson(personBO) {
-        return this.#fetchAdvanced(this.#addPersonURL(), {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(personBO)
-        }).then(responseJSON => {
-            let responsePersonBO = PersonBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responsePersonBO);
-            })
-        })
+    // Debug
+    console.log('addPerson called with:', personBO);
+
+    return this.#fetchAdvanced(this.#addPersonURL(), {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(personBO)
+    }).then(responseJSON => {
+        // Debug
+        console.log('Server response:', responseJSON);
+
+        const person = PersonBO.fromJSON(responseJSON);
+        if (!person) {
+            throw new Error('Fehler beim Erstellen der Person - keine Daten vom Server');
+        }
+        return person;
+    }).catch(error => {
+        console.error('Error in addPerson:', error);
+        throw error;
+        });
     }
 
     updatePerson(personBO) {
+        console.log('updatePerson aufgerufen mit:', personBO);  // NEU
+        console.log('Person ID beim Update:', personBO.getID());  // NEU
+
         return this.#fetchAdvanced(this.#updatePersonURL(personBO.getID()), {
             method: 'PUT',
             headers: {

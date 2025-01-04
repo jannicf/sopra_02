@@ -105,29 +105,39 @@ class PersonListOperations(Resource):
     @wardrobe_ns.marshal_with(person, code=200)
     @wardrobe_ns.expect(person)
     # @secured
+    @wardrobe_ns.marshal_with(person, code=200)
+    @wardrobe_ns.expect(person)
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
-
+        print("POST /persons aufgerufen")
+        print("Empfangene Daten:", api.payload)
 
         adm = KleiderschrankAdministration()
 
         proposal = Person.from_dict(api.payload)
+        print("Erstelltes Person-Objekt aus Payload:", proposal)
 
         if proposal is not None:
-            """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
-            eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
-            wird auch dem Client zurückgegeben. 
-            """
-            p = adm.create_person(
-                proposal.get_vorname(),
-                proposal.get_nachname(),
-                proposal.get_nickname(),
-                proposal.get_google_id(),
-            )
-            return p, 200
+            try:
+                # Person erstellen
+                p = adm.create_person(
+                    proposal.get_vorname(),
+                    proposal.get_nachname(),
+                    proposal.get_nickname(),
+                    proposal.get_google_id(),
+                )
+                print("Person erfolgreich erstellt:", p)
+                print("Person ID:", p.get_id())
+                print("Person Vorname:", p.get_vorname())
+                print("Person Nachname:", p.get_nachname())
+                print("Person Google ID:", p.get_google_id())
+                return p, 200
+            except Exception as e:
+                print("Fehler beim Erstellen der Person:", str(e))
+                return {'message': str(e)}, 500
         else:
-            # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
-            return '', 500
+            print("Fehler: Person konnte nicht aus Payload erstellt werden")
+            return {'message': 'Ungültige Personen-Daten'}, 400
 
 
 @wardrobe_ns.route('/persons/<int:id>')
@@ -233,24 +243,25 @@ class WardrobeListOperations(Resource):
         # @secured
         def post(self):
             try:
-                print("Empfangene Payload:", api.payload)  # Debug
+                print("Empfangene Payload:", api.payload)
 
                 adm = KleiderschrankAdministration()
 
-                # Erstelle ein neues Kleiderschrank-Objekt
-                kleiderschrank = Kleiderschrank()
-                kleiderschrank.set_name(api.payload['name'])
+                # Erst die Person laden
+                eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
+                if not eigentuemer:
+                    return {'message': 'Eigentümer nicht gefunden'}, 404
 
-                # Hole den Eigentümer und setze ihn
-                if 'eigentuemer_id' in api.payload:
-                    eigentuemer = adm.get_person_by_id(api.payload['eigentuemer_id'])
-                    kleiderschrank.set_eigentuemer(eigentuemer)
+                print("Gefundener Eigentümer:", eigentuemer)
+                print("Eigentümer ID:", eigentuemer.get_id())
 
-                # Erstelle den Kleiderschrank
+                # Kleiderschrank erstellen
                 result = adm.create_kleiderschrank(
-                    kleiderschrank.get_name(),
-                    kleiderschrank.get_eigentuemer()
+                    api.payload['name'],
+                    eigentuemer
                 )
+                print("Kleiderschrank erstellt:", result)
+                print("Kleiderschrank ID:", result.get_id())
 
                 return result, 201
 
