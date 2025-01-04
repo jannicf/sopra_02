@@ -70,6 +70,8 @@ class PersonForm extends Component {
         this.setState({ loading: true });
         const api = KleiderschrankAPI.getAPI();
 
+        console.log('Starte Person-Erstellung...');
+
         // 1. Person erstellen
         const personData = {
             id: 0,
@@ -79,34 +81,35 @@ class PersonForm extends Component {
             google_id: this.props.user?.uid
         };
 
-        console.log('Sende Personen-Daten:', personData); // NEUES LOG
+        console.log('Sende Person-Daten:', personData);
         const createdPerson = await api.addPerson(personData);
-        console.log('Erstellte Person:', createdPerson); // NEUES LOG
+        console.log('Person erstellt:', createdPerson);
 
         // 2. Kleiderschrank erstellen
-        const kleiderschrankData = {
-            id: 0,  // HINZUGEFÜGT
-            name: this.state.formData.kleiderschrankName,
-            eigentuemer_id: createdPerson.getID()
-        };
+        if (createdPerson && createdPerson.getID()) {
+            console.log('Starte Kleiderschrank-Erstellung...');
+            const kleiderschrankData = {
+                id: 0,
+                name: this.state.formData.kleiderschrankName,
+                eigentuemer_id: createdPerson.getID()
+            };
 
-        console.log('Sende Kleiderschrank-Daten:', kleiderschrankData); // NEUES LOG
-        const createdKleiderschrank = await api.addKleiderschrank(kleiderschrankData);
-        console.log('Erstellter Kleiderschrank:', createdKleiderschrank); // NEUES LOG
+            console.log('Sende Kleiderschrank-Daten:', kleiderschrankData);
+            const createdKleiderschrank = await api.addKleiderschrank(kleiderschrankData);
+            console.log('Kleiderschrank erstellt:', createdKleiderschrank);
 
-        // 3. Person aktualisieren
-        createdPerson.setKleiderschrank(createdKleiderschrank);
-        console.log('Aktualisiere Person mit Kleiderschrank'); // NEUES LOG
-        await api.updatePerson(createdPerson);
+            // 3. Person mit Kleiderschrank verknüpfen
+            if (createdKleiderschrank) {
+                createdPerson.setKleiderschrank(createdKleiderschrank);
+                console.log('Aktualisiere Person mit Kleiderschrank:', createdPerson);
+                await api.updatePerson(createdPerson);
+                console.log('Person erfolgreich aktualisiert');
+            }
+        }
 
         this.setState({ loading: false });
         if (this.props.onClose) {
             this.props.onClose(createdPerson);
-        }
-
-        // Optional: Lade die Daten neu
-        if (this.props.onSuccess) {
-            this.props.onSuccess();
         }
 
     } catch (error) {

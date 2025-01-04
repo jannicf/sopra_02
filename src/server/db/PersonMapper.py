@@ -38,14 +38,23 @@ class PersonMapper(Mapper):
     def update(self, person):
         """Wiederholtes Schreiben eines Person-Objekts in die Datenbank.
 
-                :param person das Objekt, das in die DB geschrieben werden soll
-                """
+        :param person das Objekt, das in die DB geschrieben werden soll
+        """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE person " + "SET vorname=%s, nachname=%s, nickname=%s, google_id=%s WHERE id=%s"
+        # Hauptdaten der Person aktualisieren
+        command = "UPDATE person SET vorname=%s, nachname=%s, nickname=%s, google_id=%s WHERE id=%s"
         data = (person.get_vorname(), person.get_nachname(), person.get_nickname(),
                 person.get_google_id(), person.get_id())
         cursor.execute(command, data)
+
+        # Wenn die Person einen Kleiderschrank hat, stelle sicher dass die Verbindung
+        # auch in der DB existiert
+        kleiderschrank = person.get_kleiderschrank()
+        if kleiderschrank is not None:
+            kleiderschrank_command = "UPDATE kleiderschrank SET eigentuemer_id=%s WHERE id=%s"
+            kleiderschrank_data = (person.get_id(), kleiderschrank.get_id())
+            cursor.execute(kleiderschrank_command, kleiderschrank_data)
 
         self._cnx.commit()
         cursor.close()
@@ -192,15 +201,12 @@ class PersonMapper(Mapper):
         return result
 
     def find_by_google_id(self, google_id):
-        """Auslesen aller Personen anhand der zugeordneten google_id.
-
-        :param google_id Google_ID der zugehörigen Person.
-        :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Google_ID enthält.
-        """
+        """Auslesen einer Person anhand der Google ID."""
+        print(f"PersonMapper: Suche Person mit Google ID {google_id}")
         result = None
 
         cursor = self._cnx.cursor()
+        # Zuerst die Person-Daten laden
         command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE google_id=%s"
         cursor.execute(command, (google_id,))
         tuples = cursor.fetchall()
@@ -213,10 +219,33 @@ class PersonMapper(Mapper):
             person.set_nachname(nachname)
             person.set_nickname(nickname)
             person.set_google_id(google_id)
+
+            print(f"PersonMapper: Person mit ID {id} gefunden")
+
+            # Dann den zugehörigen Kleiderschrank suchen
+            command = "SELECT id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
+            cursor.execute(command, (id,))
+            kleiderschrank_tuples = cursor.fetchall()
+
+            # Im PersonMapper, find_by_google_id Methode:
+            if kleiderschrank_tuples:
+                from server.db.KleiderschrankMapper import KleiderschrankMapper
+                # Verwende den KleiderschrankMapper um den vollständigen Kleiderschrank zu laden
+                with KleiderschrankMapper() as kleiderschrank_mapper:
+                    kleiderschrank = kleiderschrank_mapper.find_by_id(kleiderschrank_tuples[0][0])
+                    if kleiderschrank:
+                        person.set_kleiderschrank(kleiderschrank)
+                        kleiderschrank.set_eigentuemer(person)  # Wichtig: Beidseitige Beziehung setzen
+                        print(f"PersonMapper: Kleiderschrank {kleiderschrank.get_name()} gefunden und zugewiesen")
+                    else:
+                        print("PersonMapper: Kleiderschrank konnte nicht vollständig geladen werden")
+            else:
+                print("PersonMapper: Kein Kleiderschrank für diese Person gefunden")
+
             result = person
+
         except IndexError:
-            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
-            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            print("PersonMapper: Keine Person gefunden")
             result = None
 
         self._cnx.commit()

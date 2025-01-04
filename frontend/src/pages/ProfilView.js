@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { Typography, Button, Box, Paper, IconButton } from '@mui/material';
+import { Typography, Button, Box, Paper } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/Edit'
+import IconButton from '@mui/material/IconButton';
 import PersonForm from '../dialogs/PersonForm';
 import PersonEditForm from '../dialogs/PersonEditForm';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
+import KleiderschrankBO from "../api/KleiderschrankBO";
+import PersonBO from "../api/PersonBO";
 
 class PersonView extends Component {
     constructor(props) {
@@ -23,39 +26,50 @@ class PersonView extends Component {
     }
 
     loadPerson = async () => {
-        try {
-            this.setState({ loading: true });
-            const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
-            this.setState({
-                person: persons,
-                loading: false
-            });
-        } catch (error) {
-            this.setState({
-                error: error.message,
-                loading: false
+    try {
+        this.setState({loading: true});
+        console.log("ProfilView: Lade Person mit Google ID:", this.props.user?.uid);
+
+        const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
+        console.log("ProfilView: API Rohdaten:", persons);
+
+        // Prüfe ob die Person-Daten korrekt zurückkommen
+        if (persons) {
+            console.log("ProfilView: Person Vorname:", persons.getVorname());
+            console.log("ProfilView: Person Nachname:", persons.getNachname());
+            console.log("ProfilView: Person Kleiderschrank:", persons.getKleiderschrank());
+        }
+
+        this.setState({
+            person: persons,
+            loading: false
+        });
+    } catch (error) {
+        console.error("ProfilView: Fehler beim Laden der Person:", error);
+        this.setState({
+            error: error.message,
+            loading: false
             });
         }
-    }
+    };
 
     handleCreateClick = () => {
-        this.setState({ showCreateDialog: true });
+        this.setState({showCreateDialog: true});
     }
 
     handleEditClick = () => {
-        this.setState({ showEditDialog: true });
+        this.setState({showEditDialog: true});
     }
 
     handleCreateDialogClosed = async (createdPerson) => {
-    if (createdPerson) {
-        console.log('Person wurde erstellt:', createdPerson);
-        await this.loadPerson();  // Daten neu laden
-        this.setState({
-            showCreateDialog: false,
-            error: null
-        });
-    } else {
-        this.setState({ showCreateDialog: false });
+        if (createdPerson) {
+            await this.loadPerson();
+            this.setState({
+                showCreateDialog: false,
+                error: null
+            });
+        } else {
+            this.setState({showCreateDialog: false});
         }
     }
 
@@ -63,12 +77,36 @@ class PersonView extends Component {
         if (editedPerson) {
             await this.loadPerson();
         }
-        this.setState({ showEditDialog: false });
+        this.setState({showEditDialog: false});
     }
 
     render() {
-        const { person, showCreateDialog, showEditDialog, loading } = this.state;
+    const {person, showCreateDialog, showEditDialog, loading} = this.state;
 
+    // Schrittweise Überprüfung
+    console.log("1. Person Objekt:", {
+        person: person,
+        isPersonDefined: person !== null && person !== undefined
+    });
+
+    if (person) {
+        console.log("2. Person Details:", {
+            id: person.getID(),
+            vorname: person.getVorname(),
+            nachname: person.getNachname(),
+            kleiderschrank: person.getKleiderschrank(),
+            isKleiderschrankDefined: person.getKleiderschrank() !== null && person.getKleiderschrank() !== undefined
+        });
+
+        // Prüfen, was der Kleiderschrank tatsächlich ist
+        const kleiderschrank = person.getKleiderschrank();
+        console.log("3. Kleiderschrank Details:", {
+            kleiderschrank: kleiderschrank,
+            type: typeof kleiderschrank,
+            prototyp: kleiderschrank ? Object.getPrototypeOf(kleiderschrank) : null,
+            methods: kleiderschrank ? Object.getOwnPropertyNames(Object.getPrototypeOf(kleiderschrank)) : null
+            });
+        }
         if (loading) {
             return <Typography>Lade Profil...</Typography>;
         }
@@ -81,29 +119,39 @@ class PersonView extends Component {
 
                 {person ? (
                     // Wenn Person existiert, zeigen wir die Informationen an
-                    <Paper elevation={3} sx={{ p: 3, mt: 2 }}>
+                    <Paper elevation={3} sx={{p: 3, mt: 2}}>
                         <Box display="flex" justifyContent="space-between" alignItems="start">
                             <Typography variant="h6">Persönliche Informationen</Typography>
                             <IconButton
                                 onClick={this.handleEditClick}
                                 color="primary"
                             >
-                                <EditIcon />
+                                <EditIcon/>
                             </IconButton>
                         </Box>
-                        <Box sx={{ mt: 2 }}>
+                        <Box sx={{mt: 2}}>
                             <Typography>Vorname: {person.getVorname()}</Typography>
                             <Typography>Nachname: {person.getNachname()}</Typography>
                             <Typography>Nickname: {person.getNickname()}</Typography>
-                            {person.getKleiderschrank() ? (
-                                <Box sx={{ mt: 2 }}>
+
+                            {/* Kleiderschrank-Anzeige */}
+                            {person && person.getKleiderschrank() ? (
+                                <Box sx={{mt: 2}}>
                                     <Typography variant="subtitle1">Kleiderschrank</Typography>
                                     <Typography>
-                                        Name: {person.getKleiderschrank().getName()}
+                                        {(() => {
+                                            const kleiderschrank = person.getKleiderschrank();
+                                            if (kleiderschrank && typeof kleiderschrank === 'object') {
+                                                return `Name: ${kleiderschrank.getName ? 
+                                                       kleiderschrank.getName() : 
+                                                       (kleiderschrank.name || 'Unbekannt')}`;
+                                            }
+                                            return 'Kleiderschrank-Details nicht verfügbar';
+                                        })()}
                                     </Typography>
                                 </Box>
                             ) : (
-                                <Typography color="error">
+                                <Typography color="error" sx={{mt: 2}}>
                                     Kein Kleiderschrank zugewiesen
                                 </Typography>
                             )}
@@ -111,16 +159,16 @@ class PersonView extends Component {
                     </Paper>
                 ) : (
                     // Wenn keine Person existiert, zeigen wir den "Person hinzufügen" Button
-                    <Box sx={{ mt: 4, textAlign: 'center' }}>
+                    <Box sx={{mt: 4, textAlign: 'center'}}>
                         <Typography variant="h6" gutterBottom>
                             Sie haben noch kein Profil angelegt
                         </Typography>
                         <Button
                             variant="contained"
                             color="primary"
-                            startIcon={<AddIcon />}
+                            startIcon={<AddIcon/>}
                             onClick={this.handleCreateClick}
-                            sx={{ mt: 2 }}
+                            sx={{mt: 2}}
                         >
                             Person hinzufügen
                         </Button>

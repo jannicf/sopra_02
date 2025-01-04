@@ -46,9 +46,9 @@ class KleidungsstueckCard extends Component {
 
     return (
 
-        <Card>
+        <Card sx={{ mb: 1 }}>  {/* Fügt 8px Margin unten hinzu */}
           <CardContent>
-            <Grid container spacing={2} alignItems='center'>
+            <Grid container justifyContent="space-between" alignItems='center'>
               <Grid item>
                 <Typography variant='h6'>
                   {kleidungsstueck.getName()}

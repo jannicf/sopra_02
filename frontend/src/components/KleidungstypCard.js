@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Typography, Card, CardContent, Grid, Button, ButtonGroup } from '@mui/material';
+import { Typography, Card, CardContent, Grid, Button, ButtonGroup, Box, Chip } from '@mui/material';
 import KleidungstypForm from '../dialogs/KleidungstypForm';
 import KleidungstypDeleteDialog from '../dialogs/KleidungstypDeleteDialog';
 
@@ -42,23 +42,38 @@ class KleidungstypCard extends Component {
         const { showEditDialog, showDeleteDialog } = this.state;
 
         return (
-            <Card>
+            <Card sx={{ mb: 1 }}>
                 <CardContent>
-                    <Grid container spacing={2} alignItems='center'>
-                        <Grid item>
-                            <Typography variant='h6'>
-                                {kleidungstyp.getBezeichnung()}
-                            </Typography>
-                        </Grid>
-                        <Grid item>
-                            <ButtonGroup variant='text' size='small'>
-                                <Button color='primary' onClick={this.handleEditClick}>
-                                    Bearbeiten
-                                </Button>
-                                <Button color='secondary' onClick={this.handleDeleteClick}>
-                                    Löschen
-                                </Button>
-                            </ButtonGroup>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
+                                <Box>
+                                    <Typography variant="h6" gutterBottom>
+                                        {kleidungstyp.getBezeichnung()}
+                                    </Typography>
+                                    {kleidungstyp.getVerwendungen().length > 0 && (
+                                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                                            {kleidungstyp.getVerwendungen().map(style => (
+                                                <Chip
+                                                    key={style.getID()}
+                                                    label={style.getName()}
+                                                    size="small"
+                                                    color="primary"
+                                                    variant="outlined"
+                                                />
+                                            ))}
+                                        </Box>
+                                    )}
+                                </Box>
+                                <ButtonGroup variant="text" size="small">
+                                    <Button color="primary" onClick={this.handleEditClick}>
+                                        Bearbeiten
+                                    </Button>
+                                    <Button color="secondary" onClick={this.handleDeleteClick}>
+                                        Löschen
+                                    </Button>
+                                </ButtonGroup>
+                            </Box>
                         </Grid>
                     </Grid>
                 </CardContent>

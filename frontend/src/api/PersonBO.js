@@ -1,4 +1,5 @@
 import BusinessObject from './BusinessObject.js';
+import KleiderschrankBO from "./KleiderschrankBO";
 
 /**
  * Repräsentiert eine Person im digitalen Kleiderschranksystem.
@@ -94,6 +95,15 @@ export default class PersonBO extends BusinessObject {
    * Gibt den Kleiderschrank der Person zurück.
    */
   getKleiderschrank() {
+    if (this.kleiderschrank && typeof this.kleiderschrank === 'object' && !this.kleiderschrank.getName) {
+      // Wenn der Kleiderschrank ein Objekt ist, aber keine getName-Methode hat,
+      // konvertieren wir es in ein KleiderschrankBO
+      console.log("Konvertiere Kleiderschrank zu KleiderschrankBO:", this.kleiderschrank);
+      const kleiderschrankBO = new KleiderschrankBO();
+      kleiderschrankBO.setID(this.kleiderschrank.id);
+      kleiderschrankBO.setName(this.kleiderschrank.name);
+      this.kleiderschrank = kleiderschrankBO;
+    }
     return this.kleiderschrank;
   }
 
@@ -103,18 +113,38 @@ export default class PersonBO extends BusinessObject {
    * @param {*} persons - JSON-Daten, die in PersonBO Objekte umgewandelt werden sollen
    */
   static fromJSON(persons) {
-    let result = [];
+    let result = new PersonBO();
 
+    // Prüfen ob persons ein Array ist
     if (Array.isArray(persons)) {
-      persons.forEach((p) => {
-        Object.setPrototypeOf(p, PersonBO.prototype);
-        result.push(p);
-      })
+      console.log("PersonBO fromJSON: Array erkannt, nehme erstes Element");
+      if (persons.length > 0) {
+        persons = persons[0];
+      } else {
+        return null;
+      }
+    }
+
+    // Debug
+    console.log("PersonBO fromJSON: Verarbeite Daten:", persons);
+
+    // Basisdaten setzen
+    result.setID(persons.id);
+    result.setVorname(persons.vorname);
+    result.setNachname(persons.nachname);
+    result.setNickname(persons.nickname);
+    result.setGoogleId(persons.google_id);
+
+    // Kleiderschrank verarbeiten
+    if (persons.kleiderschrank) {
+      console.log("PersonBO fromJSON: Verarbeite Kleiderschrank:", persons.kleiderschrank);
+      const KleiderschrankBO = require('./KleiderschrankBO').default;
+      const kleiderschrank = new KleiderschrankBO();
+      kleiderschrank.setID(persons.kleiderschrank.id);
+      kleiderschrank.setName(persons.kleiderschrank.name);
+      result.setKleiderschrank(kleiderschrank);
     } else {
-      // Es handelt sich offenbar um ein singuläres Objekt
-      let p = persons;
-      Object.setPrototypeOf(p, PersonBO.prototype);
-      result.push(p);
+      console.log("PersonBO fromJSON: Kein Kleiderschrank vorhanden");
     }
 
     return result;

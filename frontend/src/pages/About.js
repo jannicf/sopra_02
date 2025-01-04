@@ -12,7 +12,7 @@ return (
         Mein digitaler Kleiderschrank | Software-Praktikum im Wintersemester 24/25
       </Typography>
       <Typography variant='h6' fontWeight= 'bold' align='center' sx={{ marginTop: 2, marginBottom: 1 }}>
-        Team 02
+        Gruppe 02
       </Typography>
       <List sx={{   bottom: 0,
                     left: 0,

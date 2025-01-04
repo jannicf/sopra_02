@@ -1,5 +1,4 @@
 from server.bo import BusinessObject as bo
-
 class Person(bo.BusinessObject):
 
 
@@ -61,17 +60,19 @@ class Person(bo.BusinessObject):
                                                        self.get_nickname(), self.get_google_id(),
                                                        )
 
-
     @staticmethod
     def from_dict(dictionary=dict()):
         """Umwandeln eines Python dict() in eine Person()."""
-        from src.server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
+        from server.bo.Kleiderschrank import Kleiderschrank  # Lokaler Import
         obj = Person()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject!
         obj.set_vorname(dictionary["vorname"])
         obj.set_nachname(dictionary["nachname"])
         obj.set_nickname(dictionary["nickname"])
         obj.set_google_id(dictionary["google_id"])
-        if "kleiderschrank" in dictionary and dictionary["kleiderschrank"] is not None:
-            obj.set_kleiderschrank(Kleiderschrank.from_dict(dictionary["kleiderschrank"]))
+        if "kleiderschrank" in dictionary and dictionary["kleiderschrank"]:
+            from server.bo.Kleiderschrank import Kleiderschrank
+            kleiderschrank = Kleiderschrank.from_dict(dictionary["kleiderschrank"])
+            obj.set_kleiderschrank(kleiderschrank)
+
         return obj
