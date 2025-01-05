@@ -128,7 +128,14 @@ class OutfitView extends Component {
                                 onDelete={this.loadOutfits} // Callback für Aktualisierung nach Löschung
                             />
                         </Grid>
-                    ))}
+                        ))}
+                    {outfits.length === 0 && (
+                        <Grid item xs={12}>
+                            <Typography color="textSecondary" align="center">
+                                Noch keine Outfits erstellt
+                            </Typography>
+                        </Grid>
+                    )}
                 </Grid>
             </div>
         );
