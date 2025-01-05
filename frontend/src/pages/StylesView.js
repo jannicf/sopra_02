@@ -71,21 +71,29 @@ class StylesView extends Component {
     return (
       <div>
         <Typography variant="h4">Meine Styles</Typography>
+
         {/* Liste der Styles */}
         <StyleList
           styles={styles}
           onEdit={this.handleEditClick}
           onDelete={this.handleDeleteClick}
         />
+
         {/* Button zum Erstellen eines neuen Styles */}
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
           onClick={this.handleCreateClick}
+          sx={{
+            position: 'fixed',
+            bottom: '4.5rem',
+            right: '2rem'
+          }}
         >
           Neuer Style
         </Button>
+
         {/* Formular-Dialog */}
         {showFormDialog && (
           <StyleForm
@@ -94,6 +102,7 @@ class StylesView extends Component {
             onClose={this.handleFormDialogClosed}
           />
         )}
+
         {/* Lösch-Dialog */}
         {showDeleteDialog && (
           <StyleDeleteDialog
