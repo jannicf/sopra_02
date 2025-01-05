@@ -79,13 +79,24 @@ binary_constraint = api.inherit('BinaryConstraint', constraint, {
     'bezugsobjekt2': fields.Integer(attribute=lambda x: x.get_bezugsobjekt2().get_id()),
 })
 
-mutex = api.inherit('MutexConstraint', binary_constraint, {})
+mutex = api.inherit('MutexConstraint', binary_constraint, {
+    'type': fields.String(default='mutex')
+})
 
-implikation = api.inherit('ImplicationConstraint', binary_constraint, {})
+implikation = api.inherit('ImplicationConstraint', binary_constraint, {
+    'type': fields.String(default='implikation')
+})
 
 kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
+    'type': fields.String(default='kardinalitaet'),
     'min_anzahl': fields.Integer(attribute=lambda x: x.get_min_anzahl()),
     'max_anzahl': fields.Integer(attribute=lambda x: x.get_max_anzahl()),
+})
+
+style = api.inherit('Style', bo, {
+    'name': fields.String(attribute='_Style__name', description='Name des Styles'),
+    'features': fields.List(fields.Nested(kleidungstyp), attribute=lambda s: s.get_features_as_list()),
+    'constraints': fields.List(fields.Raw, attribute=lambda s: s.get_constraints_as_list())
 })
 
 
@@ -105,35 +116,29 @@ class PersonListOperations(Resource):
     @wardrobe_ns.marshal_with(person, code=200)
     @wardrobe_ns.expect(person)
     # @secured
-    @wardrobe_ns.marshal_with(person, code=200)
-    @wardrobe_ns.expect(person)
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
-        print("POST /persons aufgerufen")
-        print("Empfangene Daten:", api.payload)
+
 
         adm = KleiderschrankAdministration()
 
         proposal = Person.from_dict(api.payload)
-        print("Erstelltes Person-Objekt aus Payload:", proposal)
-        print("Google ID:", proposal.get_google_id())
 
         if proposal is not None:
-            try:
-                # Person erstellen
-                p = adm.create_person(
-                    proposal.get_vorname(),
-                    proposal.get_nachname(),
-                    proposal.get_nickname(),
-                    proposal.get_google_id()
-                )
-                return p, 200
-            except Exception as e:
-                print("Fehler beim Erstellen der Person:", str(e))
-                return {'message': str(e)}, 500
+            """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
+            eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
+            wird auch dem Client zurückgegeben. 
+            """
+            p = adm.create_person(
+                proposal.get_vorname(),
+                proposal.get_nachname(),
+                proposal.get_nickname(),
+                proposal.get_google_id(),
+            )
+            return p, 200
         else:
-            print("Fehler: Person konnte nicht aus Payload erstellt werden")
-            return {'message': 'Ungültige Personen-Daten'}, 400
+            # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
+            return '', 500
 
 
 @wardrobe_ns.route('/persons/<int:id>')

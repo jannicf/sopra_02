@@ -1,23 +1,21 @@
 import React, { Component } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitDeleteDialog extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            // Da Outfits keine weiteren Abhängigkeiten haben, die gelöscht werden müssen,
-            // brauchen wir hier keinen zusätzlichen State wie bei KleidungsstueckDeleteDialog
-        };
-    }
-
     handleClose = () => {
-        // Dialog schließen ohne Aktion & dies der übergeordneten Komponente zeigen
         this.props.onClose(null);
     };
 
-    handleDelete = () => {
-        // Outfit löschen und Dialog schließen
-        this.props.onClose(this.props.outfit);
+    handleDelete = async () => {
+        try {
+            const { outfit } = this.props;
+            await KleiderschrankAPI.getAPI().deleteOutfit(outfit.getID());
+            this.props.onClose(outfit);
+        } catch (error) {
+            console.error('Fehler beim Löschen:', error);
+            this.props.onClose(outfit);
+        }
     };
 
     render() {
@@ -34,17 +32,15 @@ class OutfitDeleteDialog extends Component {
                     Outfit löschen
                 </DialogTitle>
                 <DialogContent>
-                    <p>Möchten Sie das Outfit "{outfit?.get_style()?.get_name()}" wirklich löschen?</p>
-                    <p style={{ color: 'orange' }}>Achtung: Diese Aktion kann nicht rückgangig gemacht werden!</p>
+                    <p>Möchten Sie das Outfit "#{outfit?.getID()}" wirklich löschen?</p>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={this.handleClose}>
+                    <Button onClick={this.handleClose} disabled={false}>
                         Abbrechen
                     </Button>
                     <Button
                         onClick={this.handleDelete}
                         color="error"
-                        variant="contained"
                     >
                         Löschen
                     </Button>
