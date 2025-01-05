@@ -116,6 +116,7 @@ class PersonListOperations(Resource):
 
         proposal = Person.from_dict(api.payload)
         print("Erstelltes Person-Objekt aus Payload:", proposal)
+        print("Google ID:", proposal.get_google_id())
 
         if proposal is not None:
             try:
@@ -124,13 +125,8 @@ class PersonListOperations(Resource):
                     proposal.get_vorname(),
                     proposal.get_nachname(),
                     proposal.get_nickname(),
-                    proposal.get_google_id(),
+                    proposal.get_google_id()
                 )
-                print("Person erfolgreich erstellt:", p)
-                print("Person ID:", p.get_id())
-                print("Person Vorname:", p.get_vorname())
-                print("Person Nachname:", p.get_nachname())
-                print("Person Google ID:", p.get_google_id())
                 return p, 200
             except Exception as e:
                 print("Fehler beim Erstellen der Person:", str(e))
