@@ -3,37 +3,59 @@ from server.bo.Person import Person
 
 class PersonMapper(Mapper):
     def insert(self, person):
-        """Einfügen eines Person-Objekts in die Datenbank.
+        try:
+            cursor = self._cnx.cursor()
+            print(f"1. Starte Person-Erstellung für Google ID: {person.get_google_id()}")
+            print(f"2. Person-Daten: {person.get_vorname()} {person.get_nachname()}")
+            print(f"2a. Kleiderschrank vorhanden? {person.get_kleiderschrank() is not None}")  # Debug-Print
+            if person.get_kleiderschrank():
+                print(f"2b. Kleiderschrank Name: {person.get_kleiderschrank().get_name()}")  # Debug-Print
 
-                Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
-                berichtigt.
+            # ID generieren
+            cursor.execute("SELECT MAX(id) AS maxid FROM person")
+            tuples = cursor.fetchall()
 
-                :param person das zu speichernde Objekt
-                :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
-                """
-        cursor = self._cnx.cursor()
-        cursor.execute("SELECT MAX(id) AS maxid FROM person ")
-        tuples = cursor.fetchall()
+            for (maxid) in tuples:
+                if maxid[0] is not None:
+                    person.set_id(maxid[0] + 1)
+                else:
+                    person.set_id(1)
 
-        for (maxid) in tuples:
-            if maxid[0] is not None:
-                """Wenn wir eine maximale ID festellen konnten, zählen wir diese
-                um 1 hoch und weisen diesen Wert als ID dem Person-Objekt zu."""
-                person.set_id(maxid[0] + 1)
-            else:
-                """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
-                davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
-                person.set_id(1)
+            print(f"3. Generierte Person-ID: {person.get_id()}")
 
-        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
-        data = (person.get_id(), person.get_vorname(), person.get_nachname(), person.get_nickname(),
-                person.get_google_id())
-        cursor.execute(command, data)
+            # Person in DB einfügen
+            command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
+            data = (person.get_id(), person.get_vorname(), person.get_nachname(),
+                    person.get_nickname(), person.get_google_id())
+            cursor.execute(command, data)
+            print("4. Person in Datenbank eingefügt")
 
-        self._cnx.commit()
-        cursor.close()
+            # Kleiderschrank erstellen wenn vorhanden
+            if person.get_kleiderschrank():
+                print("5. Starte Kleiderschrank-Erstellung")
+                from src.server.db.KleiderschrankMapper import KleiderschrankMapper
 
-        return person
+                kleiderschrank = person.get_kleiderschrank()
+                kleiderschrank.set_eigentuemer(person)
+                print(f"6. Eigentuemer (Person ID: {person.get_id()}) für Kleiderschrank gesetzt")
+
+                with KleiderschrankMapper() as kleiderschrank_mapper:
+                    saved_kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
+                    person.set_kleiderschrank(saved_kleiderschrank)
+                    print(f"7. Kleiderschrank (ID: {saved_kleiderschrank.get_id()}) erstellt und Person zugewiesen")
+
+            self._cnx.commit()
+            cursor.close()
+            print("8. Transaktion erfolgreich abgeschlossen")
+            print(
+                f"9. Final-Check - Person hat Kleiderschrank? {person.get_kleiderschrank() is not None}")  # Debug-Print
+            return person
+
+        except Exception as e:
+            print(f"FEHLER bei Person-Erstellung: {str(e)}")
+            self._cnx.rollback()
+            cursor.close()
+            raise e
 
     def update(self, person):
         """Wiederholtes Schreiben eines Person-Objekts in die Datenbank.
@@ -48,12 +70,10 @@ class PersonMapper(Mapper):
                 person.get_google_id(), person.get_id())
         cursor.execute(command, data)
 
-        # Wenn die Person einen Kleiderschrank hat, stelle sicher dass die Verbindung
-        # auch in der DB existiert
-        kleiderschrank = person.get_kleiderschrank()
-        if kleiderschrank is not None:
+        # Kleiderschrank-Beziehung aktualisieren
+        if person.get_kleiderschrank():
             kleiderschrank_command = "UPDATE kleiderschrank SET eigentuemer_id=%s WHERE id=%s"
-            kleiderschrank_data = (person.get_id(), kleiderschrank.get_id())
+            kleiderschrank_data = (person.get_id(), person.get_kleiderschrank().get_id())
             cursor.execute(kleiderschrank_command, kleiderschrank_data)
 
         self._cnx.commit()

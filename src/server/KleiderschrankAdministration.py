@@ -168,13 +168,9 @@ class KleiderschrankAdministration(object):
     """
 
     def create_person(self, vorname, nachname, nickname, google_id):
-        """Eine neue Person anlegen."""
         try:
-            print(f"create_person aufgerufen mit:")
-            print(f"Vorname: {vorname}")
-            print(f"Nachname: {nachname}")
-            print(f"Nickname: {nickname}")
-            print(f"Google ID: {google_id}")
+            print(f"1. Starte Person-Erstellung für Google ID: {google_id}")
+            print(f"2. Person-Daten: {vorname} {nachname}")
 
             person = Person()
             person.set_vorname(vorname)
@@ -182,17 +178,27 @@ class KleiderschrankAdministration(object):
             person.set_nickname(nickname)
             person.set_google_id(google_id)
 
-            print("Person-Objekt vor dem Speichern:")
-            print(f"ID: {person.get_id()}")
-            print(f"Vorname: {person.get_vorname()}")
-            print(f"Nachname: {person.get_nachname()}")
-            print(f"Nickname: {person.get_nickname()}")
-            print(f"Google ID: {person.get_google_id()}")
-
             with PersonMapper() as mapper:
-                result = mapper.insert(person)
-                print("Person erfolgreich erstellt mit ID:", result.get_id())
-                return result
+                # Person speichern und ID erhalten
+                person = mapper.insert(person)
+                print(f"3. Generierte Person-ID: {person.get_id()}")
+                print(f"4. Person in Datenbank eingefügt")
+
+                # Kleiderschrank anlegen wenn vorhanden
+                if person.get_kleiderschrank():  # Hier nutzen wir die get_kleiderschrank() Methode
+                    print("5. Erstelle Kleiderschrank für Person")
+                    kleiderschrank = person.get_kleiderschrank()
+                    kleiderschrank.set_eigentuemer(person)
+
+                    with KleiderschrankMapper() as kleiderschrank_mapper:
+                        kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
+                        print(f"6. Kleiderschrank angelegt mit ID: {kleiderschrank.get_id()}")
+                        person.set_kleiderschrank(kleiderschrank)
+                        mapper.update(person)
+                        print(f"7. Person mit Kleiderschrank verknüpft")
+
+                print(f"8. Transaktion erfolgreich abgeschlossen")
+                return person
 
         except Exception as e:
             print(f"ERROR in create_person: {str(e)}")

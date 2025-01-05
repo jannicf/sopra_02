@@ -11,10 +11,10 @@ class PersonEditForm extends Component {
         const { person } = props;
         this.state = {
             formData: {
-                vorname: person.getVorname(),
-                nachname: person.getNachname(),
-                nickname: person.getNickname(),
-                kleiderschrankName: person.getKleiderschrank()?.getName() || '',
+                vorname: person.getVorname()    || '',
+                nachname: person.getNachname()  || '',
+                nickname: person.getNickname()  || '',
+                kleiderschrankName: person.getKleiderschrank()?.getName()   || '',
             },
             error: null,
             loading: false,
@@ -63,41 +63,31 @@ class PersonEditForm extends Component {
     };
 
     handleSubmit = async () => {
-        if (!this.validateForm()) {
-            return;
+    try {
+        const { person } = this.props;
+        const { formData } = this.state;
+
+        // Person-Daten aktualisieren
+        person.setVorname(formData.vorname);
+        person.setNachname(formData.nachname);
+        person.setNickname(formData.nickname);
+
+        // Wenn der Kleiderschrank existiert, Name aktualisieren
+        if (person.getKleiderschrank()) {
+            person.getKleiderschrank().setName(formData.kleiderschrankName);
         }
 
-        try {
-            this.setState({ loading: true });
-            const api = KleiderschrankAPI.getAPI();
-            const { person } = this.props;
-            const { formData } = this.state;
+        // Person speichern
+        await KleiderschrankAPI.getAPI().updatePerson(person);
 
-            // Person aktualisieren
-            person.setVorname(formData.vorname);
-            person.setNachname(formData.nachname);
-            person.setNickname(formData.nickname);
-
-            // Update der Person
-            await api.updatePerson(person);
-
-            // Kleiderschrank aktualisieren wenn sich der Name geändert hat
-            if (person.getKleiderschrank() &&
-                person.getKleiderschrank().getName() !== formData.kleiderschrankName) {
-                const kleiderschrank = person.getKleiderschrank();
-                kleiderschrank.setName(formData.kleiderschrankName);
-                await api.updateKleiderschrank(kleiderschrank);
-            }
-
-            this.props.onClose(person);
-
-        } catch (error) {
-            this.setState({
-                error: 'Ein Fehler ist aufgetreten: ' + error.message,
-                loading: false
+        this.props.onClose(person);
+    } catch (error) {
+        console.error('Fehler beim Speichern:', error);
+        this.setState({
+            error: error.message
             });
         }
-    };
+    }
 
     render() {
         const { show, onClose } = this.props;

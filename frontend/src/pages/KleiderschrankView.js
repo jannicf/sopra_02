@@ -23,12 +23,12 @@ class KleiderschrankView extends Component {
     }
 
     componentDidMount() {
-        // Zuerst den Kleiderschrank laden
-        KleiderschrankAPI.getAPI().getKleiderschraenke()
-            .then(kleiderschraenke => {
-                if (kleiderschraenke && kleiderschraenke.length > 0) {
+        // Zuerst den Kleiderschrank des eingeloggten Users laden
+        KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid)
+            .then(person => {
+                if (person && person.getKleiderschrank()) {
                     this.setState({
-                        kleiderschrankId: kleiderschraenke[0].getID(),
+                        kleiderschrankId: person.getKleiderschrank().getID(),
                         loadingInProgress: false
                     }, () => {
                         // Erst nach dem Setzen der ID die anderen Daten laden
@@ -57,8 +57,9 @@ class KleiderschrankView extends Component {
             error: null
         });
 
-        KleiderschrankAPI.getAPI().getKleidungsstuecke()
-            .then(kleidungsstuecke => {
+        // Hier nur die Kleidungsstücke des eigenen Kleiderschranks laden
+        KleiderschrankAPI.getAPI()
+            .getKleidungsstueckByKleiderschrankId(this.state.kleiderschrankId)            .then(kleidungsstuecke => {
                 this.setState({
                     kleidungsstuecke: kleidungsstuecke,
                     loadingInProgress: false
@@ -79,12 +80,26 @@ class KleiderschrankView extends Component {
             error: null
         });
 
-        KleiderschrankAPI.getAPI().getKleidungstypen()
-            .then(kleidungstypen => {
-                this.setState({
-                    kleidungstypen: kleidungstypen,
-                    loadingInProgress: false
-                });
+        // Erst alle Kleidungsstücke des Kleiderschranks laden
+        KleiderschrankAPI.getAPI()
+            .getKleidungsstueckByKleiderschrankId(this.state.kleiderschrankId)
+            .then(kleidungsstuecke => {
+                // Set für eindeutige Typ-IDs erstellen
+                const typIds = new Set(kleidungsstuecke.map(k => k.getTyp().getID()));
+
+                // Alle Kleidungstypen laden
+                return KleiderschrankAPI.getAPI().getKleidungstypen()
+                    .then(alleTypen => {
+                        // Nur die Typen behalten, die in unserem Kleiderschrank verwendet werden
+                        const gefilterteTypen = alleTypen.filter(typ =>
+                            typIds.has(typ.getID())
+                        );
+
+                        this.setState({
+                            kleidungstypen: gefilterteTypen,
+                            loadingInProgress: false
+                        });
+                    });
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -218,7 +233,7 @@ class KleiderschrankView extends Component {
                     <KleidungsstueckForm
                         show={showCreateDialog}
                         onClose={this.handleCreateDialogClosed}
-                        kleiderschrankId={kleiderschrankId}
+                        kleiderschrankId={this.state.kleiderschrankId}
                     />
                 )}
                 <KleidungstypForm

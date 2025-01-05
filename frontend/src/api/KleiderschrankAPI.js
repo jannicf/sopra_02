@@ -132,8 +132,27 @@ class KleiderschrankAPI {
     }
 
     addPerson(personBO) {
-    // Debug
-    console.log('addPerson called with:', personBO);
+    // Debug Log vor dem Request
+    console.log("AddPerson Input:", {
+        person: personBO,
+        hasKleiderschrank: personBO.getKleiderschrank() !== null,
+        kleiderschrankName: personBO.getKleiderschrank()?.getName()
+    });
+
+    const requestData = {
+        vorname: personBO.getVorname(),
+        nachname: personBO.getNachname(),
+        nickname: personBO.getNickname(),
+        google_id: personBO.getGoogleId()
+    };
+
+    // Prüfen und Hinzufügen der Kleiderschrank-Daten
+    if (personBO.getKleiderschrank()) {
+        requestData.kleiderschrank = {
+            name: personBO.getKleiderschrank().getName()
+        };
+        console.log("RequestData mit Kleiderschrank:", requestData);
+    }
 
     return this.#fetchAdvanced(this.#addPersonURL(), {
         method: 'POST',
@@ -141,39 +160,39 @@ class KleiderschrankAPI {
             'Accept': 'application/json, text/plain',
             'Content-type': 'application/json',
         },
-        body: JSON.stringify(personBO)
+        body: JSON.stringify(requestData)
     }).then(responseJSON => {
-        // Debug
-        console.log('Server response:', responseJSON);
-
+        console.log("Server Response:", responseJSON);
         const person = PersonBO.fromJSON(responseJSON);
-        if (!person) {
-            throw new Error('Fehler beim Erstellen der Person - keine Daten vom Server');
-        }
         return person;
-    }).catch(error => {
-        console.error('Error in addPerson:', error);
-        throw error;
         });
     }
 
     updatePerson(personBO) {
-        console.log('updatePerson aufgerufen mit:', personBO);  // NEU
-        console.log('Person ID beim Update:', personBO.getID());  // NEU
+    // Erstelle ein neues Objekt mit den benötigten Daten
+    const requestData = {
+        id: personBO.getID(),
+        vorname: personBO.getVorname(),
+        nachname: personBO.getNachname(),
+        nickname: personBO.getNickname(),
+        google_id: personBO.getGoogleId(),
+        kleiderschrank: personBO.getKleiderschrank() ? {
+            id: personBO.getKleiderschrank().getID(),
+            name: personBO.getKleiderschrank().getName()
+        } : null
+    };
 
-        return this.#fetchAdvanced(this.#updatePersonURL(personBO.getID()), {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(personBO)
-        }).then(responseJSON => {
-            let responsePersonBO = PersonBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responsePersonBO);
-            })
-        })
+    return this.#fetchAdvanced(this.#updatePersonURL(personBO.getID()), {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    }).then(responseJSON => {
+        let responsePersonBO = PersonBO.fromJSON(responseJSON);
+        return responsePersonBO;
+        });
     }
 
     deletePerson(id) {
@@ -276,6 +295,24 @@ class KleiderschrankAPI {
                     resolve(kleidungsstueckBOs);
                 })
             })
+    }
+
+    getKleidungsstueckByKleiderschrankId(kleiderschrankId) {
+        // Standardisierte GET-Anfrage mit expliziten Optionen
+        return this.#fetchAdvanced(this.#getKleidungsstueckeURL(), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain',
+            }
+        }).then(responseJSON => {
+            // Array von Kleidungsstück-Objekten erstellen, aber nur die,
+            // die zum spezifischen Kleiderschrank gehören
+            let kleidungsstueckBOs = KleidungsstueckBO.fromJSON(responseJSON);
+            // Filtern nach kleiderschrank_id
+            return kleidungsstueckBOs.filter(kleidungsstueck =>
+                kleidungsstueck.getKleiderschrankId() === kleiderschrankId
+            );
+        })
     }
 
     updateKleidungsstueck(kleidungsstueck) {

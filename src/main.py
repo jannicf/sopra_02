@@ -118,23 +118,38 @@ class PersonListOperations(Resource):
     # @secured
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
-
-
-        adm = KleiderschrankAdministration()
+        print("Received payload:", api.payload)
 
         proposal = Person.from_dict(api.payload)
 
+        print("Created Person object:", {
+            'vorname': proposal.get_vorname(),
+            'nachname': proposal.get_nachname(),
+            'kleiderschrank': proposal.get_kleiderschrank() is not None
+        })
+
         if proposal is not None:
-            """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
-            eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
-            wird auch dem Client zurückgegeben. 
-            """
+            adm = KleiderschrankAdministration()
+
+            # Erst Person erstellen
             p = adm.create_person(
                 proposal.get_vorname(),
                 proposal.get_nachname(),
                 proposal.get_nickname(),
-                proposal.get_google_id(),
+                proposal.get_google_id()
             )
+
+            # Wenn ein Kleiderschrank im Proposal ist, diesen auch erstellen
+            if proposal.get_kleiderschrank():
+                kleiderschrank = adm.create_kleiderschrank(
+                    proposal.get_kleiderschrank().get_name(),
+                    p  # Die gerade erstellte Person als Eigentümer
+                )
+                # Den erstellten Kleiderschrank der Person zuweisen
+                p.set_kleiderschrank(kleiderschrank)
+                # Person mit dem neuen Kleiderschrank speichern
+                adm.save_person(p)
+
             return p, 200
         else:
             # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.

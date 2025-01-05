@@ -93,32 +93,27 @@ class KleiderschrankMapper(Mapper):
                 """
 
         result = None
-
         cursor = self._cnx.cursor()
-        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE id=%s"
+
+        command = "SELECT k.id, k.name, k.eigentuemer_id, p.vorname, p.nachname, p.nickname, p.google_id FROM kleiderschrank k LEFT JOIN person p ON k.eigentuemer_id = p.id WHERE k.id=%s"
         cursor.execute(command, (kleiderschrank_id,))
         tuples = cursor.fetchall()
 
         try:
-            (id, eigentuemer_id, name) = tuples[0]
-
+            (id, name, eigentuemer_id, vorname, nachname, nickname, google_id) = tuples[0]
             kleiderschrank = Kleiderschrank()
             kleiderschrank.set_id(id)
             kleiderschrank.set_name(name)
 
-            with PersonMapper() as person_mapper:
-                eigentuemer = person_mapper.find_by_id(eigentuemer_id)
-                kleiderschrank.set_eigentuemer(eigentuemer)
-
-            with KleidungsstueckMapper() as kleidungsstueck_mapper:
-                command = "SELECT id FROM kleidungsstueck WHERE kleiderschrank_id=%s"
-                cursor.execute(command, (id,))
-                kleidungsstueck_tuples = cursor.fetchall()
-
-                for (kleidungsstueck_id,) in kleidungsstueck_tuples:
-                    kleidungsstueck = kleidungsstueck_mapper.find_by_id(kleidungsstueck_id)
-                    if kleidungsstueck:
-                        kleiderschrank.add_kstueck(kleidungsstueck)
+            if eigentuemer_id:
+                from server.bo.Person import Person
+                person = Person()
+                person.set_id(eigentuemer_id)
+                person.set_vorname(vorname)
+                person.set_nachname(nachname)
+                person.set_nickname(nickname)
+                person.set_google_id(google_id)
+                kleiderschrank.set_eigentuemer(person)
 
             result = kleiderschrank
 

@@ -54,7 +54,8 @@ class Kleiderschrank(bo.BusinessObject):
         obj = Kleiderschrank()
         obj.set_id(dictionary["id"])  # Teil von BusinessObject
         obj.set_name(dictionary["name"])
-        if dictionary["eigentuemer"]:
+        # Prüfen ob eigentuemer im Dictionary existiert
+        if "eigentuemer" in dictionary and dictionary["eigentuemer"]:
             obj.set_eigentuemer(Person.from_dict(dictionary["eigentuemer"]))
         # Wenn Inhalt im Dictionary vorhanden ist, diesen auch setzen
         if "inhalt" in dictionary and dictionary["inhalt"] is not None:

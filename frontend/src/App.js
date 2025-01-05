@@ -189,11 +189,8 @@ class App extends React.Component {
                         } />
 
                         {/* Alle anderen Routen erfordern ein Profil */}
-                        <Route path="/kleiderschrank" element={
-                            currentUser && userHasProfile ?
-                                <KleiderschrankView />
-                                :
-                                <Navigate to="/profile" />
+                       <Route path="/kleiderschrank" element={
+                            currentUser ? <KleiderschrankView user={currentUser} /> : <Navigate to="/" />
                         } />
 
                         <Route path="/outfits" element={
