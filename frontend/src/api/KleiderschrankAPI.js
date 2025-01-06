@@ -111,7 +111,7 @@ class KleiderschrankAPI {
         return this.#fetchAdvanced(this.#getPersonByGoogleIdURL(id))
             .then(responseJSON => {
                 console.log("API Response:", responseJSON);
-                if (responseJSON) {
+                if (responseJSON && responseJSON.id) {
                     const person = PersonBO.fromJSON(responseJSON);
                     console.log("KleiderschrankAPI: Erstelltes PersonBO:", person);
                     return person;
