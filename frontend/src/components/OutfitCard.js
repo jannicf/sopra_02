@@ -1,112 +1,150 @@
 import React, { Component } from 'react';
-import { Card, CardContent, Typography, IconButton, Box } from '@mui/material';
+import { Card, CardContent, Typography, IconButton, Box, Chip, Collapse, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import KleiderschrankAPI from '../api/KleiderschrankAPI';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import OutfitDeleteDialog from '../dialogs/OutfitDeleteDialog';
 
-/**
- * Komponente zur Darstellung eines einzelnen Outfits in Kartenform.
- * Zeigt den Style-Namen, die Anzahl der Kleidungsstücke und optional Details an.
- */
 class OutfitCard extends Component {
-    constructor(props) {
-        super(props);
-        // Initialisierung des States mit dem übergebenen Outfit und dem expanded-Status
-        this.state = {
-            outfit: props.outfit,
-            expanded: false  // Steuert, ob die detaillierte Ansicht angezeigt wird
-        };
+  state = {
+    expanded: false,
+    showDeleteDialog: false
+  };
+
+  handleExpandClick = () => {
+    this.setState(prevState => ({
+      expanded: !prevState.expanded
+    }));
+  };
+
+  handleDeleteClick = () => {
+    this.setState({ showDeleteDialog: true });
+  };
+
+  handleDeleteDialogClose = (deletedOutfit) => {
+    if (deletedOutfit) {
+      this.props.onDelete(deletedOutfit);
+    }
+    this.setState({ showDeleteDialog: false });
+  };
+
+  render() {
+    const { outfit } = this.props;
+    const { expanded, showDeleteDialog } = this.state;
+
+    if (!outfit) {
+      return null;
     }
 
-    /**
-     * Handler für das Löschen eines Outfits.
-     * Kommuniziert mit der API und informiert die übergeordnete Komponente über Änderungen.
-     */
-    handleDelete = async () => {
-        try {
-            // Lösche das Outfit über die API
-            await KleiderschrankAPI.getAPI().deleteOutfit(this.state.outfit.getID());
-            // Informiere die Elternkomponente über die erfolgreiche Löschung
-            this.props.onDelete(this.state.outfit);
-        } catch (error) {
-            console.error("Fehler beim Löschen des Outfits:", error);
-        }
-    };
+    const style = outfit.getStyle();
+    const kleidungsstuecke = outfit.getBausteine() || [];
 
-    /**
-     * Handler für das Aus- und Einklappen der detaillierten Ansicht.
-     * Wechselt den expanded-Status im State.
-     */
-    handleExpandClick = () => {
-        this.setState({
-            expanded: !this.state.expanded
-        });
-    };
+    return (
+      <>
+        <Card sx={{ mb: 2 }}>
+          <CardContent>
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              {/* Header mit Outfit-ID und Anzahl der Kleidungsstücke */}
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Outfit ID: {outfit.getID()}
+                </Typography>
+                <Typography color="text.secondary">
+                  Kleidungsstücke: {kleidungsstuecke.length}
+                </Typography>
+              </Box>
 
-    render() {
-        const { outfit, expanded } = this.state;
+              {/* Action Buttons */}
+              <Box display="flex" alignItems="center">
+                <Button
+                  onClick={this.handleExpandClick}
+                  endIcon={expanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                  sx={{ mr: 1 }}
+                >
+                  Details
+                </Button>
+                <IconButton
+                  onClick={this.handleDeleteClick}
+                  color="error"
+                  size="small"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            </Box>
 
-        if (!outfit || !outfit.getStyle()) {
-            return (
-                <Card className="mb-4">
-                    <CardContent>
-                        <Typography color="error">
-                            Fehlerhaftes Outfit (kein Style zugewiesen)
+            {/* Expandierbarer Bereich */}
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+              <Box sx={{ mt: 2 }}>
+                {/* Style */}
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Typography variant="subtitle1" mr={2}>
+                    Style:
+                  </Typography>
+                  {style && (
+                    <Chip
+                      label={style.getName()}
+                      color="primary"
+                      variant="outlined"
+                    />
+                  )}
+                </Box>
+
+                {/* Kleidungsstücke */}
+                <Typography variant="subtitle1" gutterBottom>
+                  Details der Kleidungsstücke:
+                </Typography>
+
+                {kleidungsstuecke.length > 0 ? (
+                  <Box sx={{ ml: 2 }}>
+                    {kleidungsstuecke.map((kleidungsstueck, index) => (
+                      <Box key={index} mb={1.5} sx={{
+                        p: 1.5,
+                        backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                        borderRadius: 1
+                      }}>
+                        <Typography variant="subtitle2">
+                          {kleidungsstueck.getName() || 'Unbenannt'}
                         </Typography>
-                    </CardContent>
-                </Card>
-            );
-        }
-
-        return (
-            <Card className="mb-4">
-                <CardContent>
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        {/* Linke Seite: Outfit-Informationen */}
-                        <div>
-                            {/* Style-Name des Outfits */}
-                            <Typography variant="h6">
-                                {outfit.getStyle() ? outfit.getStyle().getName() : 'Kein Style zugewiesen'}
-                            </Typography>
-                            {/* Anzahl der Kleidungsstücke im Outfit */}
-                            <Typography color="textSecondary">
-                                {outfit.getBausteine().length} Kleidungsstücke
-                            </Typography>
-
-                            {/* Erweiterte Ansicht mit Details zu den Kleidungsstücken */}
-                            {expanded && (
-                                <Box mt={2}>
-                                    {/* Liste aller Kleidungsstücke im Outfit */}
-                                    {outfit.getBausteine().map(kleidungsstueck => (
-                                        <Typography key={kleidungsstueck.getID()}>
-                                            • {kleidungsstueck.getName()} ({kleidungsstueck.getTyp().getBezeichnung()})
-                                        </Typography>
-                                    ))}
-                                </Box>
-                            )}
-                        </div>
-
-                        {/* Rechte Seite: Aktions-Buttons */}
-                        <Box>
-                            {/* Button zum Erweitern/Reduzieren der Ansicht */}
-                            <IconButton
-                                onClick={this.handleExpandClick}
-                                aria-expanded={expanded}
-                            >
-                                {expanded ? "Weniger" : "Mehr"}
-                            </IconButton>
-                            {/* Button zum Löschen des Outfits */}
-                            <IconButton
-                                onClick={this.handleDelete}
-                                color="error"
-                            >
-                                <DeleteIcon />
-                            </IconButton>
+                        <Box display="flex" gap={1} mt={0.5}>
+                          {kleidungsstueck.getTyp() && (
+                            <Chip
+                              label={`Typ: ${kleidungsstueck.getTyp().getBezeichnung()}`}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                          {style && (
+                            <Chip
+                              label={`Style: ${style.getName()}`}
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                            />
+                          )}
                         </Box>
-                    </Box>
-                </CardContent>
-            </Card>
-        );
-    }
+                      </Box>
+                    ))}
+                  </Box>
+                ) : (
+                  <Typography color="text.secondary" sx={{ ml: 2 }}>
+                    Keine Kleidungsstücke vorhanden
+                  </Typography>
+                )}
+              </Box>
+            </Collapse>
+          </CardContent>
+        </Card>
+
+        {/* Delete Dialog */}
+        <OutfitDeleteDialog
+          show={showDeleteDialog}
+          outfit={outfit}
+          onClose={this.handleDeleteDialogClose}
+        />
+      </>
+    );
+  }
 }
 
 export default OutfitCard;
