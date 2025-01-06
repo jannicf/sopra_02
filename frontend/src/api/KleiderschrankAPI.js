@@ -513,20 +513,47 @@ class KleiderschrankAPI {
         })
     }
 
-    getOutfits() {
-        // Standardisierte GET-Anfrage mit expliziten Optionen
-        return this.#fetchAdvanced(this.#getOutfitsURL(), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
+    async getOutfits() {
+        try {
+          const responseJSON = await this.#fetchAdvanced(this.#getOutfitsURL());
+
+          const outfits = OutfitBO.fromJSON(responseJSON);
+
+          // Lade für jedes Outfit die vollständigen Informationen
+          const outfitsWithDetails = await Promise.all(outfits.map(async (outfit) => {
+            // Style vollständig laden
+            if (outfit.getStyle()) {
+              const style = await this.getStyle(outfit.getStyle().getID());
+              outfit.setStyle(style);
             }
-        }).then(responseJSON => {
-            let outfitBOs = OutfitBO.fromJSON(responseJSON);
-            return new Promise(function (resolve) {
-                resolve(outfitBOs);
-            })
-        })
-    }
+
+            // Kleidungsstücke vollständig laden
+            const bausteine = outfit.getBausteine();
+            if (bausteine && bausteine.length > 0) {
+              const vollstaendigeBausteine = await Promise.all(
+                bausteine.map(async (baustein) => {
+                  const kleidungsstueck = await this.getKleidungsstueck(baustein.getID());
+                  return kleidungsstueck;
+                })
+              );
+              // Alte Bausteine entfernen
+              while(outfit.getBausteine().length > 0) {
+                outfit.getBausteine().pop();
+              }
+              // Neue vollständige Bausteine hinzufügen
+              vollstaendigeBausteine.forEach(baustein => {
+                outfit.addBaustein(baustein);
+              });
+            }
+
+            return outfit;
+          }));
+
+          return outfitsWithDetails;
+        } catch (error) {
+          throw error;
+        }
+      }
 
     addOutfit(outfitData) {
         // POST-Anfrage bleibt unverändert
@@ -563,10 +590,9 @@ class KleiderschrankAPI {
     }
 
     deleteOutfit(id) {
-        // DELETE-Anfrage bleibt unverändert
-        return this.#fetchAdvanced(this.#deleteOutfitURL(id), {
+        return this.#fetchAdvanced(`${this.#KleiderschrankServerBaseURL}/outfits/${id}`, {
             method: 'DELETE'
-        })
+        });
     }
 
     validateOutfit(outfitId) {
