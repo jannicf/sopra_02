@@ -50,7 +50,7 @@ class Header extends Component {
                             zIndex: 1
                         }}>
                             <img
-                                src="/favicon.ico"
+                                src="/logo192.png"
                                 alt="Logo"
                                 style={{
                                     width: 45,
