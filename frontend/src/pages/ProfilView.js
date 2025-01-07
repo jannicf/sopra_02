@@ -113,7 +113,7 @@ class PersonView extends Component {
 
         return (
             <div>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Profil
                 </Typography>
 

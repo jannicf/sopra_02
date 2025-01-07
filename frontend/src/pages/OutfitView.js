@@ -34,7 +34,7 @@ class OutfitView extends Component {
     return (
       <div>
         {/* Hauptüberschrift */}
-        <Typography variant="h4" gutterBottom>
+        <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
           Meine erstellten Outfits
         </Typography>
 
