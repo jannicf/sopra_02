@@ -195,10 +195,15 @@ class KleiderschrankAPI {
         });
     }
 
-    deletePerson(id) {
-        return this.#fetchAdvanced(this.#deletePersonURL(id), {
+    deletePerson(person) {
+        return fetch(this.#deletePersonURL(person.getID()), {
             method: 'DELETE'
-        })
+        }).then(res => {
+            if (!res.ok) {
+                throw Error(`${res.status} ${res.statusText}`);
+            }
+            return; // Keine JSON-Antwort erwartet
+        });
     }
 
     // Kleiderschrank-bezogene Methoden

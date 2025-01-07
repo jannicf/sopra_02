@@ -180,10 +180,10 @@ class PersonOperations(Resource):
         try:
             adm = KleiderschrankAdministration()
             pers = adm.get_person_by_id(id)
-            if pers is None:
-                return {'message': 'Person nicht gefunden'}, 404
-            adm.delete_person(pers)
-            return '', 204  # Standardmäßiger Status-Code für erfolgreiche DELETE-Operation
+            if pers:
+                adm.delete_person(pers)
+                return '', 204  # Standardmäßiger Status-Code für erfolgreiche DELETE-Operation
+            return {'message': 'Person nicht gefunden'}, 404
         except Exception as e:
             return {'message': str(e)}, 500
 
