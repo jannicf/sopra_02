@@ -166,8 +166,16 @@ class KleiderschrankView extends Component {
 
         return (
             <div>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Kleiderschrank
+                </Typography>
+
+                {/* Erklärender Text */}
+                <Typography variant="body1" sx={{ mb: 4 }}>
+                    Hier kannst du deine Kleidungsstücke und Kleidungstypen verwalten. Füge neue Kleidungsstücke hinzu,
+                    ordne sie verschiedenen Typen zu und organisiere deinen digitalen Kleiderschrank ganz nach deinen
+                    Vorstellungen. Du kannst zwischen der Ansicht deiner Kleidungsstücke und der Verwaltung der
+                    Kleidungstypen wechseln.
                 </Typography>
 
                 {/* Auswahlbuttons */}
@@ -195,10 +203,26 @@ class KleiderschrankView extends Component {
                 {/* Bedingte Anzeige der Listen */}
                 {activeView === 'kleidungsstuecke' ? (
                     <>
-                        <KleidungsstueckList
-                            kleidungsstuecke={kleidungsstuecke}
-                            onUpdate={this.loadKleidungsstuecke}
-                        />
+                        {kleidungsstuecke.length > 0 ? (
+                            <KleidungsstueckList
+                                kleidungsstuecke={kleidungsstuecke}
+                                onUpdate={this.loadKleidungsstuecke}
+                            />
+                        ) : (
+                            <Typography
+                                variant="body1"
+                                align="center"
+                                sx={{
+                                    my: 4,
+                                    p: 3,
+                                    bgcolor: 'grey.100',
+                                    borderRadius: 1
+                                }}
+                            >
+                                Dein Kleiderschrank ist noch leer. Füge dein erstes Kleidungsstück hinzu,
+                                indem du auf den "Neues Kleidungsstück" Button klickst.
+                            </Typography>
+                        )}
                         <Button
                             variant="contained"
                             color="primary"
@@ -211,11 +235,27 @@ class KleiderschrankView extends Component {
                     </>
                 ) : (
                     <>
-                        <KleidungstypList
-                            kleidungstypen={kleidungstypen}
-                            onUpdate={this.loadKleidungstypen}
-                            onDelete={this.handleDeleteKleidungstyp}
-                        />
+                        {kleidungstypen.length > 0 ? (
+                            <KleidungstypList
+                                kleidungstypen={kleidungstypen}
+                                onUpdate={this.loadKleidungstypen}
+                                onDelete={this.handleDeleteKleidungstyp}
+                            />
+                        ) : (
+                            <Typography
+                                variant="body1"
+                                align="center"
+                                sx={{
+                                    my: 4,
+                                    p: 3,
+                                    bgcolor: 'grey.100',
+                                    borderRadius: 1
+                                }}
+                            >
+                                Es sind noch keine Kleidungstypen definiert. Erstelle deinen ersten Kleidungstyp,
+                                indem du auf den "Neuer Kleidungstyp" Button klickst.
+                            </Typography>
+                        )}
                         <Button
                             variant="contained"
                             color="primary"

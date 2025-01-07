@@ -95,6 +95,9 @@ class StyleBasiertesOutfitDialog extends Component {
                 bausteine: this.state.ausgewaehlteKleidung.map(k => k.getID())
             });
 
+            // Zeige Erfolgsmeldung
+            alert('Outfit wurde erfolgreich erstellt!');
+
             this.props.onClose(true);
         } catch (error) {
             this.setState({

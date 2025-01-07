@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { List, Typography, Box } from '@mui/material';
-import OutfitCard from './OutfitCard';
+import { Grid, Typography, Card, CardContent, Box, Chip } from '@mui/material';
+import OutfitDetailDialog from '../dialogs/OutfitDetailDialog';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitList extends Component {
@@ -8,6 +8,8 @@ class OutfitList extends Component {
     super(props);
     this.state = {
       outfits: [],
+      selectedOutfit: null,
+      dialogOpen: false,
       loading: true,
       error: null
     };
@@ -34,25 +36,35 @@ class OutfitList extends Component {
     }
   };
 
-  handleOutfitDelete = (deletedOutfit) => {
-    if (deletedOutfit) {
-      const updatedOutfits = this.state.outfits.filter(
-        outfit => outfit.getID() !== deletedOutfit.getID()
-      );
-      this.setState({ outfits: updatedOutfits });
+  handleOutfitClick = (outfit) => {
+    this.setState({
+      selectedOutfit: outfit,
+      dialogOpen: true
+    });
+  };
 
-      // Nach dem UI-Update das Backend aktualisieren
-      KleiderschrankAPI.getAPI().deleteOutfit(deletedOutfit.getID())
-        .catch(error => {
-          console.error('Fehler beim Löschen:', error);
-          // Bei Fehler den State wiederherstellen
-          this.setState({ outfits: this.state.outfits });
-        });
+  handleDialogClose = () => {
+    this.setState({
+      selectedOutfit: null,
+      dialogOpen: false
+    });
+  };
+
+  handleOutfitDelete = async (deletedOutfit) => {
+    try {
+      await KleiderschrankAPI.getAPI().deleteOutfit(deletedOutfit.getID());
+      this.setState(prevState => ({
+        outfits: prevState.outfits.filter(outfit => outfit.getID() !== deletedOutfit.getID()),
+        dialogOpen: false,
+        selectedOutfit: null
+      }));
+    } catch (error) {
+      console.error('Fehler beim Löschen:', error);
     }
   };
 
   render() {
-    const { outfits, loading, error } = this.state;
+    const { outfits, selectedOutfit, dialogOpen, loading, error } = this.state;
 
     if (loading) {
       return <Typography>Lade Outfits...</Typography>;
@@ -63,15 +75,59 @@ class OutfitList extends Component {
     }
 
     return (
-      <List>
-        {outfits.map((outfit) => (
-          <OutfitCard
-            key={outfit.getID()}
-            outfit={outfit}
-            onDelete={this.handleOutfitDelete}
-          />
-        ))}
-      </List>
+      <>
+        <Grid container spacing={3}>
+          {outfits.map((outfit) => (
+            <Grid item xs={12} sm={6} md={4} key={outfit.getID()}>
+              <Card
+                onClick={() => this.handleOutfitClick(outfit)}
+                sx={{
+                  cursor: 'pointer',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  '&:hover': {
+                    boxShadow: 3,
+                    transform: 'scale(1.02)',
+                    transition: 'all 0.2s ease-in-out'
+                  }
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Outfit {outfit.getID()}
+                  </Typography>
+
+                  {/* Style */}
+                  {outfit.getStyle() && (
+                    <Box sx={{ mb: 2 }}>
+                      <Chip
+                        label={`Style: ${outfit.getStyle().getName()}`}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Box>
+                  )}
+
+                  {/* Kleidungsstücke Übersicht */}
+                  <Typography color="textSecondary">
+                    {outfit.getBausteine().length} Kleidungsstücke
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Detail Dialog */}
+        <OutfitDetailDialog
+          outfit={selectedOutfit}
+          open={dialogOpen}
+          onClose={this.handleDialogClose}
+          onDelete={this.handleOutfitDelete}
+        />
+      </>
     );
   }
 }

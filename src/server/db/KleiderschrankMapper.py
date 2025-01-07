@@ -4,7 +4,7 @@ from server.db.PersonMapper import PersonMapper
 from server.db.KleidungsstueckMapper import KleidungsstueckMapper
 
 class KleiderschrankMapper(Mapper):
-    # In KleiderschrankMapper.py
+
     def insert(self, kleiderschrank):
         cursor = self._cnx.cursor()
         print(f"KleiderschrankMapper: Versuche Kleiderschrank einzufügen")

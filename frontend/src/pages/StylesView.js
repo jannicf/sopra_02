@@ -70,7 +70,7 @@ class StylesView extends Component {
 
     return (
       <div>
-        <Typography variant="h4">Meine Styles</Typography>
+        <Typography variant="h4" sx={{ mt: 2 }}>Meine Styles</Typography>
 
         {/* Liste der Styles */}
         <StyleList
