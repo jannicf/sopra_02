@@ -7,10 +7,6 @@ class KleiderschrankMapper(Mapper):
 
     def insert(self, kleiderschrank):
         cursor = self._cnx.cursor()
-        print(f"KleiderschrankMapper: Versuche Kleiderschrank einzufügen")
-        print(f"Name: {kleiderschrank.get_name()}")
-        print(f"Eigentuemer ID: {kleiderschrank.get_eigentuemer().get_id()}")
-
         cursor.execute("SELECT MAX(id) AS maxid FROM kleiderschrank")
         tuples = cursor.fetchall()
 
@@ -20,18 +16,12 @@ class KleiderschrankMapper(Mapper):
             else:
                 kleiderschrank.set_id(1)
 
-        print(f"KleiderschrankMapper: Generierte ID: {kleiderschrank.get_id()}")
-
         command = "INSERT INTO kleiderschrank (id, eigentuemer_id, name) VALUES (%s,%s,%s)"
         data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name())
-        print(f"KleiderschrankMapper: SQL Command:", command)
-        print(f"KleiderschrankMapper: Data:", data)
-
         cursor.execute(command, data)
+
         self._cnx.commit()
         cursor.close()
-
-        print(f"KleiderschrankMapper: Kleiderschrank erfolgreich eingefügt mit ID {kleiderschrank.get_id()}")
         return kleiderschrank
 
     def update(self, kleiderschrank):
