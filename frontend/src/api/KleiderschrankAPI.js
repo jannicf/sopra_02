@@ -470,43 +470,45 @@ updateKleiderschrank = async (kleiderschrank) => {
         })
     }
 
-    addStyle(styleBO) {
-    return this.#fetchAdvanced(this.#addStyleURL(), {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json, text/plain',
-            'Content-type': 'application/json'
-        },
-        body: JSON.stringify(styleBO)  // Direktes Stringifizieren wie bei anderen Methoden
-    }).then(responseJSON => {
-        let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
-        return new Promise(function (resolve) {
-            resolve(responseStyleBO);
-        })
-    })
-}
+    addStyle(styleData) {
+        return this.#fetchAdvanced(this.#addStyleURL(), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: styleData.name,
+                features: styleData.features,
+                constraints: styleData.constraints || []
+            }) // Hier wird nur das geschickt was das Backend erwartet
+        }).then(responseJSON => {
+            return StyleBO.fromJSON([responseJSON])[0];
+        });
+    }
 
-    updateStyle(styleBO) {
-    return this.#fetchAdvanced(this.#updateStyleURL(styleBO.getID()), {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json, text/plain',
-            'Content-type': 'application/json'
-        },
-        body: JSON.stringify(styleBO)  // Hier auch das direkte Stringifizieren
-    }).then(responseJSON => {
-        let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
-        return new Promise(function (resolve) {
-            resolve(responseStyleBO);
-        })
-    })
-}
+    updateStyle(id, styleData) {
+        const requestData = {
+            name: styleData.name,
+            features: Array.isArray(styleData.features) ? styleData.features : [],
+            constraints: styleData.constraints // Füge Constraints hinzu
+        };
 
-    deleteStyle(id) {
-        return this.#fetchAdvanced(this.#deleteStyleURL(id), {
-            method: 'DELETE'
+        return this.#fetchAdvanced(this.#updateStyleURL(id), {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json, text/plain',
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        }).then(responseJSON => {
+            let updatedStyle = StyleBO.fromJSON([responseJSON])[0];
+            return new Promise(function (resolve) {
+                resolve(updatedStyle);
+            });
         })
     }
+
 
 // Outfit-bezogene Methoden
     getOutfit(id) {
