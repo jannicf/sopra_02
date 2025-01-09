@@ -18,7 +18,7 @@ class Mapper(AbstractContextManager, ABC):
                                           unix_socket='/cloudsql/civil-array-440815-m3:europe-west3:sopra-db-instanz',
                                           database='sopra_db')
         else:
-            """Wenn wir hier ankommen, dann handelt sich offenbar um die Ausführung des Codes in einer lokalen Umgebung,
+            """Wenn wir hier ankommen, dann handelt es sich offenbar um die Ausführung des Codes in einer lokalen Umgebung,
             also auf einem Local Development Server. Hierbei stellen wir eine einfache Verbindung zu einer lokal
             installierten mySQL-Datenbank her."""
 

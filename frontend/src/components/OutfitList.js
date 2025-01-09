@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { List, Typography, Button, Box } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import OutfitCard from './OutfitCard';
+import { Grid, Typography, Card, CardContent, Box, Chip } from '@mui/material';
+import OutfitDetailDialog from '../dialogs/OutfitDetailDialog';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitList extends Component {
@@ -9,8 +8,10 @@ class OutfitList extends Component {
     super(props);
     this.state = {
       outfits: [],
-      error: null,
-      loading: false
+      selectedOutfit: null,
+      dialogOpen: false,
+      loading: true,
+      error: null
     };
   }
 
@@ -20,68 +21,113 @@ class OutfitList extends Component {
 
   loadOutfits = async () => {
     try {
-      this.setState({ loading: true });
-      const outfits = await KleiderschrankAPI.getAPI().getOutfits();
+      const api = KleiderschrankAPI.getAPI();
+      const outfits = await api.getOutfits();
       this.setState({
         outfits: outfits,
-        error: null,
         loading: false
       });
     } catch (error) {
+      console.error("Fehler beim Laden der Outfits:", error);
       this.setState({
         error: error.message,
-        outfits: [],
         loading: false
       });
     }
   };
 
-  handleOutfitDelete = async (deletedOutfit) => {
-    const updatedOutfits = this.state.outfits.filter(
-      outfit => outfit.getID() !== deletedOutfit.getID()
-    );
+  handleOutfitClick = (outfit) => {
     this.setState({
-      outfits: updatedOutfits
+      selectedOutfit: outfit,
+      dialogOpen: true
     });
   };
 
-  handleCreateClick = () => {
-    this.props.onNavigateToCreate();
+  handleDialogClose = () => {
+    this.setState({
+      selectedOutfit: null,
+      dialogOpen: false
+    });
+  };
+
+  handleOutfitDelete = async (deletedOutfit) => {
+    try {
+      await KleiderschrankAPI.getAPI().deleteOutfit(deletedOutfit.getID());
+      this.setState(prevState => ({
+        outfits: prevState.outfits.filter(outfit => outfit.getID() !== deletedOutfit.getID()),
+        dialogOpen: false,
+        selectedOutfit: null
+      }));
+    } catch (error) {
+      console.error('Fehler beim Löschen:', error);
+    }
   };
 
   render() {
-    const { outfits, error, loading } = this.state;
+    const { outfits, selectedOutfit, dialogOpen, loading, error } = this.state;
 
     if (loading) {
       return <Typography>Lade Outfits...</Typography>;
     }
 
     if (error) {
-      return <Typography color="error">Fehler beim Laden der Outfits: {error}</Typography>;
+      return <Typography color="error">Fehler beim Laden: {error}</Typography>;
     }
 
     return (
-      <Box>
-        <List>
-          {outfits.map(outfit => (
-            <OutfitCard
-              key={outfit.getID()}
-              outfit={outfit}
-              onDelete={this.handleOutfitDelete}
-            />
-          ))}
-        </List>
+      <>
+        <Grid container spacing={3}>
+          {outfits.map((outfit) => (
+            <Grid item xs={12} sm={6} md={4} key={outfit.getID()}>
+              <Card
+                onClick={() => this.handleOutfitClick(outfit)}
+                sx={{
+                  cursor: 'pointer',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  '&:hover': {
+                    boxShadow: 3,
+                    transform: 'scale(1.02)',
+                    transition: 'all 0.2s ease-in-out'
+                  }
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Outfit {outfit.getID()}
+                  </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={this.handleCreateClick}
-          sx={{ position: 'fixed', bottom: '2rem', right: '2rem' }}
-        >
-          Neues Outfit erstellen
-        </Button>
-      </Box>
+                  {/* Style */}
+                  {outfit.getStyle() && (
+                    <Box sx={{ mb: 2 }}>
+                      <Chip
+                        label={`Style: ${outfit.getStyle().getName()}`}
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Box>
+                  )}
+
+                  {/* Kleidungsstücke Übersicht */}
+                  <Typography color="textSecondary">
+                    {outfit.getBausteine().length} Kleidungsstücke
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Detail Dialog */}
+        <OutfitDetailDialog
+          outfit={selectedOutfit}
+          open={dialogOpen}
+          onClose={this.handleDialogClose}
+          onDelete={this.handleOutfitDelete}
+        />
+      </>
     );
   }
 }

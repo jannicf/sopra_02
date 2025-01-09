@@ -3,37 +3,47 @@ from server.bo.Person import Person
 
 class PersonMapper(Mapper):
     def insert(self, person):
-        """Einfügen eines Person-Objekts in die Datenbank.
+        try:
+            cursor = self._cnx.cursor()
+            if person.get_kleiderschrank():
+                person.get_kleiderschrank().get_name()
 
-                Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
-                berichtigt.
+            # ID generieren
+            cursor.execute("SELECT MAX(id) AS maxid FROM person")
+            tuples = cursor.fetchall()
 
-                :param person das zu speichernde Objekt
-                :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
-                """
-        cursor = self._cnx.cursor()
-        cursor.execute("SELECT MAX(id) AS maxid FROM person ")
-        tuples = cursor.fetchall()
+            for (maxid) in tuples:
+                if maxid[0] is not None:
+                    person.set_id(maxid[0] + 1)
+                else:
+                    person.set_id(1)
 
-        for (maxid) in tuples:
-            if maxid[0] is not None:
-                """Wenn wir eine maximale ID festellen konnten, zählen wir diese
-                um 1 hoch und weisen diesen Wert als ID dem Person-Objekt zu."""
-                person.set_id(maxid[0] + 1)
-            else:
-                """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
-                davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
-                person.set_id(1)
+            # Person in DB einfügen
+            command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
+            data = (person.get_id(), person.get_vorname(), person.get_nachname(),
+                    person.get_nickname(), person.get_google_id())
+            cursor.execute(command, data)
 
-        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
-        data = (person.get_id(), person.get_vorname(), person.get_nachname(), person.get_nickname(),
-                person.get_google_id())
-        cursor.execute(command, data)
+            # Kleiderschrank erstellen wenn vorhanden
+            if person.get_kleiderschrank():
+                from src.server.db.KleiderschrankMapper import KleiderschrankMapper
 
-        self._cnx.commit()
-        cursor.close()
+                kleiderschrank = person.get_kleiderschrank()
+                kleiderschrank.set_eigentuemer(person)
 
-        return person
+                with KleiderschrankMapper() as kleiderschrank_mapper:
+                    saved_kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
+                    person.set_kleiderschrank(saved_kleiderschrank)
+
+            self._cnx.commit()
+            cursor.close()
+            return person
+
+        except Exception as e:
+            print(f"FEHLER bei Person-Erstellung: {str(e)}")
+            self._cnx.rollback()
+            cursor.close()
+            raise e
 
     def update(self, person):
         """Wiederholtes Schreiben eines Person-Objekts in die Datenbank.
@@ -48,12 +58,10 @@ class PersonMapper(Mapper):
                 person.get_google_id(), person.get_id())
         cursor.execute(command, data)
 
-        # Wenn die Person einen Kleiderschrank hat, stelle sicher dass die Verbindung
-        # auch in der DB existiert
-        kleiderschrank = person.get_kleiderschrank()
-        if kleiderschrank is not None:
+        # Kleiderschrank-Beziehung aktualisieren
+        if person.get_kleiderschrank():
             kleiderschrank_command = "UPDATE kleiderschrank SET eigentuemer_id=%s WHERE id=%s"
-            kleiderschrank_data = (person.get_id(), kleiderschrank.get_id())
+            kleiderschrank_data = (person.get_id(), person.get_kleiderschrank().get_id())
             cursor.execute(kleiderschrank_command, kleiderschrank_data)
 
         self._cnx.commit()
@@ -114,7 +122,7 @@ class PersonMapper(Mapper):
 
         :param vorname Vorname der zugehörigen Person.
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Vorname enthält.
+            mit dem gewünschten Vornamen enthält.
         """
         result = []
 
@@ -143,7 +151,7 @@ class PersonMapper(Mapper):
 
         :param nachname Nachname der zugehörigen Person.
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Nachname enthält.
+            mit dem gewünschten Nachnamen enthält.
         """
         result = []
 
@@ -172,7 +180,7 @@ class PersonMapper(Mapper):
 
         :param nickname Nickname der zugehörigen Person.
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Nickname enthält.
+            mit dem gewünschten Nickname enthält.
         """
         result = None
 
@@ -202,7 +210,6 @@ class PersonMapper(Mapper):
 
     def find_by_google_id(self, google_id):
         """Auslesen einer Person anhand der Google ID."""
-        print(f"PersonMapper: Suche Person mit Google ID {google_id}")
         result = None
 
         cursor = self._cnx.cursor()
@@ -220,14 +227,11 @@ class PersonMapper(Mapper):
             person.set_nickname(nickname)
             person.set_google_id(google_id)
 
-            print(f"PersonMapper: Person mit ID {id} gefunden")
-
-            # Dann den zugehörigen Kleiderschrank suchen
+            # Den zugehörigen Kleiderschrank suchen
             command = "SELECT id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
             cursor.execute(command, (id,))
             kleiderschrank_tuples = cursor.fetchall()
 
-            # Im PersonMapper, find_by_google_id Methode:
             if kleiderschrank_tuples:
                 from server.db.KleiderschrankMapper import KleiderschrankMapper
                 # Verwende den KleiderschrankMapper um den vollständigen Kleiderschrank zu laden
@@ -245,7 +249,6 @@ class PersonMapper(Mapper):
             result = person
 
         except IndexError:
-            print("PersonMapper: Keine Person gefunden")
             result = None
 
         self._cnx.commit()

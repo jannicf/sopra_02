@@ -1,53 +1,61 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class OutfitDeleteDialog extends Component {
-    handleClose = () => {
+  constructor(props) {
+    super(props);
+  }
+
+  handleClose = () => {
+    this.props.onClose(null);
+  };
+
+  handleDelete = () => {
+    const { outfit } = this.props;
+
+    KleiderschrankAPI.getAPI().deleteOutfit(outfit.getID())
+      .then(() => {
+        this.props.onClose(outfit);
+      })
+      .catch(error => {
+        console.error('Error:', error);
         this.props.onClose(null);
-    };
+      });
+  };
 
-    handleDelete = async () => {
-        try {
-            const { outfit } = this.props;
-            await KleiderschrankAPI.getAPI().deleteOutfit(outfit.getID());
-            this.props.onClose(outfit);
-        } catch (error) {
-            console.error('Fehler beim Löschen:', error);
-            this.props.onClose(outfit);
-        }
-    };
+  render() {
+    const { show, outfit } = this.props;
 
-    render() {
-        const { show, outfit } = this.props;
-
-        return (
-            <Dialog
-                open={show}
-                onClose={this.handleClose}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle>
-                    Outfit löschen
-                </DialogTitle>
-                <DialogContent>
-                    <p>Möchten Sie das Outfit "#{outfit?.getID()}" wirklich löschen?</p>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={this.handleClose} disabled={false}>
-                        Abbrechen
-                    </Button>
-                    <Button
-                        onClick={this.handleDelete}
-                        color="error"
-                    >
-                        Löschen
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
+    return (
+      <Dialog
+        open={show}
+        onClose={this.handleClose}
+        maxWidth='xs'
+        fullWidth
+      >
+        <DialogTitle>
+          Outfit löschen
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            Möchten Sie das Outfit wirklich löschen?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={this.handleClose}>
+            Abbrechen
+          </Button>
+          <Button
+            onClick={this.handleDelete}
+            color="secondary"
+          >
+            Löschen
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 }
 
 export default OutfitDeleteDialog;

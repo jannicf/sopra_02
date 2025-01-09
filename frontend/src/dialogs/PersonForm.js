@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
          Typography, Box } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
+import PersonBO from "../api/PersonBO";
+import KleiderschrankBO from "../api/KleiderschrankBO";
 
 class PersonForm extends Component {
     constructor(props) {
@@ -62,64 +64,50 @@ class PersonForm extends Component {
     };
 
     handleSubmit = async () => {
-    if (!this.validateForm()) {
-        return;
-    }
-
     try {
         this.setState({ loading: true });
         const api = KleiderschrankAPI.getAPI();
 
-        console.log('Starte Person-Erstellung...');
+        // Person-Daten vorbereiten
+        const personBO = new PersonBO();
+        personBO.setVorname(this.state.formData.vorname);
+        personBO.setNachname(this.state.formData.nachname);
+        personBO.setNickname(this.state.formData.nickname);
+        personBO.setGoogleId(this.props.user?.uid);
 
-        // 1. Person erstellen
-        const personData = {
-            id: 0,
-            vorname: this.state.formData.vorname,
-            nachname: this.state.formData.nachname,
-            nickname: this.state.formData.nickname,
-            google_id: this.props.user?.uid
-        };
+        // Debug-Log
+        console.log("FormData:", this.state.formData);
 
-        console.log('Sende Person-Daten:', personData);
-        const createdPerson = await api.addPerson(personData);
-        console.log('Person erstellt:', createdPerson);
+        // Kleiderschrank vorbereiten
+        if (this.state.formData.kleiderschrankName) {
+            console.log("Erstelle Kleiderschrank mit Name:", this.state.formData.kleiderschrankName);
+            const kleiderschrankBO = new KleiderschrankBO();
+            kleiderschrankBO.setName(this.state.formData.kleiderschrankName);
+            personBO.setKleiderschrank(kleiderschrankBO);
 
-        // 2. Kleiderschrank erstellen
-        if (createdPerson && createdPerson.getID()) {
-            console.log('Starte Kleiderschrank-Erstellung...');
-            const kleiderschrankData = {
-                id: 0,
-                name: this.state.formData.kleiderschrankName,
-                eigentuemer_id: createdPerson.getID()
-            };
-
-            console.log('Sende Kleiderschrank-Daten:', kleiderschrankData);
-            const createdKleiderschrank = await api.addKleiderschrank(kleiderschrankData);
-            console.log('Kleiderschrank erstellt:', createdKleiderschrank);
-
-            // 3. Person mit Kleiderschrank verknüpfen
-            if (createdKleiderschrank) {
-                createdPerson.setKleiderschrank(createdKleiderschrank);
-                console.log('Aktualisiere Person mit Kleiderschrank:', createdPerson);
-                await api.updatePerson(createdPerson);
-                console.log('Person erfolgreich aktualisiert');
-            }
+            // Debug-Log
+            console.log("PersonBO mit Kleiderschrank:", {
+                vorname: personBO.getVorname(),
+                nachname: personBO.getNachname(),
+                kleiderschrank: personBO.getKleiderschrank()
+            });
         }
 
-        this.setState({ loading: false });
-        if (this.props.onClose) {
+        // Person erstellen
+        const createdPerson = await api.addPerson(personBO);
+
+        // Debug-Log
+        console.log("Erstellte Person:", createdPerson);
+        if (createdPerson) {
             this.props.onClose(createdPerson);
         }
-
     } catch (error) {
-        console.error('Fehler beim Erstellen:', error);
-        this.setState({
-            error: 'Ein Fehler ist aufgetreten: ' + error.message,
-            loading: false
-        });
-    }
-};
+        console.error('Error in handleSubmit:', error);
+        this.setState({ error: error.message });
+    } finally {
+        this.setState({ loading: false });
+        }
+    };
 
     render() {
         const { show, onClose } = this.props;

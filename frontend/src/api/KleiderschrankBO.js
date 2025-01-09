@@ -85,45 +85,52 @@ export default class KleiderschrankBO extends BusinessObject {
    *
    * @param {*} wardrobes - JSON-Daten, die in KleiderschrankBO Objekte umgewandelt werden sollen
    */
-  static fromJSON(wardrobes) {
+  // KleiderschrankBO.js
+static fromJSON(wardrobes) {
     let result = [];
 
     if (Array.isArray(wardrobes)) {
-      wardrobes.forEach((k) => {
-        let kleiderschrank = new KleiderschrankBO();
-        kleiderschrank.setID(k.id);
-        kleiderschrank.setName(k.name);
+        wardrobes.forEach((k) => {
+            let kleiderschrank = new KleiderschrankBO();
+            kleiderschrank.setID(k.id);
+            kleiderschrank.setName(k.name);
 
-        if (k.eigentuemer) {
-          kleiderschrank.setEigentuemer(PersonBO.fromJSON([k.eigentuemer])[0]);
+            // Wenn ein Eigentümer vorhanden ist, diesen setzen
+            if (k.eigentuemer) {
+                const PersonBO = require('./PersonBO').default;
+                const eigentuemer = PersonBO.fromJSON([k.eigentuemer])[0];
+                kleiderschrank.setEigentuemer(eigentuemer);
+            }
+
+            if (k.inhalt && Array.isArray(k.inhalt)) {
+                k.inhalt.forEach(item => {
+                    const kleidungsstueck = KleidungsstueckBO.fromJSON([item])[0];
+                    kleiderschrank.addKleidungsstueck(kleidungsstueck);
+                });
+            }
+
+            result.push(kleiderschrank);
+        });
+    } else if (wardrobes) {
+        let kleiderschrank = new KleiderschrankBO();
+        kleiderschrank.setID(wardrobes.id);
+        kleiderschrank.setName(wardrobes.name);
+
+        // Wenn ein Eigentümer vorhanden ist, diesen setzen
+        if (wardrobes.eigentuemer) {
+            const PersonBO = require('./PersonBO').default;
+            const eigentuemer = PersonBO.fromJSON([wardrobes.eigentuemer])[0];
+            kleiderschrank.setEigentuemer(eigentuemer);
         }
 
-        if (k.inhalt && Array.isArray(k.inhalt)) {
-          k.inhalt.forEach(item => {
-            const kleidungsstueck = KleidungsstueckBO.fromJSON([item])[0];
-            kleiderschrank.addKleidungsstueck(kleidungsstueck);
-          });
+        if (wardrobes.inhalt && Array.isArray(wardrobes.inhalt)) {
+            wardrobes.inhalt.forEach(item => {
+                const kleidungsstueck = KleidungsstueckBO.fromJSON([item])[0];
+                kleiderschrank.addKleidungsstueck(kleidungsstueck);
+            });
         }
 
         result.push(kleiderschrank);
-      })
-    } else if (wardrobes) {
-      let kleiderschrank = new KleiderschrankBO();
-      kleiderschrank.setID(wardrobes.id);
-      kleiderschrank.setName(wardrobes.name);
-
-      if (wardrobes.eigentuemer) {
-        kleiderschrank.setEigentuemer(PersonBO.fromJSON([wardrobes.eigentuemer])[0]);
-      }
-
-      if (wardrobes.inhalt && Array.isArray(wardrobes.inhalt)) {
-        wardrobes.inhalt.forEach(item => {
-          const kleidungsstueck = KleidungsstueckBO.fromJSON([item])[0];
-          kleiderschrank.addKleidungsstueck(kleidungsstueck);
-        });
-      }
-
-      result.push(kleiderschrank);
     }
 
     return result;

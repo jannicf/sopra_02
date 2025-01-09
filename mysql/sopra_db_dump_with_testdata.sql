@@ -103,7 +103,7 @@ CREATE TABLE `kleiderschrank` (
 
 LOCK TABLES `kleiderschrank` WRITE;
 /*!40000 ALTER TABLE `kleiderschrank` DISABLE KEYS */;
-INSERT INTO `kleiderschrank` VALUES (1,'Maximilians Schrank',1),(2,'Erikas Schrank',2);
+INSERT INTO `kleiderschrank` VALUES (1,'Maximilian sein Schrank',1),(2,'Erikas Fashion Schrank',2);
 /*!40000 ALTER TABLE `kleiderschrank` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -147,7 +147,10 @@ DROP TABLE IF EXISTS `kleidungstyp`;
 CREATE TABLE `kleidungstyp` (
   `id` int NOT NULL,
   `bezeichnung` varchar(128) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`)
+  `kleiderschrank_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `kleiderschrank_id` (`kleiderschrank_id`),
+  CONSTRAINT `kleidungstyp_ibfk_1` FOREIGN KEY (`kleiderschrank_id`) REFERENCES `kleiderschrank` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -157,7 +160,7 @@ CREATE TABLE `kleidungstyp` (
 
 LOCK TABLES `kleidungstyp` WRITE;
 /*!40000 ALTER TABLE `kleidungstyp` DISABLE KEYS */;
-INSERT INTO `kleidungstyp` VALUES (1,'T-Shirt'),(2,'Jeans'),(3,'Pullover'),(4,'Jacke'),(5,'Hemd'),(6,'Shorts'),(7,'Kleid'),(8,'Rock'),(9,'Anzughose'),(10,'Blazer');
+INSERT INTO `kleidungstyp` VALUES (1,'T-Shirt',1),(2,'Jeans',1),(3,'Pullover',1),(4,'Jacke',1),(5,'Hemd',1),(6,'Shorts',2),(7,'Kleid',2),(8,'Rock',2),(9,'Anzughose',1),(10,'Blazer',2);
 /*!40000 ALTER TABLE `kleidungstyp` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -203,9 +206,12 @@ DROP TABLE IF EXISTS `outfit`;
 CREATE TABLE `outfit` (
   `id` int NOT NULL,
   `style_id` int DEFAULT NULL,
+  `kleiderschrank_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `style_id` (`style_id`),
-  CONSTRAINT `outfit_ibfk_1` FOREIGN KEY (`style_id`) REFERENCES `style` (`id`)
+  KEY `kleiderschrank_id` (`kleiderschrank_id`),
+  CONSTRAINT `outfit_ibfk_1` FOREIGN KEY (`style_id`) REFERENCES `style` (`id`),
+  CONSTRAINT `outfit_ibfk_2` FOREIGN KEY (`kleiderschrank_id`) REFERENCES `kleiderschrank` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -215,7 +221,7 @@ CREATE TABLE `outfit` (
 
 LOCK TABLES `outfit` WRITE;
 /*!40000 ALTER TABLE `outfit` DISABLE KEYS */;
-INSERT INTO `outfit` VALUES (1,1),(2,2),(3,3),(4,4);
+INSERT INTO `outfit` VALUES (1,1,1),(2,2,1),(3,3,2),(4,4,2);
 /*!40000 ALTER TABLE `outfit` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -283,7 +289,10 @@ DROP TABLE IF EXISTS `style`;
 CREATE TABLE `style` (
   `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`)
+  `kleiderschrank_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `kleiderschrank_id` (`kleiderschrank_id`),
+  CONSTRAINT `style_ibfk_1` FOREIGN KEY (`kleiderschrank_id`) REFERENCES `kleiderschrank` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -293,7 +302,7 @@ CREATE TABLE `style` (
 
 LOCK TABLES `style` WRITE;
 /*!40000 ALTER TABLE `style` DISABLE KEYS */;
-INSERT INTO `style` VALUES (1,'Business Casual'),(2,'Sportlich'),(3,'Elegant'),(4,'Freizeit');
+INSERT INTO `style` VALUES (1,'Business Casual',1),(2,'Sportlich',1),(3,'Elegant',2),(4,'Freizeit',2);
 /*!40000 ALTER TABLE `style` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -333,4 +342,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-29 12:21:41
+-- Dump completed on 2025-01-09 11:23:57

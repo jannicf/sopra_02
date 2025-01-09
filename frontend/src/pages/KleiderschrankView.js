@@ -23,12 +23,12 @@ class KleiderschrankView extends Component {
     }
 
     componentDidMount() {
-        // Zuerst den Kleiderschrank laden
-        KleiderschrankAPI.getAPI().getKleiderschraenke()
-            .then(kleiderschraenke => {
-                if (kleiderschraenke && kleiderschraenke.length > 0) {
+        // Zuerst den Kleiderschrank des eingeloggten Users laden
+        KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid)
+            .then(person => {
+                if (person && person.getKleiderschrank()) {
                     this.setState({
-                        kleiderschrankId: kleiderschraenke[0].getID(),
+                        kleiderschrankId: person.getKleiderschrank().getID(),
                         loadingInProgress: false
                     }, () => {
                         // Erst nach dem Setzen der ID die anderen Daten laden
@@ -57,8 +57,9 @@ class KleiderschrankView extends Component {
             error: null
         });
 
-        KleiderschrankAPI.getAPI().getKleidungsstuecke()
-            .then(kleidungsstuecke => {
+        // Hier nur die Kleidungsstücke des eigenen Kleiderschranks laden
+        KleiderschrankAPI.getAPI()
+            .getKleidungsstueckByKleiderschrankId(this.state.kleiderschrankId)            .then(kleidungsstuecke => {
                 this.setState({
                     kleidungsstuecke: kleidungsstuecke,
                     loadingInProgress: false
@@ -79,12 +80,26 @@ class KleiderschrankView extends Component {
             error: null
         });
 
-        KleiderschrankAPI.getAPI().getKleidungstypen()
-            .then(kleidungstypen => {
-                this.setState({
-                    kleidungstypen: kleidungstypen,
-                    loadingInProgress: false
-                });
+        // Erst alle Kleidungsstücke des Kleiderschranks laden
+        KleiderschrankAPI.getAPI()
+            .getKleidungsstueckByKleiderschrankId(this.state.kleiderschrankId)
+            .then(kleidungsstuecke => {
+                // Set für eindeutige Typ-IDs erstellen
+                const typIds = new Set(kleidungsstuecke.map(k => k.getTyp().getID()));
+
+                // Alle Kleidungstypen laden
+                return KleiderschrankAPI.getAPI().getKleidungstypen()
+                    .then(alleTypen => {
+                        // Nur die Typen behalten, die in unserem Kleiderschrank verwendet werden
+                        const gefilterteTypen = alleTypen.filter(typ =>
+                            typIds.has(typ.getID())
+                        );
+
+                        this.setState({
+                            kleidungstypen: gefilterteTypen,
+                            loadingInProgress: false
+                        });
+                    });
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -151,8 +166,16 @@ class KleiderschrankView extends Component {
 
         return (
             <div>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Kleiderschrank
+                </Typography>
+
+                {/* Erklärender Text */}
+                <Typography variant="body1" sx={{ mb: 4 }}>
+                    Hier kannst du deine Kleidungsstücke und Kleidungstypen verwalten. Füge neue Kleidungsstücke hinzu,
+                    ordne sie verschiedenen Typen zu und organisiere deinen digitalen Kleiderschrank ganz nach deinen
+                    Vorstellungen. Du kannst zwischen der Ansicht deiner Kleidungsstücke und der Verwaltung der
+                    Kleidungstypen wechseln.
                 </Typography>
 
                 {/* Auswahlbuttons */}
@@ -180,10 +203,26 @@ class KleiderschrankView extends Component {
                 {/* Bedingte Anzeige der Listen */}
                 {activeView === 'kleidungsstuecke' ? (
                     <>
-                        <KleidungsstueckList
-                            kleidungsstuecke={kleidungsstuecke}
-                            onUpdate={this.loadKleidungsstuecke}
-                        />
+                        {kleidungsstuecke.length > 0 ? (
+                            <KleidungsstueckList
+                                kleidungsstuecke={kleidungsstuecke}
+                                onUpdate={this.loadKleidungsstuecke}
+                            />
+                        ) : (
+                            <Typography
+                                variant="body1"
+                                align="center"
+                                sx={{
+                                    my: 4,
+                                    p: 3,
+                                    bgcolor: 'grey.100',
+                                    borderRadius: 1
+                                }}
+                            >
+                                Dein Kleiderschrank ist noch leer. Füge dein erstes Kleidungsstück hinzu,
+                                indem du auf den "Neues Kleidungsstück" Button klickst.
+                            </Typography>
+                        )}
                         <Button
                             variant="contained"
                             color="primary"
@@ -196,11 +235,27 @@ class KleiderschrankView extends Component {
                     </>
                 ) : (
                     <>
-                        <KleidungstypList
-                            kleidungstypen={kleidungstypen}
-                            onUpdate={this.loadKleidungstypen}
-                            onDelete={this.handleDeleteKleidungstyp}
-                        />
+                        {kleidungstypen.length > 0 ? (
+                            <KleidungstypList
+                                kleidungstypen={kleidungstypen}
+                                onUpdate={this.loadKleidungstypen}
+                                onDelete={this.handleDeleteKleidungstyp}
+                            />
+                        ) : (
+                            <Typography
+                                variant="body1"
+                                align="center"
+                                sx={{
+                                    my: 4,
+                                    p: 3,
+                                    bgcolor: 'grey.100',
+                                    borderRadius: 1
+                                }}
+                            >
+                                Es sind noch keine Kleidungstypen definiert. Erstelle deinen ersten Kleidungstyp,
+                                indem du auf den "Neuer Kleidungstyp" Button klickst.
+                            </Typography>
+                        )}
                         <Button
                             variant="contained"
                             color="primary"
@@ -218,7 +273,7 @@ class KleiderschrankView extends Component {
                     <KleidungsstueckForm
                         show={showCreateDialog}
                         onClose={this.handleCreateDialogClosed}
-                        kleiderschrankId={kleiderschrankId}
+                        kleiderschrankId={this.state.kleiderschrankId}
                     />
                 )}
                 <KleidungstypForm

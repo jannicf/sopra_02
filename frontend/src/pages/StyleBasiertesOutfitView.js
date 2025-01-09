@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, Typography, Card, CardContent } from '@mui/material';
+import { Grid, Typography, Box, Card, CardContent } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleBasiertesOutfitDialog from '../dialogs/StyleBasiertesOutfitDialog';
 
@@ -77,7 +77,7 @@ class StyleBasiertesOutfitView extends Component {
         const { styles, selectedStyle, showDialog, loading, error } = this.state;
 
         if (loading) {
-            return <Typography>Lade Styles...</Typography>;
+            return <Typography>Lädt...</Typography>;
         }
 
         if (error) {
@@ -85,41 +85,40 @@ class StyleBasiertesOutfitView extends Component {
         }
 
         return (
-            <Box sx={{ p: 3 }}>
+            <Box sx={{ padding: 2 }}>
                 <Typography variant="h4" gutterBottom>
-                    Outfit nach Style erstellen
+                    Wähle einen Style
                 </Typography>
 
-                {/* Anzeige der verfügbaren Styles als Karten */}
-                <Box sx={{ mt: 3 }}>
+                <Grid container spacing={2}>
                     {styles.map((style) => (
-                        <Card
-                            key={style.getID()}
-                            onClick={() => this.handleStyleClick(style)}
-                            sx={{
-                                mb: 2,
-                                cursor: 'pointer',
-                                '&:hover': {
-                                    boxShadow: 3,
-                                    transform: 'scale(1.01)',
-                                    transition: 'all 0.2s'
-                                }
-                            }}
-                        >
-                            <CardContent>
-                                <Typography variant="h6">
-                                    {style.getName()}
-                                </Typography>
-                                <Typography color="textSecondary">
-                                    {style.getFeatures().length} Kleidungstypen
-                                </Typography>
-                                <Typography variant="body2">
-                                    {style.getConstraints().length} Constraints
-                                </Typography>
-                            </CardContent>
-                        </Card>
+                        <Grid item xs={12} sm={6} md={4} key={style.getID()}>
+                            <Card
+                                onClick={() => this.handleStyleClick(style)}
+                                sx={{
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                        boxShadow: 3,
+                                        transform: 'scale(1.02)',
+                                        transition: 'all 0.2s ease-in-out'
+                                    }
+                                }}
+                            >
+                                <CardContent>
+                                    <Typography variant="h6">
+                                        {style.getName()}
+                                    </Typography>
+                                    <Typography color="textSecondary">
+                                        Features: {style.getFeatures().length} Kleidungstypen
+                                    </Typography>
+                                    <Typography color="textSecondary">
+                                        Constraints: {style.getConstraints().length} Regeln
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
                     ))}
-                </Box>
+                </Grid>
 
                 {/* Dialog für die Outfit-Erstellung */}
                 <StyleBasiertesOutfitDialog

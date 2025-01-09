@@ -111,7 +111,7 @@ class KleiderschrankAPI {
         return this.#fetchAdvanced(this.#getPersonByGoogleIdURL(id))
             .then(responseJSON => {
                 console.log("API Response:", responseJSON);
-                if (responseJSON) {
+                if (responseJSON && responseJSON.id) {
                     const person = PersonBO.fromJSON(responseJSON);
                     console.log("KleiderschrankAPI: Erstelltes PersonBO:", person);
                     return person;
@@ -132,8 +132,27 @@ class KleiderschrankAPI {
     }
 
     addPerson(personBO) {
-    // Debug
-    console.log('addPerson called with:', personBO);
+    // Debug Log vor dem Request
+    console.log("AddPerson Input:", {
+        person: personBO,
+        hasKleiderschrank: personBO.getKleiderschrank() !== null,
+        kleiderschrankName: personBO.getKleiderschrank()?.getName()
+    });
+
+    const requestData = {
+        vorname: personBO.getVorname(),
+        nachname: personBO.getNachname(),
+        nickname: personBO.getNickname(),
+        google_id: personBO.getGoogleId()
+    };
+
+    // Prüfen und Hinzufügen der Kleiderschrank-Daten
+    if (personBO.getKleiderschrank()) {
+        requestData.kleiderschrank = {
+            name: personBO.getKleiderschrank().getName()
+        };
+        console.log("RequestData mit Kleiderschrank:", requestData);
+    }
 
     return this.#fetchAdvanced(this.#addPersonURL(), {
         method: 'POST',
@@ -141,45 +160,50 @@ class KleiderschrankAPI {
             'Accept': 'application/json, text/plain',
             'Content-type': 'application/json',
         },
-        body: JSON.stringify(personBO)
+        body: JSON.stringify(requestData)
     }).then(responseJSON => {
-        // Debug
-        console.log('Server response:', responseJSON);
-
+        console.log("Server Response:", responseJSON);
         const person = PersonBO.fromJSON(responseJSON);
-        if (!person) {
-            throw new Error('Fehler beim Erstellen der Person - keine Daten vom Server');
-        }
         return person;
-    }).catch(error => {
-        console.error('Error in addPerson:', error);
-        throw error;
         });
     }
 
     updatePerson(personBO) {
-        console.log('updatePerson aufgerufen mit:', personBO);  // NEU
-        console.log('Person ID beim Update:', personBO.getID());  // NEU
+    // Erstelle ein neues Objekt mit den benötigten Daten
+    const requestData = {
+        id: personBO.getID(),
+        vorname: personBO.getVorname(),
+        nachname: personBO.getNachname(),
+        nickname: personBO.getNickname(),
+        google_id: personBO.getGoogleId(),
+        kleiderschrank: personBO.getKleiderschrank() ? {
+            id: personBO.getKleiderschrank().getID(),
+            name: personBO.getKleiderschrank().getName()
+        } : null
+    };
 
-        return this.#fetchAdvanced(this.#updatePersonURL(personBO.getID()), {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(personBO)
-        }).then(responseJSON => {
-            let responsePersonBO = PersonBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responsePersonBO);
-            })
-        })
+    return this.#fetchAdvanced(this.#updatePersonURL(personBO.getID()), {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    }).then(responseJSON => {
+        let responsePersonBO = PersonBO.fromJSON(responseJSON);
+        return responsePersonBO;
+        });
     }
 
-    deletePerson(id) {
-        return this.#fetchAdvanced(this.#deletePersonURL(id), {
+    deletePerson(person) {
+        return fetch(this.#deletePersonURL(person.getID()), {
             method: 'DELETE'
-        })
+        }).then(res => {
+            if (!res.ok) {
+                throw Error(`${res.status} ${res.statusText}`);
+            }
+            return; // Keine JSON-Antwort erwartet
+        });
     }
 
     // Kleiderschrank-bezogene Methoden
@@ -219,21 +243,27 @@ class KleiderschrankAPI {
         })
     }
 
-    updateKleiderschrank(kleiderschrankBO) {
-        return this.#fetchAdvanced(this.#updateKleiderschrankURL(kleiderschrankBO.getID()), {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(kleiderschrankBO)
-        }).then(responseJSON => {
-            let responseKleiderschrankBO = KleiderschrankBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responseKleiderschrankBO);
-            })
-        })
-    }
+    // KleiderschrankAPI.js
+
+updateKleiderschrank = async (kleiderschrank) => {
+    // Erstelle ein einfaches Objekt für den Request
+    const requestData = {
+        id: kleiderschrank.getID(),
+        name: kleiderschrank.getName(),
+        eigentuemer_id: kleiderschrank.getEigentuemer()?.getID()
+    };
+
+    return this.#fetchAdvanced(this.#updateKleiderschrankURL(kleiderschrank.getID()), {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    }).then(responseJSON => {
+        return KleiderschrankBO.fromJSON(responseJSON)[0];
+        });
+    };
 
     deleteKleiderschrank(id) {
         return this.#fetchAdvanced(this.#deleteKleiderschrankURL(id), {
@@ -276,6 +306,24 @@ class KleiderschrankAPI {
                     resolve(kleidungsstueckBOs);
                 })
             })
+    }
+
+    getKleidungsstueckByKleiderschrankId(kleiderschrankId) {
+        // Standardisierte GET-Anfrage mit expliziten Optionen
+        return this.#fetchAdvanced(this.#getKleidungsstueckeURL(), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain',
+            }
+        }).then(responseJSON => {
+            // Array von Kleidungsstück-Objekten erstellen, aber nur die,
+            // die zum spezifischen Kleiderschrank gehören
+            let kleidungsstueckBOs = KleidungsstueckBO.fromJSON(responseJSON);
+            // Filtern nach kleiderschrank_id
+            return kleidungsstueckBOs.filter(kleidungsstueck =>
+                kleidungsstueck.getKleiderschrankId() === kleiderschrankId
+            );
+        })
     }
 
     updateKleidungsstueck(kleidungsstueck) {
@@ -478,20 +526,47 @@ class KleiderschrankAPI {
         })
     }
 
-    getOutfits() {
-        // Standardisierte GET-Anfrage mit expliziten Optionen
-        return this.#fetchAdvanced(this.#getOutfitsURL(), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
+    async getOutfits() {
+        try {
+          const responseJSON = await this.#fetchAdvanced(this.#getOutfitsURL());
+
+          const outfits = OutfitBO.fromJSON(responseJSON);
+
+          // Lade für jedes Outfit die vollständigen Informationen
+          const outfitsWithDetails = await Promise.all(outfits.map(async (outfit) => {
+            // Style vollständig laden
+            if (outfit.getStyle()) {
+              const style = await this.getStyle(outfit.getStyle().getID());
+              outfit.setStyle(style);
             }
-        }).then(responseJSON => {
-            let outfitBOs = OutfitBO.fromJSON(responseJSON);
-            return new Promise(function (resolve) {
-                resolve(outfitBOs);
-            })
-        })
-    }
+
+            // Kleidungsstücke vollständig laden
+            const bausteine = outfit.getBausteine();
+            if (bausteine && bausteine.length > 0) {
+              const vollstaendigeBausteine = await Promise.all(
+                bausteine.map(async (baustein) => {
+                  const kleidungsstueck = await this.getKleidungsstueck(baustein.getID());
+                  return kleidungsstueck;
+                })
+              );
+              // Alte Bausteine entfernen
+              while(outfit.getBausteine().length > 0) {
+                outfit.getBausteine().pop();
+              }
+              // Neue vollständige Bausteine hinzufügen
+              vollstaendigeBausteine.forEach(baustein => {
+                outfit.addBaustein(baustein);
+              });
+            }
+
+            return outfit;
+          }));
+
+          return outfitsWithDetails;
+        } catch (error) {
+          throw error;
+        }
+      }
 
     addOutfit(outfitData) {
         // POST-Anfrage bleibt unverändert
@@ -528,10 +603,9 @@ class KleiderschrankAPI {
     }
 
     deleteOutfit(id) {
-        // DELETE-Anfrage bleibt unverändert
-        return this.#fetchAdvanced(this.#deleteOutfitURL(id), {
+        return this.#fetchAdvanced(`${this.#KleiderschrankServerBaseURL}/outfits/${id}`, {
             method: 'DELETE'
-        })
+        });
     }
 
     validateOutfit(outfitId) {

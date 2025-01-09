@@ -5,6 +5,7 @@ import {
     Box,
     Card,
     CardContent,
+    Alert,
 } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import KleidungsstueckBasiertesOutfitDialog from '../dialogs/KleidungsstueckBasiertesOutfitDialog';
@@ -29,8 +30,14 @@ class KleidungsstueckBasiertesOutfitView extends Component {
         try {
             this.setState({ loading: true });
             const kleidungsstuecke = await KleiderschrankAPI.getAPI().getKleidungsstuecke();
+
+            // Filtere Kleidungsstücke ohne Styles heraus
+            const kleidungsstueckeMitStyles = kleidungsstuecke.filter(
+                ks => ks.getTyp()?.getVerwendungen()?.length > 0
+            );
+
             this.setState({
-                kleidungsstuecke: kleidungsstuecke || [],
+                kleidungsstuecke: kleidungsstueckeMitStyles || [],
                 loading: false
             });
         } catch (error) {
@@ -43,9 +50,19 @@ class KleidungsstueckBasiertesOutfitView extends Component {
     };
 
     handleBasisKleidungsstueckAuswahl = (kleidungsstueck) => {
+        // Prüfen ob das Kleidungsstück überhaupt Styles hat
+        const styles = kleidungsstueck.getTyp()?.getVerwendungen() || [];
+        if (styles.length === 0) {
+            this.setState({
+                error: "Dieses Kleidungsstück hat keine Styles zugewiesen und kann nicht als Basis verwendet werden."
+            });
+            return;
+        }
+
         this.setState({
             ausgewaehltesBasisKleidungsstueck: kleidungsstueck,
-            dialogOpen: true
+            dialogOpen: true,
+            error: null
         });
     };
 
@@ -69,15 +86,17 @@ class KleidungsstueckBasiertesOutfitView extends Component {
             return <Typography>Lädt...</Typography>;
         }
 
-        if (error) {
-            return <Typography color="error">{error}</Typography>;
-        }
-
         return (
             <Box sx={{ padding: 2 }}>
                 <Typography variant="h4" gutterBottom>
                     Wähle ein Basis-Kleidungsstück
                 </Typography>
+
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>
+                        {error}
+                    </Alert>
+                )}
 
                 <Grid container spacing={2}>
                     {kleidungsstuecke.map((kleidungsstueck) => (
@@ -101,7 +120,7 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                                         Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
                                     </Typography>
                                     <Typography color="textSecondary">
-                                        Style: {kleidungsstueck.getTyp()?.getVerwendungen()?.map(style => style.getName()).join(', ') || 'Kein Style'}
+                                        Verfügbare Styles: {kleidungsstueck.getTyp()?.getVerwendungen()?.map(style => style.getName()).join(', ') || 'Keine'}
                                     </Typography>
                                 </CardContent>
                             </Card>
@@ -113,7 +132,6 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                     show={dialogOpen}
                     basisKleidungsstueck={ausgewaehltesBasisKleidungsstueck}
                     onClose={this.handleDialogClose}
-                    kleidungsstuecke={kleidungsstuecke}
                 />
             </Box>
         );

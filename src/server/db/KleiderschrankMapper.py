@@ -4,13 +4,9 @@ from server.db.PersonMapper import PersonMapper
 from server.db.KleidungsstueckMapper import KleidungsstueckMapper
 
 class KleiderschrankMapper(Mapper):
-    # In KleiderschrankMapper.py
+
     def insert(self, kleiderschrank):
         cursor = self._cnx.cursor()
-        print(f"KleiderschrankMapper: Versuche Kleiderschrank einzufügen")
-        print(f"Name: {kleiderschrank.get_name()}")
-        print(f"Eigentuemer ID: {kleiderschrank.get_eigentuemer().get_id()}")
-
         cursor.execute("SELECT MAX(id) AS maxid FROM kleiderschrank")
         tuples = cursor.fetchall()
 
@@ -20,18 +16,12 @@ class KleiderschrankMapper(Mapper):
             else:
                 kleiderschrank.set_id(1)
 
-        print(f"KleiderschrankMapper: Generierte ID: {kleiderschrank.get_id()}")
-
         command = "INSERT INTO kleiderschrank (id, eigentuemer_id, name) VALUES (%s,%s,%s)"
         data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name())
-        print(f"KleiderschrankMapper: SQL Command:", command)
-        print(f"KleiderschrankMapper: Data:", data)
-
         cursor.execute(command, data)
+
         self._cnx.commit()
         cursor.close()
-
-        print(f"KleiderschrankMapper: Kleiderschrank erfolgreich eingefügt mit ID {kleiderschrank.get_id()}")
         return kleiderschrank
 
     def update(self, kleiderschrank):
@@ -40,26 +30,24 @@ class KleiderschrankMapper(Mapper):
                 :param kleiderschrank das Objekt, das in die DB geschrieben werden soll
                 """
         cursor = self._cnx.cursor()
+        try:
+            # Hauptdaten des Kleiderschranks aktualisieren, inklusive Eigentümer
+            command = "UPDATE kleiderschrank SET name = %s, eigentuemer_id = %s WHERE id = %s"
+            data = (kleiderschrank.get_name(),
+                    kleiderschrank.get_eigentuemer().get_id(),
+                    kleiderschrank.get_id())
+            cursor.execute(command, data)
 
-        # Hauptobjekt aktualisieren
-        command = "UPDATE kleiderschrank SET eigentuemer_id=%s, name=%s WHERE id=%s"
-        data = (kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name(), kleiderschrank.get_id())
-        cursor.execute(command, data)
+            self._cnx.commit()
+            return kleiderschrank
 
-        # Statt alle auf NULL zu setzen, aktualisieren wir nur die tatsächlichen Zuordnungen
-        # Wir holen uns die IDs der aktuell zugeordneten Kleidungsstücke
-        current_items = [k.get_id() for k in kleiderschrank.get_inhalt()]
+        except Exception as e:
+            print(f"Mapper: Fehler beim Update: {str(e)}")
+            self._cnx.rollback()
+            raise e
 
-        if current_items:
-            # Setze die Zuordnung für die aktuellen Kleidungsstücke
-            items_str = ','.join(['%s'] * len(current_items))
-            update_command = f"""UPDATE kleidungsstueck 
-                                   SET kleiderschrank_id=%s 
-                                   WHERE id IN ({items_str})"""
-            cursor.execute(update_command, (kleiderschrank.get_id(), *current_items))
-
-        self._cnx.commit()
-        cursor.close()
+        finally:
+            cursor.close()
 
     def delete(self, kleiderschrank):
         """Löschen der Daten eines Kleiderschrank-Objekts aus der Datenbank.
@@ -93,32 +81,27 @@ class KleiderschrankMapper(Mapper):
                 """
 
         result = None
-
         cursor = self._cnx.cursor()
-        command = "SELECT id, eigentuemer_id, name FROM kleiderschrank WHERE id=%s"
+
+        command = "SELECT k.id, k.name, k.eigentuemer_id, p.vorname, p.nachname, p.nickname, p.google_id FROM kleiderschrank k LEFT JOIN person p ON k.eigentuemer_id = p.id WHERE k.id=%s"
         cursor.execute(command, (kleiderschrank_id,))
         tuples = cursor.fetchall()
 
         try:
-            (id, eigentuemer_id, name) = tuples[0]
-
+            (id, name, eigentuemer_id, vorname, nachname, nickname, google_id) = tuples[0]
             kleiderschrank = Kleiderschrank()
             kleiderschrank.set_id(id)
             kleiderschrank.set_name(name)
 
-            with PersonMapper() as person_mapper:
-                eigentuemer = person_mapper.find_by_id(eigentuemer_id)
-                kleiderschrank.set_eigentuemer(eigentuemer)
-
-            with KleidungsstueckMapper() as kleidungsstueck_mapper:
-                command = "SELECT id FROM kleidungsstueck WHERE kleiderschrank_id=%s"
-                cursor.execute(command, (id,))
-                kleidungsstueck_tuples = cursor.fetchall()
-
-                for (kleidungsstueck_id,) in kleidungsstueck_tuples:
-                    kleidungsstueck = kleidungsstueck_mapper.find_by_id(kleidungsstueck_id)
-                    if kleidungsstueck:
-                        kleiderschrank.add_kstueck(kleidungsstueck)
+            if eigentuemer_id:
+                from server.bo.Person import Person
+                person = Person()
+                person.set_id(eigentuemer_id)
+                person.set_vorname(vorname)
+                person.set_nachname(nachname)
+                person.set_nickname(nickname)
+                person.set_google_id(google_id)
+                kleiderschrank.set_eigentuemer(person)
 
             result = kleiderschrank
 

@@ -69,48 +69,59 @@ export default class OutfitBO extends BusinessObject {
    * @param {*} outfits - JSON-Daten aus dem Backend
    */
   static fromJSON(outfits) {
-    let result = [];
+      let result = [];
 
-    if (Array.isArray(outfits)) {
+      // Debug-Logging
+      console.log("OutfitBO.fromJSON input:", outfits);
+
+      if (Array.isArray(outfits)) {
         outfits.forEach((o) => {
-            let outfit = new OutfitBO();
-            outfit.setID(o.id);
-            if (o.style && o.style.id) {
-                let style = StyleBO.fromJSON([o.style])[0];
-                outfit.setStyle(style);
+          let outfit = new OutfitBO();
+          outfit.setID(o.id);
+
+          // Verbesserte Style-Verarbeitung
+          if (o.style) {
+            // Wenn style direkt eine ID ist
+            if (typeof o.style === 'number') {
+              const style = new StyleBO();
+              style.setID(o.style);
+              outfit.setStyle(style);
             }
-            if (o.bausteine && Array.isArray(o.bausteine)) {
-                o.bausteine.forEach(baustein => {
-                    if (baustein && baustein.id) {
-                        let kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
-                        if (kleidungsstueck) {
-                            outfit.addBaustein(kleidungsstueck);
-                        }
-                    }
-                });
+            // Wenn style ein Objekt ist
+            else if (typeof o.style === 'object') {
+              const style = StyleBO.fromJSON([o.style])[0];
+              outfit.setStyle(style);
             }
-            result.push(outfit);
-        });
-    } else if (outfits) {
-        let o = outfits;
-        let outfit = new OutfitBO();
-        outfit.setID(o.id);
-        if (o.style && o.style.id) {
-            let style = StyleBO.fromJSON([o.style])[0];
-            outfit.setStyle(style);
-        }
-        if (o.bausteine && Array.isArray(o.bausteine)) {
+          }
+
+          // Verbesserte Bausteine-Verarbeitung
+          if (o.bausteine && Array.isArray(o.bausteine)) {
             o.bausteine.forEach(baustein => {
-                if (baustein && baustein.id) {
-                    let kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
-                    if (kleidungsstueck) {
-                        outfit.addBaustein(kleidungsstueck);
-                    }
-                }
+              // Wenn baustein direkt eine ID ist
+              if (typeof baustein === 'number') {
+                const kleidungsstueck = new KleidungsstueckBO();
+                kleidungsstueck.setID(baustein);
+                outfit.addBaustein(kleidungsstueck);
+              }
+              // Wenn baustein ein Objekt ist
+              else if (typeof baustein === 'object') {
+                const kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
+                outfit.addBaustein(kleidungsstueck);
+              }
             });
-        }
-        result.push(outfit);
+          }
+
+          // Debug-Logging für jedes konvertierte Outfit
+          console.log("Konvertiertes Outfit:", {
+            id: outfit.getID(),
+            style: outfit.getStyle(),
+            bausteine: outfit.getBausteine()
+          });
+
+          result.push(outfit);
+        });
+      }
+
+      return result;
     }
-    return result;
-}
 }

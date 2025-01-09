@@ -95,17 +95,8 @@ export default class PersonBO extends BusinessObject {
    * Gibt den Kleiderschrank der Person zurück.
    */
   getKleiderschrank() {
-    if (this.kleiderschrank && typeof this.kleiderschrank === 'object' && !this.kleiderschrank.getName) {
-      // Wenn der Kleiderschrank ein Objekt ist, aber keine getName-Methode hat,
-      // konvertieren wir es in ein KleiderschrankBO
-      console.log("Konvertiere Kleiderschrank zu KleiderschrankBO:", this.kleiderschrank);
-      const kleiderschrankBO = new KleiderschrankBO();
-      kleiderschrankBO.setID(this.kleiderschrank.id);
-      kleiderschrankBO.setName(this.kleiderschrank.name);
-      this.kleiderschrank = kleiderschrankBO;
+        return this.kleiderschrank;
     }
-    return this.kleiderschrank;
-  }
 
   /**
    * Gibt ein Array von PersonBO Objekten aus einer gegebenen JSON-Struktur zurück.
@@ -115,18 +106,14 @@ export default class PersonBO extends BusinessObject {
   static fromJSON(persons) {
     let result = new PersonBO();
 
-    // Prüfen ob persons ein Array ist
+    // Prüfe ob persons ein Array ist
     if (Array.isArray(persons)) {
-      console.log("PersonBO fromJSON: Array erkannt, nehme erstes Element");
-      if (persons.length > 0) {
-        persons = persons[0];
-      } else {
-        return null;
-      }
+        if (persons.length > 0) {
+            persons = persons[0];
+        } else {
+            return null;
+        }
     }
-
-    // Debug
-    console.log("PersonBO fromJSON: Verarbeite Daten:", persons);
 
     // Basisdaten setzen
     result.setID(persons.id);
@@ -137,14 +124,11 @@ export default class PersonBO extends BusinessObject {
 
     // Kleiderschrank verarbeiten
     if (persons.kleiderschrank) {
-      console.log("PersonBO fromJSON: Verarbeite Kleiderschrank:", persons.kleiderschrank);
-      const KleiderschrankBO = require('./KleiderschrankBO').default;
-      const kleiderschrank = new KleiderschrankBO();
-      kleiderschrank.setID(persons.kleiderschrank.id);
-      kleiderschrank.setName(persons.kleiderschrank.name);
-      result.setKleiderschrank(kleiderschrank);
-    } else {
-      console.log("PersonBO fromJSON: Kein Kleiderschrank vorhanden");
+        const KleiderschrankBO = require('./KleiderschrankBO').default;
+        const kleiderschrank = new KleiderschrankBO();
+        kleiderschrank.setID(persons.kleiderschrank.id);
+        kleiderschrank.setName(persons.kleiderschrank.name);
+        result.setKleiderschrank(kleiderschrank);
     }
 
     return result;

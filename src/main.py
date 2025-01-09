@@ -125,16 +125,27 @@ class PersonListOperations(Resource):
         proposal = Person.from_dict(api.payload)
 
         if proposal is not None:
-            """ Wir verwenden Vor- und Nachnamen des Proposals für die Erzeugung
-            eines Personen-Objekts. Das serverseitig erzeugte Objekt ist das maßgebliche und 
-            wird auch dem Client zurückgegeben. 
-            """
+            adm = KleiderschrankAdministration()
+
+            # Erst Person erstellen
             p = adm.create_person(
                 proposal.get_vorname(),
                 proposal.get_nachname(),
                 proposal.get_nickname(),
-                proposal.get_google_id(),
+                proposal.get_google_id()
             )
+
+            # Wenn ein Kleiderschrank im Proposal ist, diesen auch erstellen
+            if proposal.get_kleiderschrank():
+                kleiderschrank = adm.create_kleiderschrank(
+                    proposal.get_kleiderschrank().get_name(),
+                    p  # Die gerade erstellte Person als Eigentümer
+                )
+                # Den erstellten Kleiderschrank der Person zuweisen
+                p.set_kleiderschrank(kleiderschrank)
+                # Person mit dem neuen Kleiderschrank speichern
+                adm.save_person(p)
+
             return p, 200
         else:
             # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
@@ -165,10 +176,10 @@ class PersonOperations(Resource):
         try:
             adm = KleiderschrankAdministration()
             pers = adm.get_person_by_id(id)
-            if pers is None:
-                return {'message': 'Person nicht gefunden'}, 404
-            adm.delete_person(pers)
-            return '', 204  # Standardmäßiger Status-Code für erfolgreiche DELETE-Operation
+            if pers:
+                adm.delete_person(pers)
+                return '', 204  # Standardmäßiger Status-Code für erfolgreiche DELETE-Operation
+            return {'message': 'Person nicht gefunden'}, 404
         except Exception as e:
             return {'message': str(e)}, 500
 
@@ -309,32 +320,21 @@ class WardrobeOperations(Resource):
         """
         try:
             adm = KleiderschrankAdministration()
+            kleiderschrank = adm.get_kleiderschrank_by_id(id)
 
-            # Prüfen ob der Kleiderschrank existiert
-            existing_wardrobe = adm.get_kleiderschrank_by_id(id)
-            if not existing_wardrobe:
+            if not kleiderschrank:
                 return {'message': f'Kleiderschrank mit ID {id} nicht gefunden'}, 404
 
-            # Payload in Kleiderschrank-Objekt umwandeln
-            wardrobe = Kleiderschrank()
-            wardrobe.set_id(id)
-            wardrobe.set_name(api.payload.get('name'))
+            # Name aktualisieren
+            kleiderschrank.set_name(api.payload['name'])
 
-            # Eigentümer setzen
-            eigentuemer_id = api.payload.get('eigentuemer_id')
-            if eigentuemer_id:
-                eigentuemer = adm.get_person_by_id(eigentuemer_id)
-                if eigentuemer:
-                    wardrobe.set_eigentuemer(eigentuemer)
-                else:
-                    return {'message': f'Person mit ID {eigentuemer_id} nicht gefunden'}, 404
-
-            # Kleiderschrank speichern
-            adm.save_kleiderschrank(wardrobe)
-            return wardrobe, 200
+            # Speichern
+            adm.save_kleiderschrank(kleiderschrank)
+            return kleiderschrank, 200
 
         except Exception as e:
-            return {'message': f'Server error: {str(e)}'}, 500
+            print(f"Route: Fehler beim Update: {str(e)}")
+            return {'message': str(e)}, 500
 
 
 @wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
@@ -344,10 +344,8 @@ class PersonsByGoogleIdOperations(Resource):
     @wardrobe_ns.marshal_with(person)
     def get(self, google_id):
         """Auslesen einer Person anhand der Google ID"""
-        print(f"Backend: Person mit Google ID {google_id} wird gesucht")  # Debug log
         adm = KleiderschrankAdministration()
         person = adm.get_person_by_google_id(google_id)
-        print(f"Backend: Person gefunden: {person}")  # Debug log
 
         # Neue Debug-Ausgaben
         if person:
@@ -385,10 +383,10 @@ class ClothesListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Hole zuerst den Typ als vollständiges Objekt
+        # Holt zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        # Modifiziert das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -440,10 +438,10 @@ class ClothingItemOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Hole zuerst den Typ als vollständiges Objekt
+        # Holt zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so, dass es ein Typ-Objekt enthält
+        # Modifiziert das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -483,7 +481,7 @@ class StyleListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Style-Objekt aus den übertragenen Daten
+        # Erstellt Style-Objekt aus den übertragenen Daten
         proposal = Style.from_dict(api.payload)
 
         if proposal is not None:
@@ -612,14 +610,14 @@ class ClothingTypeListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Kleidungstyp-Objekt aus den übertragenen Daten
+        # Erstellt Kleidungstyp-Objekt aus den übertragenen Daten
         proposal = Kleidungstyp.from_dict(api.payload)
-        # Erstelle eine leere Liste für die Style-IDs
+        # Erstellt eine leere Liste für die Style-IDs
         verwendungen = []
 
-        # Gehe durch alle Verwendungen des Kleidungstyps
+        # Geht durch alle Verwendungen des Kleidungstyps
         for verwendung in proposal.get_verwendungen():
-            # Hole die ID jeder Verwendung und füge sie der Liste hinzu
+            # Holt die ID jeder Verwendung und fügt sie der Liste hinzu
             style_id = verwendung.get_id()
             verwendungen.append(style_id)
 
@@ -676,7 +674,7 @@ class ClothingTypeOperations(Resource):
         ct = Kleidungstyp.from_dict(api.payload)
 
         if ct is not None:
-            """Setze die ID des zu überschreibenden Kleidungstyp-Objekts."""
+            """Setzt die ID des zu überschreibenden Kleidungstyp-Objekts."""
             ct.set_id(id)
             adm.save_kleidungstyp(ct)
             return '', 200
@@ -952,20 +950,20 @@ class ImplicationConstraintOperations(Resource):
         ic = Implikation.from_dict(payload)
 
         if ic is not None:
-            # Setze die ID des Constraints
+            # Setzt die ID des Constraints
             ic.set_id(id)
 
-            # Lade den Style basierend auf der Style-ID aus dem Payload
+            # Lädt den Style basierend auf der Style-ID aus dem Payload
             style_id = payload.get('style')
             style = adm.get_style_by_id(style_id)
 
             if not style:
                 return '', 404
 
-            # Setze den Style in der Implikation
+            # Setzt den Style in der Implikation
             ic.set_style(style)
 
-            # Speichere die aktualisierte Implikation
+            # Speichert die aktualisierte Implikation
             adm.save_implikation(ic)
 
             # Erfolgreiche Antwort
@@ -1040,4 +1038,3 @@ class MutexConstraintOperations(Resource):
 
 if __name__ == '__main__':
     app.run(debug=True)
-

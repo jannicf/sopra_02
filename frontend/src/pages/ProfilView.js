@@ -6,8 +6,8 @@ import IconButton from '@mui/material/IconButton';
 import PersonForm from '../dialogs/PersonForm';
 import PersonEditForm from '../dialogs/PersonEditForm';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
-import KleiderschrankBO from "../api/KleiderschrankBO";
-import PersonBO from "../api/PersonBO";
+import PersonDeleteDialog from "../dialogs/PersonDeleteDialog";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 class PersonView extends Component {
     constructor(props) {
@@ -16,9 +16,35 @@ class PersonView extends Component {
             person: null,
             showCreateDialog: false,
             showEditDialog: false,
+            showDeleteDialog: false,
             error: null,
             loading: false
         };
+    }
+
+    handleDeleteClick = () => {
+        this.setState({showDeleteDialog: true});
+    }
+
+    handleDeleteDialogClosed = async (wasDeleted) => {
+    if (wasDeleted) {
+        // Erst State zurücksetzen
+        this.setState({
+            person: null,
+            showDeleteDialog: false
+        });
+
+        // Dann alle relevanten Cookies löschen
+        document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
+
+        // Kurz warten
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Zur Login-Seite navigieren und neu laden
+        window.location.href = '/'
+    } else {
+        this.setState({showDeleteDialog: false});
+        }
     }
 
     componentDidMount() {
@@ -28,27 +54,18 @@ class PersonView extends Component {
     loadPerson = async () => {
     try {
         this.setState({loading: true});
-        console.log("ProfilView: Lade Person mit Google ID:", this.props.user?.uid);
-
         const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
-        console.log("ProfilView: API Rohdaten:", persons);
-
-        // Prüfe ob die Person-Daten korrekt zurückkommen
-        if (persons) {
-            console.log("ProfilView: Person Vorname:", persons.getVorname());
-            console.log("ProfilView: Person Nachname:", persons.getNachname());
-            console.log("ProfilView: Person Kleiderschrank:", persons.getKleiderschrank());
-        }
-
         this.setState({
             person: persons,
-            loading: false
+            loading: false,
+            error: null
         });
     } catch (error) {
         console.error("ProfilView: Fehler beim Laden der Person:", error);
         this.setState({
             error: error.message,
-            loading: false
+            loading: false,
+            person: null
             });
         }
     };
@@ -74,46 +91,37 @@ class PersonView extends Component {
     }
 
     handleEditDialogClosed = async (editedPerson) => {
-        if (editedPerson) {
-            await this.loadPerson();
-        }
-        this.setState({showEditDialog: false});
-    }
+    if (editedPerson) {
+        // Explizit neu laden, um die aktuellsten Daten vom Server zu bekommen
+        await this.loadPerson();
 
-    render() {
-    const {person, showCreateDialog, showEditDialog, loading} = this.state;
-
-    // Schrittweise Überprüfung
-    console.log("1. Person Objekt:", {
-        person: person,
-        isPersonDefined: person !== null && person !== undefined
-    });
-
-    if (person) {
-        console.log("2. Person Details:", {
-            id: person.getID(),
-            vorname: person.getVorname(),
-            nachname: person.getNachname(),
-            kleiderschrank: person.getKleiderschrank(),
-            isKleiderschrankDefined: person.getKleiderschrank() !== null && person.getKleiderschrank() !== undefined
+        // State aktualisieren, um Re-Render zu triggern
+        this.setState({
+            showEditDialog: false
         });
-
-        // Prüfen, was der Kleiderschrank tatsächlich ist
-        const kleiderschrank = person.getKleiderschrank();
-        console.log("3. Kleiderschrank Details:", {
-            kleiderschrank: kleiderschrank,
-            type: typeof kleiderschrank,
-            prototyp: kleiderschrank ? Object.getPrototypeOf(kleiderschrank) : null,
-            methods: kleiderschrank ? Object.getOwnPropertyNames(Object.getPrototypeOf(kleiderschrank)) : null
+    } else {
+        this.setState({
+            showEditDialog: false
             });
         }
-        if (loading) {
-            return <Typography>Lade Profil...</Typography>;
+    };
+
+    render() {
+    const {person, showCreateDialog, showEditDialog, showDeleteDialog, loading} = this.state;
+
+    // Schrittweise Überprüfung
+    if (person) {
+        // Prüfen, was der Kleiderschrank tatsächlich ist
+        const kleiderschrank = person.getKleiderschrank();
+        }
+
+    if (loading) {
+        return <Typography>Lade Profil...</Typography>;
         }
 
         return (
             <div>
-                <Typography variant="h4" gutterBottom>
+                <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Profil
                 </Typography>
 
@@ -122,12 +130,21 @@ class PersonView extends Component {
                     <Paper elevation={3} sx={{p: 3, mt: 2}}>
                         <Box display="flex" justifyContent="space-between" alignItems="start">
                             <Typography variant="h6">Persönliche Informationen</Typography>
-                            <IconButton
-                                onClick={this.handleEditClick}
-                                color="primary"
-                            >
-                                <EditIcon/>
-                            </IconButton>
+                            <Box>
+                                <IconButton
+                                    onClick={this.handleEditClick}
+                                    color="primary"
+                                    sx={{ mr: 1 }}
+                                >
+                                    <EditIcon/>
+                                </IconButton>
+                                <IconButton
+                                    onClick={this.handleDeleteClick}
+                                    color="error"
+                                >
+                                    <DeleteIcon/>
+                                </IconButton>
+                            </Box>
                         </Box>
                         <Box sx={{mt: 2}}>
                             <Typography>Vorname: {person.getVorname()}</Typography>
@@ -184,11 +201,18 @@ class PersonView extends Component {
 
                 {/* Dialog zum Bearbeiten der Person */}
                 {person && (
+                  <>
                     <PersonEditForm
                         show={showEditDialog}
                         onClose={this.handleEditDialogClosed}
                         person={person}
                     />
+                    <PersonDeleteDialog
+                        show={showDeleteDialog}
+                        onClose={this.handleDeleteDialogClosed}
+                        person={person}
+                    />
+                  </>
                 )}
             </div>
         );
