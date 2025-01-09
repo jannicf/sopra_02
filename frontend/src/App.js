@@ -216,7 +216,7 @@ class App extends React.Component {
 
                         <Route path="/styles" element={
                             currentUser && userHasProfile ?
-                                <StylesView />
+                                <StylesView user={currentUser}/>
                                 :
                                 <Navigate to="/profile" />
                         } />

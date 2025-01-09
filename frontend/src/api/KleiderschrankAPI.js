@@ -454,6 +454,11 @@ updateKleiderschrank = async (kleiderschrank) => {
     })
 }
 
+    getStylesByKleiderschrankId(kleiderschrankId) {
+        return this.#fetchAdvanced(this.#getStylesURL())
+        .then(styles => styles.filter(s => s.kleiderschrank_id === kleiderschrankId));
+}
+
     getStyle(id) {
         // Fetch mit den standardGetOptions
         return this.#fetchAdvanced(this.#getStyleURL(id), {

@@ -9,6 +9,7 @@ class Style(bo.BusinessObject):
         self.__name = ""
         self.__constraints = [] # Liste der Constraints in diesem Style
         self.__features = []  # Liste der Kleidungstypen in diesem Style
+        self.__kleiderschrank_id = None
 
     def set_name(self, name):
         """Setzen des Namens vom Style"""
@@ -153,6 +154,14 @@ class Style(bo.BusinessObject):
             result.append(c_dict)
         return result
 
+    def set_kleiderschrank_id(self, kleiderschrank_id):
+        """Setzen der Kleiderschrank ID"""
+        self.__kleiderschrank_id = kleiderschrank_id
+
+    def get_kleiderschrank_id(self):
+        """Auslesen der Kleiderschrank ID"""
+        return self.__kleiderschrank_id
+
     @staticmethod
     def from_dict(dictionary=dict()):
         from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
@@ -192,5 +201,7 @@ class Style(bo.BusinessObject):
                     i.set_bezugsobjekt1(Kleidungstyp().set_id(constraint["bezugsobjekt1_id"]))
                     i.set_bezugsobjekt2(Kleidungstyp().set_id(constraint["bezugsobjekt2_id"]))
                     obj.add_constraint(i)
+
+        obj.set_kleiderschrank_id(dictionary["kleiderschrank_id"])
 
         return obj

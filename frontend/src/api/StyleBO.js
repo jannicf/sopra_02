@@ -18,6 +18,7 @@ export default class StyleBO extends BusinessObject {
     this._name = "";
     this._constraints = []; // Array der Constraints in diesem
     this._features = [];    // Array der Kleidungstypen
+    this.kleiderschrankId = null;
   }
 
   /**
@@ -97,6 +98,23 @@ export default class StyleBO extends BusinessObject {
   getConstraints() {
     return this._constraints;
   }
+
+  /**
+   * Setzt die ID des zugehörigen Kleiderschranks.
+   *
+   * @param {Number} aKleiderschrankId - Die neue Kleiderschrank ID
+   */
+  setKleiderschrankId(aKleiderschrankId) {
+    this.kleiderschrankId = aKleiderschrankId;
+  }
+
+  /**
+   * Gibt die ID des zugehörigen Kleiderschranks zurück.
+   */
+  getKleiderschrankId() {
+    return this.kleiderschrankId;
+  }
+
   /**
    * Konvertiert eine JSON-Antwort in ein StyleBO Objekt bzw. Array von StyleBO Objekten.
    *
@@ -111,6 +129,7 @@ export default class StyleBO extends BusinessObject {
       let style = new StyleBO();
       style.setID(s.id);
       style.setName(s.name);
+      style.setKleiderschrankId(s.kleiderschrank_id);
 
       // Features hinzufügen
       s.features?.forEach(f => {
@@ -142,6 +161,7 @@ export default class StyleBO extends BusinessObject {
     let style = new StyleBO();
     style.setID(s.id);
     style.setName(s.name);
+    style.setKleiderschrankId(styles.kleiderschrank_id);
 
     s.features?.forEach(f => {
       style.addFeature(KleidungstypBO.fromJSON([f])[0]);

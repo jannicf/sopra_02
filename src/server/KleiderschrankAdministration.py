@@ -312,10 +312,11 @@ class KleiderschrankAdministration(object):
     Style-spezifische Methoden
     """
 
-    def create_style(self, name):
+    def create_style(self, name, kleiderschrank_id):
         """Einen Style anlegen"""
         style = Style()
         style.set_name(name)
+        style.set_kleiderschrank_id(kleiderschrank_id)
         style.set_id(1)
 
         with StyleMapper() as mapper:

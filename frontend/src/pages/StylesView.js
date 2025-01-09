@@ -16,23 +16,54 @@ class StylesView extends Component {
       showDeleteDialog: false,
       loadingInProgress: false,
       error: null,
+      kleiderschrankId: null
     };
   }
 
   componentDidMount() {
-    this.loadStyles();
+        // Zuerst Kleiderschrank ID laden
+        KleiderschrankAPI.getAPI()
+            .getPersonByGoogleId(this.props.user?.uid)
+            .then(person => {
+                if (person && person.getKleiderschrank()) {
+                const kleiderschrankId = person.getKleiderschrank().getID();
+                this.setState({
+                    kleiderschrankId: kleiderschrankId
+                }, () => {
+                    this.loadStyles();
+                });
+                }
+            }).catch(error => {
+                this.setState({
+                    error: "Fehler beim Laden des Kleiderschranks"
+                });
+            });
   }
 
   // Lädt alle Styles
   loadStyles = () => {
     this.setState({ loadingInProgress: true, error: null });
+    // Nur die Styles des eigenen Kleiderschranks laden
     KleiderschrankAPI.getAPI()
-      .getStyles()
-      .then((styles) => this.setState({ styles, loadingInProgress: false }))
-      .catch((error) =>
-        this.setState({ error: error.message, loadingInProgress: false })
-      );
-  };
+        .getStyles()
+        .then(styles => {
+          // Hier filtern wir die Styles nach kleiderschrank_id
+          const filteredStyles = styles.filter(style => {
+                return style.getKleiderschrankId() === this.state.kleiderschrankId;
+            });
+
+          this.setState({
+            styles: filteredStyles,
+            loadingInProgress: false
+          });
+        })
+        .catch(error => {
+          this.setState({
+            error: error.message,
+            loadingInProgress: false
+          });
+        });
+    };
 
   // Öffnet den Formular-Dialog zum Erstellen eines neuen Styles
   handleCreateClick = () => {
@@ -52,6 +83,8 @@ class StylesView extends Component {
   // Schließt den Formular-Dialog und aktualisiert die Liste der Styles
   handleFormDialogClosed = (updatedStyle) => {
     if (updatedStyle) {
+      // Style wurde erstellt/bearbeitet
+      updatedStyle.setKleiderschrankId(this.state.kleiderschrankId);
       this.loadStyles();
     }
     this.setState({ showFormDialog: false, selectedStyle: null });
@@ -100,6 +133,7 @@ class StylesView extends Component {
             show={showFormDialog}
             style={selectedStyle}
             onClose={this.handleFormDialogClosed}
+            kleiderschrankId={this.state.kleiderschrankId}
           />
         )}
 

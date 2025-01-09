@@ -95,6 +95,8 @@ kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
 
 style = api.inherit('Style', bo, {
     'name': fields.String(attribute='_Style__name', description='Name des Styles'),
+    'kleiderschrank_id': fields.Integer(attribute='_Style__kleiderschrank_id',
+                                        description='ID des zugehörigen Kleiderschranks'),
     'features': fields.List(fields.Nested(kleidungstyp), attribute=lambda s: s.get_features_as_list()),
     'constraints': fields.List(fields.Raw, attribute=lambda s: s.get_constraints_as_list())
 })

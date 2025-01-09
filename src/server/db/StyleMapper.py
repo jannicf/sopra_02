@@ -34,8 +34,8 @@ class StyleMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 style.set_id(1)
 
-        command = "INSERT INTO style (id, name) VALUES (%s,%s)"
-        data = (style.get_id(), style.get_name())
+        command = "INSERT INTO style (id, name, kleiderschrank_id) VALUES (%s,%s)"
+        data = (style.get_id(), style.get_name(), style.get_kleiderschrank_id())
         cursor.execute(command, data)
 
         features = style.get_features()
@@ -86,8 +86,8 @@ class StyleMapper(Mapper):
         """
         cursor = self._cnx.cursor()
 
-        command = "UPDATE style " + "SET name=%s WHERE id=%s"
-        data = (style.get_name(), style.get_id())
+        command = "UPDATE style " + "SET name=%s, kleiderschrank_id=%s WHERE id=%s"
+        data = (style.get_name(), style.get_id(), style.get_kleiderschrank_id())
         cursor.execute(command, data)
 
         # Alte Feature löschen
@@ -170,15 +170,16 @@ class StyleMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Style-Basisdaten laden
-        command = "SELECT id, name FROM style WHERE id=%s"
+        command = "SELECT id, name, kleiderschrank_id FROM style WHERE id=%s"
         cursor.execute(command, (style_id,))
         tuples = cursor.fetchall()
 
         try:
-            (id, name) = tuples[0]
+            (id, name, kleiderschrank_id) = tuples[0]
             style = Style()
             style.set_id(id)
             style.set_name(name)
+            style.set_kleiderschrank_id(kleiderschrank_id)
 
             # Features (Kleidungstypen) laden
             cursor.execute("""
