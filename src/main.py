@@ -18,11 +18,22 @@ from server.bo.UnaryConstraint import UnaryConstraint
 
 from SecurityDecorator import secured
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='build', static_url_path='')
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('index.html')
+
 CORS(app, resources=r'/wardrobe/*')  # Erlaubt CORS für alle Wardrobe-Endpoints
 
 api = Api(app, version='1.0', title='Digitaler Kleiderschrank API',
           description='Eine API zur Verwaltung digitaler Kleiderschränke')
+
 
 # Namespace für alle Kleiderschrank-bezogenen Operationen
 wardrobe_ns = api.namespace('wardrobe', description='Funktionen des digitalen Kleiderschranks')
