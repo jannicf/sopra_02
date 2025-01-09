@@ -5,11 +5,8 @@ class PersonMapper(Mapper):
     def insert(self, person):
         try:
             cursor = self._cnx.cursor()
-            print(f"1. Starte Person-Erstellung für Google ID: {person.get_google_id()}")
-            print(f"2. Person-Daten: {person.get_vorname()} {person.get_nachname()}")
-            print(f"2a. Kleiderschrank vorhanden? {person.get_kleiderschrank() is not None}")  # Debug-Print
             if person.get_kleiderschrank():
-                print(f"2b. Kleiderschrank Name: {person.get_kleiderschrank().get_name()}")  # Debug-Print
+                person.get_kleiderschrank().get_name()
 
             # ID generieren
             cursor.execute("SELECT MAX(id) AS maxid FROM person")
@@ -21,34 +18,25 @@ class PersonMapper(Mapper):
                 else:
                     person.set_id(1)
 
-            print(f"3. Generierte Person-ID: {person.get_id()}")
-
             # Person in DB einfügen
             command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
             data = (person.get_id(), person.get_vorname(), person.get_nachname(),
                     person.get_nickname(), person.get_google_id())
             cursor.execute(command, data)
-            print("4. Person in Datenbank eingefügt")
 
             # Kleiderschrank erstellen wenn vorhanden
             if person.get_kleiderschrank():
-                print("5. Starte Kleiderschrank-Erstellung")
                 from src.server.db.KleiderschrankMapper import KleiderschrankMapper
 
                 kleiderschrank = person.get_kleiderschrank()
                 kleiderschrank.set_eigentuemer(person)
-                print(f"6. Eigentuemer (Person ID: {person.get_id()}) für Kleiderschrank gesetzt")
 
                 with KleiderschrankMapper() as kleiderschrank_mapper:
                     saved_kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
                     person.set_kleiderschrank(saved_kleiderschrank)
-                    print(f"7. Kleiderschrank (ID: {saved_kleiderschrank.get_id()}) erstellt und Person zugewiesen")
 
             self._cnx.commit()
             cursor.close()
-            print("8. Transaktion erfolgreich abgeschlossen")
-            print(
-                f"9. Final-Check - Person hat Kleiderschrank? {person.get_kleiderschrank() is not None}")  # Debug-Print
             return person
 
         except Exception as e:
@@ -222,7 +210,6 @@ class PersonMapper(Mapper):
 
     def find_by_google_id(self, google_id):
         """Auslesen einer Person anhand der Google ID."""
-        print(f"PersonMapper: Suche Person mit Google ID {google_id}")
         result = None
 
         cursor = self._cnx.cursor()
@@ -240,14 +227,11 @@ class PersonMapper(Mapper):
             person.set_nickname(nickname)
             person.set_google_id(google_id)
 
-            print(f"PersonMapper: Person mit ID {id} gefunden")
-
-            # Dann den zugehörigen Kleiderschrank suchen
+            # Den zugehörigen Kleiderschrank suchen
             command = "SELECT id, name FROM kleiderschrank WHERE eigentuemer_id=%s"
             cursor.execute(command, (id,))
             kleiderschrank_tuples = cursor.fetchall()
 
-            # Im PersonMapper, find_by_google_id Methode:
             if kleiderschrank_tuples:
                 from server.db.KleiderschrankMapper import KleiderschrankMapper
                 # Verwende den KleiderschrankMapper um den vollständigen Kleiderschrank zu laden
@@ -265,7 +249,6 @@ class PersonMapper(Mapper):
             result = person
 
         except IndexError:
-            print("PersonMapper: Keine Person gefunden")
             result = None
 
         self._cnx.commit()
