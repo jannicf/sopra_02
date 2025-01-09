@@ -95,8 +95,8 @@ kardinalitaet = api.inherit('CardinalityConstraint', unary_constraint, {
 
 style = api.inherit('Style', bo, {
     'name': fields.String(attribute='_Style__name', description='Name des Styles'),
-    'features': fields.List(fields.Nested(kleidungstyp), attribute=lambda s: s.get_features_as_list()),
-    'constraints': fields.List(fields.Raw, attribute=lambda s: s.get_constraints_as_list())
+    'features': fields.List(fields.Nested(kleidungstyp), attribute='_Style__features'),
+    'constraints': fields.Raw(attribute=lambda x: x.get_constraints())
 })
 
 
@@ -443,7 +443,7 @@ class ClothingItemOperations(Resource):
         # Hole zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        # Modifiziere das payload so, dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -529,22 +529,63 @@ class StyleOperations(Resource):
     @wardrobe_ns.marshal_with(style)
     @wardrobe_ns.expect(style, validate=True)
     #@secured
-    def put(self, id):
-        """Update eines bestimmten Style-Objekts.
+    @wardrobe_ns.route('/styles/<int:id>')
+    class StyleOperations(Resource):
+        @wardrobe_ns.marshal_with(style)
+        def put(self, id):
+            try:
+                adm = KleiderschrankAdministration()
+                existing_style = adm.get_style_by_id(id)
 
-        Die Objekt-ID wird durch den URI-Parameter überschrieben.
-        """
-        adm = KleiderschrankAdministration()
-        s = Style.from_dict(api.payload)
+                # Name und Features aktualisieren
+                existing_style.set_name(api.payload['name'])
+                existing_style._Style__features = []
 
-        if s is not None:
-            """Setze die ID des zu überschreibenden Style-Objekts."""
-            s.set_id(id)
-            adm.save_style(s)
-            return '', 200
-        else:
-            return '', 500
+                # Features hinzufügen
+                for feature_id in api.payload['features']:
+                    existing_style.add_feature(adm.get_kleidungstyp_by_id(feature_id))
 
+                # Constraints zurücksetzen
+                existing_style._Style__constraints = {
+                    'kardinalitaeten': [],
+                    'mutexe': [],
+                    'implikationen': []
+                }
+
+                # Kardinalitäten
+                for k in api.payload['constraints'].get('kardinalitaeten', []):
+                    existing_style.add_constraint({
+                        'type': 'kardinalitaet',
+                        'minAnzahl': k.get('min_anzahl'),
+                        'maxAnzahl': k.get('max_anzahl'),
+                        'bezugsobjekt_id': k.get('bezugsobjekt_id')
+                    })
+
+                # Mutexe
+                for m in api.payload['constraints'].get('mutexe', []):
+                    existing_style.add_constraint({
+                        'type': 'mutex',
+                        'bezugsobjekt1_id': m.get('bezugsobjekt1_id'),
+                        'bezugsobjekt2_id': m.get('bezugsobjekt2_id')
+                    })
+
+                # Implikationen
+                for i in api.payload['constraints'].get('implikationen', []):
+                    existing_style.add_constraint({
+                        'type': 'implikation',
+                        'bezugsobjekt1_id': i.get('bezugsobjekt1_id'),
+                        'bezugsobjekt2_id': i.get('bezugsobjekt2_id')
+                    })
+
+                # Style speichern
+                adm.save_style(existing_style)
+
+                # Das aktualisierte Style-Objekt zurückgeben
+                updated_style = adm.get_style_by_id(id)
+                return updated_style
+
+            except Exception as e:
+                return {'message': str(e)}, 500
 
 @wardrobe_ns.route('/clothing-types')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -999,3 +1040,4 @@ class MutexConstraintOperations(Resource):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
