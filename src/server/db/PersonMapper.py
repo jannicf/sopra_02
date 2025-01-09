@@ -134,7 +134,7 @@ class PersonMapper(Mapper):
 
         :param vorname Vorname der zugehörigen Person.
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Vorname enthält.
+            mit dem gewünschten Vornamen enthält.
         """
         result = []
 
@@ -163,7 +163,7 @@ class PersonMapper(Mapper):
 
         :param nachname Nachname der zugehörigen Person.
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Nachname enthält.
+            mit dem gewünschten Nachnamen enthält.
         """
         result = []
 
@@ -192,7 +192,7 @@ class PersonMapper(Mapper):
 
         :param nickname Nickname der zugehörigen Person.
         :return Eine Sammlung mit Person-Objekten, die sämtliche Personen
-            mit der gewünschten Nickname enthält.
+            mit dem gewünschten Nickname enthält.
         """
         result = None
 

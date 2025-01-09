@@ -400,10 +400,10 @@ class ClothesListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Hole zuerst den Typ als vollständiges Objekt
+        # Holt zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        # Modifiziert das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -455,10 +455,10 @@ class ClothingItemOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Hole zuerst den Typ als vollständiges Objekt
+        # Holt zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        # Modifiziert das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -498,7 +498,7 @@ class StyleListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Style-Objekt aus den übertragenen Daten
+        # Erstellt Style-Objekt aus den übertragenen Daten
         proposal = Style.from_dict(api.payload)
 
         if proposal is not None:
@@ -586,14 +586,14 @@ class ClothingTypeListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Kleidungstyp-Objekt aus den übertragenen Daten
+        # Erstellt Kleidungstyp-Objekt aus den übertragenen Daten
         proposal = Kleidungstyp.from_dict(api.payload)
-        # Erstelle eine leere Liste für die Style-IDs
+        # Erstellt eine leere Liste für die Style-IDs
         verwendungen = []
 
-        # Gehe durch alle Verwendungen des Kleidungstyps
+        # Geht durch alle Verwendungen des Kleidungstyps
         for verwendung in proposal.get_verwendungen():
-            # Hole die ID jeder Verwendung und füge sie der Liste hinzu
+            # Holt die ID jeder Verwendung und fügt sie der Liste hinzu
             style_id = verwendung.get_id()
             verwendungen.append(style_id)
 
@@ -650,7 +650,7 @@ class ClothingTypeOperations(Resource):
         ct = Kleidungstyp.from_dict(api.payload)
 
         if ct is not None:
-            """Setze die ID des zu überschreibenden Kleidungstyp-Objekts."""
+            """Setzt die ID des zu überschreibenden Kleidungstyp-Objekts."""
             ct.set_id(id)
             adm.save_kleidungstyp(ct)
             return '', 200
@@ -926,20 +926,20 @@ class ImplicationConstraintOperations(Resource):
         ic = Implikation.from_dict(payload)
 
         if ic is not None:
-            # Setze die ID des Constraints
+            # Setzt die ID des Constraints
             ic.set_id(id)
 
-            # Lade den Style basierend auf der Style-ID aus dem Payload
+            # Lädt den Style basierend auf der Style-ID aus dem Payload
             style_id = payload.get('style')
             style = adm.get_style_by_id(style_id)
 
             if not style:
                 return '', 404
 
-            # Setze den Style in der Implikation
+            # Setzt den Style in der Implikation
             ic.set_style(style)
 
-            # Speichere die aktualisierte Implikation
+            # Speichert die aktualisierte Implikation
             adm.save_implikation(ic)
 
             # Erfolgreiche Antwort

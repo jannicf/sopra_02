@@ -162,7 +162,7 @@ class MutexMapper(Mapper):
             mutex = Mutex()
             mutex.set_id(id)
 
-            # Lade die zugehörigen Kleidungstyp-Objekte separat
+            # Lädt die zugehörigen Kleidungstyp-Objekte separat
             with KleidungstypMapper() as kleidungstyp_mapper:
                 bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
                 bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)

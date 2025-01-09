@@ -88,12 +88,12 @@ class KardinalitaetMapper(Mapper):
             kardinalitaet.set_id(id)
             kardinalitaet.set_min_anzahl(min_anzahl)
             kardinalitaet.set_max_anzahl(max_anzahl)
-            # Lade das zugehörige Kleidungstyp-Objekt separat aus der Datenbank
+            # Lädt das zugehörige Kleidungstyp-Objekt separat aus der Datenbank
             with KleidungstypMapper() as kleidungstyp_mapper:
                 bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
             kardinalitaet.set_bezugsobjekt(bezugsobjekt)
 
-            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            # Lädt das zugehörige Style-Objekt separat aus der Datenbank
             with StyleMapper() as style_mapper:
                 style = style_mapper.find_by_id(style_id)
             kardinalitaet.set_style(style)
@@ -128,12 +128,12 @@ class KardinalitaetMapper(Mapper):
             kardinalitaet.set_id(id)
             kardinalitaet.set_min_anzahl(min_anzahl)
             kardinalitaet.set_max_anzahl(max_anzahl)
-            # Lade das zugehörige Kleidungstyp-Objekt separat aus der Datenbank
+            # Lädt das zugehörige Kleidungstyp-Objekt separat aus der Datenbank
             with KleidungstypMapper() as kleidungstyp_mapper:
                 bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
             kardinalitaet.set_bezugsobjekt(bezugsobjekt)
 
-            # Lade das zugehörige Style-Objekt separat aus der Datenbank
+            # Lädt das zugehörige Style-Objekt separat aus der Datenbank
             with StyleMapper() as style_mapper:
                 style = style_mapper.find_by_id(style_id)
             kardinalitaet.set_style(style)

@@ -51,7 +51,7 @@ class KleiderschrankMapper(Mapper):
         current_items = [k.get_id() for k in kleiderschrank.get_inhalt()]
 
         if current_items:
-            # Setze die Zuordnung für die aktuellen Kleidungsstücke
+            # Setzt die Zuordnung für die aktuellen Kleidungsstücke
             items_str = ','.join(['%s'] * len(current_items))
             update_command = f"""UPDATE kleidungsstueck 
                                    SET kleiderschrank_id=%s 
@@ -64,7 +64,7 @@ class KleiderschrankMapper(Mapper):
     def delete(self, kleiderschrank):
         """Löschen der Daten eines Kleiderschrank-Objekts aus der Datenbank.
 
-                :param Kleiderschrank das aus der DB zu löschende "Objekt"
+                :param kleiderschrank das aus der DB zu löschende "Objekt"
                 """
         cursor = self._cnx.cursor()
 

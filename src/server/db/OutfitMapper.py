@@ -34,9 +34,9 @@ class OutfitMapper(Mapper):
         # Bausteine (Outfit) separat behandeln
         bausteine = outfit.get_bausteine()
 
-        # Falls bausteine vorhanden sind
+        # Falls Bausteine vorhanden sind
         if bausteine:
-            # Für jeden baustein einen separaten Eintrag in einer Verknüpfungstabelle erstellen
+            # Für jeden Baustein einen separaten Eintrag in einer Verknüpfungstabelle erstellen
             for baustein in bausteine:
                 verknuepfung_command = "INSERT INTO outfit_kleidungsstueck (outfit_id, kleidungsstueck_id) VALUES (%s, %s)"
                 verknuepfung_data = (outfit.get_id(), baustein.get_id())
@@ -57,11 +57,11 @@ class OutfitMapper(Mapper):
         data = (outfit.get_style().get_id(), outfit.get_id())
         cursor.execute(command, data)
 
-        # bestehende Verknüpfungen zu bausteinen löschen
+        # bestehende Verknüpfungen zu Bausteinen löschen
         delete_command = "DELETE FROM outfit_kleidungsstueck WHERE outfit_id = %s"
         cursor.execute(delete_command, (outfit.get_id(),))
 
-        # Neue Verknüpfungen zu bausteinen einfügen
+        # Neue Verknüpfungen zu Bausteinen einfügen
         bausteine = outfit.get_bausteine()
         if bausteine:
             for baustein in bausteine:
