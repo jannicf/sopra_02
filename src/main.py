@@ -324,32 +324,21 @@ class WardrobeOperations(Resource):
         """
         try:
             adm = KleiderschrankAdministration()
+            kleiderschrank = adm.get_kleiderschrank_by_id(id)
 
-            # Prüfen ob der Kleiderschrank existiert
-            existing_wardrobe = adm.get_kleiderschrank_by_id(id)
-            if not existing_wardrobe:
+            if not kleiderschrank:
                 return {'message': f'Kleiderschrank mit ID {id} nicht gefunden'}, 404
 
-            # Payload in Kleiderschrank-Objekt umwandeln
-            wardrobe = Kleiderschrank()
-            wardrobe.set_id(id)
-            wardrobe.set_name(api.payload.get('name'))
+            # Name aktualisieren
+            kleiderschrank.set_name(api.payload['name'])
 
-            # Eigentümer setzen
-            eigentuemer_id = api.payload.get('eigentuemer_id')
-            if eigentuemer_id:
-                eigentuemer = adm.get_person_by_id(eigentuemer_id)
-                if eigentuemer:
-                    wardrobe.set_eigentuemer(eigentuemer)
-                else:
-                    return {'message': f'Person mit ID {eigentuemer_id} nicht gefunden'}, 404
-
-            # Kleiderschrank speichern
-            adm.save_kleiderschrank(wardrobe)
-            return wardrobe, 200
+            # Speichern
+            adm.save_kleiderschrank(kleiderschrank)
+            return kleiderschrank, 200
 
         except Exception as e:
-            return {'message': f'Server error: {str(e)}'}, 500
+            print(f"Route: Fehler beim Update: {str(e)}")
+            return {'message': str(e)}, 500
 
 
 @wardrobe_ns.route('/persons-by-google-id/<string:google_id>')
@@ -359,10 +348,8 @@ class PersonsByGoogleIdOperations(Resource):
     @wardrobe_ns.marshal_with(person)
     def get(self, google_id):
         """Auslesen einer Person anhand der Google ID"""
-        print(f"Backend: Person mit Google ID {google_id} wird gesucht")  # Debug log
         adm = KleiderschrankAdministration()
         person = adm.get_person_by_google_id(google_id)
-        print(f"Backend: Person gefunden: {person}")  # Debug log
 
         # Neue Debug-Ausgaben
         if person:

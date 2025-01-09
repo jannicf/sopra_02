@@ -7,8 +7,6 @@ import PersonForm from '../dialogs/PersonForm';
 import PersonEditForm from '../dialogs/PersonEditForm';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import PersonDeleteDialog from "../dialogs/PersonDeleteDialog";
-import KleiderschrankBO from "../api/KleiderschrankBO";
-import PersonBO from "../api/PersonBO";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 class PersonView extends Component {
@@ -56,18 +54,7 @@ class PersonView extends Component {
     loadPerson = async () => {
     try {
         this.setState({loading: true});
-        console.log("ProfilView: Lade Person mit Google ID:", this.props.user?.uid);
-
         const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
-        console.log("ProfilView: API Rohdaten:", persons);
-
-        // Prüfe ob die Person-Daten korrekt zurückkommen
-        if (persons) {
-            console.log("ProfilView: Person Vorname:", persons.getVorname());
-            console.log("ProfilView: Person Nachname:", persons.getNachname());
-            console.log("ProfilView: Person Kleiderschrank:", persons.getKleiderschrank());
-        }
-
         this.setState({
             person: persons,
             loading: false,
@@ -123,31 +110,13 @@ class PersonView extends Component {
     const {person, showCreateDialog, showEditDialog, showDeleteDialog, loading} = this.state;
 
     // Schrittweise Überprüfung
-    console.log("1. Person Objekt:", {
-        person: person,
-        isPersonDefined: person !== null && person !== undefined
-    });
-
     if (person) {
-        console.log("2. Person Details:", {
-            id: person.getID(),
-            vorname: person.getVorname(),
-            nachname: person.getNachname(),
-            kleiderschrank: person.getKleiderschrank(),
-            isKleiderschrankDefined: person.getKleiderschrank() !== null && person.getKleiderschrank() !== undefined
-        });
-
         // Prüfen, was der Kleiderschrank tatsächlich ist
         const kleiderschrank = person.getKleiderschrank();
-        console.log("3. Kleiderschrank Details:", {
-            kleiderschrank: kleiderschrank,
-            type: typeof kleiderschrank,
-            prototyp: kleiderschrank ? Object.getPrototypeOf(kleiderschrank) : null,
-            methods: kleiderschrank ? Object.getOwnPropertyNames(Object.getPrototypeOf(kleiderschrank)) : null
-            });
         }
-        if (loading) {
-            return <Typography>Lade Profil...</Typography>;
+
+    if (loading) {
+        return <Typography>Lade Profil...</Typography>;
         }
 
         return (
