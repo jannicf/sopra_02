@@ -7,10 +7,6 @@ class KleiderschrankMapper(Mapper):
 
     def insert(self, kleiderschrank):
         cursor = self._cnx.cursor()
-        print(f"KleiderschrankMapper: Versuche Kleiderschrank einzufügen")
-        print(f"Name: {kleiderschrank.get_name()}")
-        print(f"Eigentuemer ID: {kleiderschrank.get_eigentuemer().get_id()}")
-
         cursor.execute("SELECT MAX(id) AS maxid FROM kleiderschrank")
         tuples = cursor.fetchall()
 
@@ -20,18 +16,12 @@ class KleiderschrankMapper(Mapper):
             else:
                 kleiderschrank.set_id(1)
 
-        print(f"KleiderschrankMapper: Generierte ID: {kleiderschrank.get_id()}")
-
         command = "INSERT INTO kleiderschrank (id, eigentuemer_id, name) VALUES (%s,%s,%s)"
         data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name())
-        print(f"KleiderschrankMapper: SQL Command:", command)
-        print(f"KleiderschrankMapper: Data:", data)
-
         cursor.execute(command, data)
+
         self._cnx.commit()
         cursor.close()
-
-        print(f"KleiderschrankMapper: Kleiderschrank erfolgreich eingefügt mit ID {kleiderschrank.get_id()}")
         return kleiderschrank
 
     def update(self, kleiderschrank):
@@ -40,26 +30,24 @@ class KleiderschrankMapper(Mapper):
                 :param kleiderschrank das Objekt, das in die DB geschrieben werden soll
                 """
         cursor = self._cnx.cursor()
+        try:
+            # Hauptdaten des Kleiderschranks aktualisieren, inklusive Eigentümer
+            command = "UPDATE kleiderschrank SET name = %s, eigentuemer_id = %s WHERE id = %s"
+            data = (kleiderschrank.get_name(),
+                    kleiderschrank.get_eigentuemer().get_id(),
+                    kleiderschrank.get_id())
+            cursor.execute(command, data)
 
-        # Hauptobjekt aktualisieren
-        command = "UPDATE kleiderschrank SET eigentuemer_id=%s, name=%s WHERE id=%s"
-        data = (kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name(), kleiderschrank.get_id())
-        cursor.execute(command, data)
+            self._cnx.commit()
+            return kleiderschrank
 
-        # Statt alle auf NULL zu setzen, aktualisieren wir nur die tatsächlichen Zuordnungen
-        # Wir holen uns die IDs der aktuell zugeordneten Kleidungsstücke
-        current_items = [k.get_id() for k in kleiderschrank.get_inhalt()]
+        except Exception as e:
+            print(f"Mapper: Fehler beim Update: {str(e)}")
+            self._cnx.rollback()
+            raise e
 
-        if current_items:
-            # Setze die Zuordnung für die aktuellen Kleidungsstücke
-            items_str = ','.join(['%s'] * len(current_items))
-            update_command = f"""UPDATE kleidungsstueck 
-                                   SET kleiderschrank_id=%s 
-                                   WHERE id IN ({items_str})"""
-            cursor.execute(update_command, (kleiderschrank.get_id(), *current_items))
-
-        self._cnx.commit()
-        cursor.close()
+        finally:
+            cursor.close()
 
     def delete(self, kleiderschrank):
         """Löschen der Daten eines Kleiderschrank-Objekts aus der Datenbank.

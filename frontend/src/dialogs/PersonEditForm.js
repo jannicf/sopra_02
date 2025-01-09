@@ -65,29 +65,24 @@ class PersonEditForm extends Component {
     handleSubmit = async () => {
     try {
         const { person } = this.props;
-        const { formData } = this.state;
-
-        // Person-Daten aktualisieren
-        person.setVorname(formData.vorname);
-        person.setNachname(formData.nachname);
-        person.setNickname(formData.nickname);
-
-        // Wenn der Kleiderschrank existiert, Name aktualisieren
         if (person.getKleiderschrank()) {
-            person.getKleiderschrank().setName(formData.kleiderschrankName);
-        }
+            const kleiderschrank = person.getKleiderschrank();
+            kleiderschrank.setName(this.state.formData.kleiderschrankName);
 
-        // Person speichern
-        await KleiderschrankAPI.getAPI().updatePerson(person);
+            // Kleiderschrank direkt aktualisieren
+            await KleiderschrankAPI.getAPI().updateKleiderschrank(kleiderschrank);
+
+            // Person mit dem aktualisierten Kleiderschrank speichern
+            person.setKleiderschrank(kleiderschrank);
+            await KleiderschrankAPI.getAPI().updatePerson(person);
+        }
 
         this.props.onClose(person);
     } catch (error) {
-        console.error('Fehler beim Speichern:', error);
-        this.setState({
-            error: error.message
-            });
+        console.error("Fehler beim Aktualisieren:", error);
+        this.setState({ error: error.message });
         }
-    }
+    };
 
     render() {
         const { show, onClose } = this.props;

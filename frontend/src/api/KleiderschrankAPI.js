@@ -243,21 +243,27 @@ class KleiderschrankAPI {
         })
     }
 
-    updateKleiderschrank(kleiderschrankBO) {
-        return this.#fetchAdvanced(this.#updateKleiderschrankURL(kleiderschrankBO.getID()), {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(kleiderschrankBO)
-        }).then(responseJSON => {
-            let responseKleiderschrankBO = KleiderschrankBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responseKleiderschrankBO);
-            })
-        })
-    }
+    // KleiderschrankAPI.js
+
+updateKleiderschrank = async (kleiderschrank) => {
+    // Erstelle ein einfaches Objekt für den Request
+    const requestData = {
+        id: kleiderschrank.getID(),
+        name: kleiderschrank.getName(),
+        eigentuemer_id: kleiderschrank.getEigentuemer()?.getID()
+    };
+
+    return this.#fetchAdvanced(this.#updateKleiderschrankURL(kleiderschrank.getID()), {
+        method: 'PUT',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    }).then(responseJSON => {
+        return KleiderschrankBO.fromJSON(responseJSON)[0];
+        });
+    };
 
     deleteKleiderschrank(id) {
         return this.#fetchAdvanced(this.#deleteKleiderschrankURL(id), {
