@@ -71,25 +71,30 @@ export default class StyleBO extends BusinessObject {
   /**
    * Fügt einen Constraint zum Style hinzu.
    *
-   * @param {ConstraintBO} aConstraint - Der hinzuzufügende Constraint
+   * @param {ConstraintBO} constraint - Der hinzuzufügende Constraint
    */
-  addConstraint(aConstraint) {
-    if (aConstraint instanceof ConstraintBO) {
-      this._constraints.push(aConstraint);
+  addConstraint(constraint) {
+    if (Array.isArray(this._constraints)) {
+        this._constraints.push(constraint);
+    } else {
+        this._constraints = [constraint];
     }
-  }
+}
 
   /**
    * Entfernt einen Constraint aus dem Style.
    *
-   * @param {ConstraintBO} aConstraint - Der zu entfernende Constraint
+   * @param {ConstraintBO} constraint - Der zu entfernende Constraint
    */
-  removeConstraint(aConstraint) {
-    const index = this._constraints.findIndex(c => c.getID() === aConstraint.getID());
-    if (index > -1) {
-      this._constraints.splice(index, 1);
+  removeConstraint(constraint) {
+    if (Array.isArray(this._constraints)) {
+        const index = this._constraints.findIndex(c =>
+            c.getID() === constraint.getID());
+        if (index > -1) {
+            this._constraints.splice(index, 1);
+        }
     }
-  }
+}
 
   /**
    * Gibt alle Constraints des Styles zurück.
@@ -100,69 +105,59 @@ export default class StyleBO extends BusinessObject {
   /**
    * Konvertiert eine JSON-Antwort in ein StyleBO Objekt bzw. Array von StyleBO Objekten.
    *
-   * @param {*} styles - JSON-Daten aus dem Backend
+   * @param {any[]} styles - JSON-Daten aus dem Backend.
+   * @returns {any[]} Ein Array von StyleBO-Objekten.
    */
   static fromJSON(styles) {
-  let result = [];
+    let result = [];
 
-  // Falls styles bereits ein Array ist …
-  if (Array.isArray(styles)) {
-    styles.forEach(s => {
-      let style = new StyleBO();
-      style.setID(s.id);
-      style.setName(s.name);
+    if (Array.isArray(styles)) {
+        styles.forEach((s) => {
+            let style = new StyleBO();
 
-      // Features hinzufügen
-      s.features?.forEach(f => {
-        style.addFeature(KleidungstypBO.fromJSON([f])[0]);
-      });
+            // ID und Name setzen
+            style.setID(s.id || null); // Verwendet Standardwerte, falls `id` fehlt
+            style.setName(s.name || "Unnamed Style");
 
-      // Constraints hinzufügen
-      s.constraints?.forEach(c => {
-        if (c.min_anzahl) {
-          // Kardinalität
-          style.addConstraint(KardinalitaetBO.fromJSON([c])[0]);
-        } else if (c.bezugsobjekt1) {
-          // => Mutex oder Implikation
-          if (c.type === 'mutex') {
-            style.addConstraint(MutexBO.fromJSON([c])[0]);
-          } else {
-            style.addConstraint(ImplikationBO.fromJSON([c])[0]);
-          }
-        }
+            // Features verarbeiten
+            if (Array.isArray(s.features)) {
+                s.features.forEach((f) => {
+                    const feature = KleidungstypBO.fromJSON([f])[0]; // Konvertiert Feature-Objekt
+                    style.addFeature(feature); // Fügt Feature hinzu
+                });
+            }
 
-      });
+            // Constraints verarbeiten
+            if (s.constraints) {
+                // Kardinalitäten
+                if (Array.isArray(s.constraints.kardinalitaeten)) {
+                    style._constraints.kardinalitaeten = s.constraints.kardinalitaeten.map((k) => ({
+                        minAnzahl: k.min_anzahl,
+                        maxAnzahl: k.max_anzahl,
+                        bezugsobjekt: { id: k.bezugsobjekt_id },
+                    }));
+                }
 
-      result.push(style);
-    });
+                // Mutexe
+                if (Array.isArray(s.constraints.mutexe)) {
+                    style._constraints.mutexe = s.constraints.mutexe.map((m) => ({
+                        bezugsobjekt1: { id: m.bezugsobjekt1_id },
+                        bezugsobjekt2: { id: m.bezugsobjekt2_id },
+                    }));
+                }
 
-  } else {
-    // Falls styles nur ein einzelnes Objekt ist …
-    let s = styles;
-    let style = new StyleBO();
-    style.setID(s.id);
-    style.setName(s.name);
-
-    s.features?.forEach(f => {
-      style.addFeature(KleidungstypBO.fromJSON([f])[0]);
-    });
-
-    s.constraints?.forEach(c => {
-      if (c.min_anzahl) {
-        style.addConstraint(KardinalitaetBO.fromJSON([c])[0]);
-      } else if (c.bezugsobjekt1_id) {
-        if (c.type === 'mutex') {
-          style.addConstraint(MutexBO.fromJSON([c])[0]);
-        } else {
-          style.addConstraint(ImplikationBO.fromJSON([c])[0]);
-        }
-      }
-    });
-
-    result.push(style);
-  }
-
-  // Wir geben immer ein Array zurück
-  return result;
+                // Implikationen
+                if (Array.isArray(s.constraints.implikationen)) {
+                    style._constraints.implikationen = s.constraints.implikationen.map((i) => ({
+                        bezugsobjekt1: { id: i.bezugsobjekt1_id },
+                        bezugsobjekt2: { id: i.bezugsobjekt2_id },
+                    }));
+                }
+            }
+            result.push(style);
+        });
+    }
+    return result;
 }
+
 }
