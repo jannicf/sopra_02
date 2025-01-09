@@ -143,7 +143,10 @@ DROP TABLE IF EXISTS `kleidungstyp`;
 CREATE TABLE `kleidungstyp` (
   `id` int NOT NULL,
   `bezeichnung` varchar(128) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`)
+  `kleiderschrank_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `kleiderschrank_id` (`kleiderschrank_id`),
+  CONSTRAINT `kleidungstyp_ibfk_1` FOREIGN KEY (`kleiderschrank_id`) REFERENCES `kleiderschrank` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -197,9 +200,12 @@ DROP TABLE IF EXISTS `outfit`;
 CREATE TABLE `outfit` (
   `id` int NOT NULL,
   `style_id` int DEFAULT NULL,
+  `kleiderschrank_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `style_id` (`style_id`),
-  CONSTRAINT `outfit_ibfk_1` FOREIGN KEY (`style_id`) REFERENCES `style` (`id`)
+  KEY `kleiderschrank_id` (`kleiderschrank_id`),
+  CONSTRAINT `outfit_ibfk_1` FOREIGN KEY (`style_id`) REFERENCES `style` (`id`),
+  CONSTRAINT `outfit_ibfk_2` FOREIGN KEY (`kleiderschrank_id`) REFERENCES `kleiderschrank` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -274,7 +280,10 @@ DROP TABLE IF EXISTS `style`;
 CREATE TABLE `style` (
   `id` int NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
-  PRIMARY KEY (`id`)
+  `kleiderschrank_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `kleiderschrank_id` (`kleiderschrank_id`),
+  CONSTRAINT `style_ibfk_1` FOREIGN KEY (`kleiderschrank_id`) REFERENCES `kleiderschrank` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -322,4 +331,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-12-12 17:58:18
+-- Dump completed on 2025-01-09 11:10:38
