@@ -27,53 +27,54 @@ class StyleMapper(Mapper):
 
         for (maxid) in tuples:
             if maxid[0] is not None:
-                """Wenn wir eine maximale ID festellen konnten, zählen wir diese
-                um 1 hoch und weisen diesen Wert als ID dem Style-Objekt zu."""
                 style.set_id(maxid[0] + 1)
             else:
-                """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
-                davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 style.set_id(1)
 
+        # Erst den Style selbst einfügen
         command = "INSERT INTO style (id, name) VALUES (%s,%s)"
         data = (style.get_id(), style.get_name())
         cursor.execute(command, data)
 
+        # Features einfügen falls vorhanden
         features = style.get_features()
         if features:
-            for feature in style.get_features():
+            for feature in features:
                 command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s,%s)"
-                data = (style.get_id(), feature.get_id())
+                data = (style.get_id(), feature)
                 cursor.execute(command, data)
 
-        # Constraints einfügen
+        # Constraints NACH dem Einfügen des Styles verarbeiten
         constraints = style.get_constraints()
-        if constraints:
-            for constraint in constraints:
-                constraint.set_style(style)
-                if isinstance(constraint, Kardinalitaet):
+        if isinstance(constraints, dict):  # Prüfen ob constraints ein Dictionary ist
+            # Kardinalitäten
+            if 'kardinalitaeten' in constraints and constraints['kardinalitaeten']:
+                for k in constraints['kardinalitaeten']:
                     command = """INSERT INTO kardinalitaet 
-                        (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
-                        VALUES (%s, %s, %s, %s, %s)"""
-                    data = (constraint.get_id(), constraint.get_min_anzahl(),
-                            constraint.get_max_anzahl(), constraint.get_bezugsobjekt().get_id(),
-                            style.get_id())
+                            (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
+                            VALUES (%s, %s, %s, %s, %s)"""
+                    data = (k.get('id', None), k.get('minAnzahl'), k.get('maxAnzahl'),
+                            k.get('bezugsobjekt_id'), style.get_id())
                     cursor.execute(command, data)
 
-                elif isinstance(constraint, Mutex):
+            # Mutexe
+            if 'mutexe' in constraints and constraints['mutexe']:
+                for m in constraints['mutexe']:
                     command = """INSERT INTO mutex 
-                        (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
-                        VALUES (%s, %s, %s, %s)"""
-                    data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
-                            constraint.get_bezugsobjekt2().get_id(), style.get_id())
+                            (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                            VALUES (%s, %s, %s, %s)"""
+                    data = (m.get('id', None), m.get('bezugsobjekt1_id'),
+                            m.get('bezugsobjekt2_id'), style.get_id())
                     cursor.execute(command, data)
 
-                elif isinstance(constraint, Implikation):
+            # Implikationen
+            if 'implikationen' in constraints and constraints['implikationen']:
+                for i in constraints['implikationen']:
                     command = """INSERT INTO implikation 
-                        (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
-                        VALUES (%s, %s, %s, %s)"""
-                    data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
-                            constraint.get_bezugsobjekt2().get_id(), style.get_id())
+                            (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
+                            VALUES (%s, %s, %s, %s)"""
+                    data = (i.get('id', None), i.get('bezugsobjekt1_id'),
+                            i.get('bezugsobjekt2_id'), style.get_id())
                     cursor.execute(command, data)
 
         self._cnx.commit()

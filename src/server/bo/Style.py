@@ -78,7 +78,7 @@ class Style(bo.BusinessObject):
 
     def get_constraints(self):
         """Gibt alle Constraints in einem JSON-kompatiblen Format zurück"""
-        if not hasattr(self, '_Style__constraints'):
+        if not hasattr(self, '__constraints'):
             self.__constraints = {
                 'kardinalitaeten': [],
                 'mutexe': [],
@@ -90,42 +90,6 @@ class Style(bo.BusinessObject):
         """Entfernt einen Constraint aus dem Style"""
         if constraint in self.__constraints:
             self.__constraints.remove(constraint)
-
-    def get_constraints(self):
-        from server.bo.Kardinalitaet import Kardinalitaet
-        from server.bo.Mutex import Mutex
-        from server.bo.Implikation import Implikation
-
-        """Gibt alle Constraints in einem JSON-kompatiblen Format zurück,
-        so wie es das Frontend in 'StyleBO.fromJSON()' erwartet.
-        """
-        result = {
-            'kardinalitaeten': [],
-            'mutexe': [],
-            'implikationen': []
-        }
-
-        for constraint in self.__constraints:
-            if isinstance(constraint, Kardinalitaet):
-                result['kardinalitaeten'].append({
-                    'type': 'kardinalitaet',
-                    'min_anzahl': constraint.get_min_anzahl(),
-                    'max_anzahl': constraint.get_max_anzahl(),
-                    'bezugsobjekt_id': constraint.get_bezugsobjekt().get_id()
-                })
-            elif isinstance(constraint, Mutex):
-                result['mutexe'].append({
-                    'type': 'mutex',
-                    'bezugsobjekt1_id': constraint.get_bezugsobjekt1().get_id(),
-                    'bezugsobjekt2_id': constraint.get_bezugsobjekt2().get_id()
-                })
-            elif isinstance(constraint, Implikation):
-                result['implikationen'].append({
-                    'type': 'implikation',
-                    'bezugsobjekt1_id': constraint.get_bezugsobjekt1().get_id(),
-                    'bezugsobjekt2_id': constraint.get_bezugsobjekt2().get_id()
-                })
-        return result
 
     def __eq__(self, other):
         """Zwei Styles sind gleich, wenn sie die gleiche ID haben"""
