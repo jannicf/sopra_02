@@ -15,11 +15,11 @@ const StyleForm = ({ show, style, onClose }) => {
     name: '',
     features: [],
     constraints: {
-      kardinalitaeten: [],
-      mutexe: [],
-      implikationen: []
+        kardinalitaeten: [],
+        mutexe: [],
+        implikationen: []
     }
-  });
+});
 
   // Liste aller Kleidungstypen, damit wir sie im Features-Select anbieten können
   const [kleidungstypen, setKleidungstypen] = useState([]);
@@ -46,66 +46,90 @@ const StyleForm = ({ show, style, onClose }) => {
 
   useEffect(() => {
     if (show && style) {
-      setFormData({
-        name: style.getName(),
-        features: style.getFeatures(), // Array von KleidungstypBO
-        constraints: {
-          kardinalitaeten: style.getConstraints().filter(c => c.constructor.name === 'KardinalitaetBO'),
-          mutexe: style.getConstraints().filter(c => c.constructor.name === 'MutexBO'),
-          implikationen: style.getConstraints().filter(c => c.constructor.name === 'ImplikationBO')
-        }
-      });
+        setFormData({
+            name: style.getName(),
+            features: style.getFeatures(),
+            constraints: {
+                kardinalitaeten: style.getConstraints()?.kardinalitaeten || [],
+                mutexe: style.getConstraints()?.mutexe || [],
+                implikationen: style.getConstraints()?.implikationen || []
+            }
+        });
     } else if (!style) {
-      // Neuer Style
-      setFormData({
-        name: '',
-        features: [],
-        constraints: {
-          kardinalitaeten: [],
-          mutexe: [],
-          implikationen: []
-        }
-      });
+        // Neuer Style
+        setFormData({
+            name: '',
+            features: [],
+            constraints: {
+                kardinalitaeten: [],
+                mutexe: [],
+                implikationen: []
+            }
+        });
     }
-  }, [show, style]);
+}, [show, style]);
 
   /**
    * Wird aufgerufen, wenn wir in KardinalitaetDialog / MutexDialog / ImplikationDialog speichern.
    */
-  const handleConstraintSave = (constraintType, constraintData) => {
-    setFormData(prev => {
-      const updatedConstraints = { ...prev.constraints };
+const handleConstraintSave = (constraintType, constraintData) => {
 
-      // Wähle das richtige Array (kardinalitaeten|mutexe|implikationen)
-      const constraintArrayKey = (
-        constraintType === 'kardinalitaet' ? 'kardinalitaeten'
-          : constraintType === 'mutex' ? 'mutexe'
-          : 'implikationen'
-      );
+    // Kopiert des aktuellen formData erstellen
+    const updatedFormData = { ...formData };
 
-      if (selectedConstraint) {
-        // Bearbeiten eines existierenden Constraints
-        updatedConstraints[constraintArrayKey] = updatedConstraints[constraintArrayKey].map(c =>
-          c === selectedConstraint ? { ...c, ...constraintData } : c
-        );
-      } else {
-        // Neuen Constraint hinzufügen
-        updatedConstraints[constraintArrayKey] = [
-          ...updatedConstraints[constraintArrayKey],
-          constraintData
-        ];
-      }
+    if (constraintType === 'kardinalitaet') {
+        const kardinalitaet = {
+            type: constraintType,
+            minAnzahl: constraintData.min_anzahl,
+            maxAnzahl: constraintData.max_anzahl,
+            bezugsobjekt: { id: constraintData.bezugsobjekt_id }
+        };
 
-      return {
-        ...prev,
-        constraints: updatedConstraints
-      };
-    });
+        // Hier style.addConstraint aufrufen, wenn style existiert
+        if (style) {
+            style.addConstraint(kardinalitaet);
+        }
 
-    // Dialog schließen
+        if (selectedConstraint) {
+            updatedFormData.constraints.kardinalitaeten = updatedFormData.constraints.kardinalitaeten.map(k =>
+                k === selectedConstraint ? kardinalitaet : k
+            );
+        } else {
+            if (!updatedFormData.constraints.kardinalitaeten) {
+                updatedFormData.constraints.kardinalitaeten = [];
+            }
+            updatedFormData.constraints.kardinalitaeten.push(kardinalitaet);
+        }
+    } else {
+        const constraintArrayKey = constraintType === 'mutex' ? 'mutexe' : 'implikationen';
+        const constraint = {
+            type: constraintType,
+            bezugsobjekt1: { id: constraintData.bezugsobjekt1_id },
+            bezugsobjekt2: { id: constraintData.bezugsobjekt2_id }
+        };
+
+        if (style) {
+            style.addConstraint(constraint);
+        }
+
+        if (selectedConstraint) {
+            updatedFormData.constraints[constraintArrayKey] = updatedFormData.constraints[constraintArrayKey].map(c =>
+                c === selectedConstraint ? constraint : c
+            );
+        } else {
+            if (!updatedFormData.constraints[constraintArrayKey]) {
+                updatedFormData.constraints[constraintArrayKey] = [];
+            }
+            updatedFormData.constraints[constraintArrayKey].push(constraint);
+        }
+    }
+
+    // Aktualisiere den State mit der neuen Version
+    setFormData(updatedFormData);
+
     setActiveDialog(null);
     setSelectedConstraint(null);
-  };
+};
 
   /**
    * Constraint löschen (wenn wir in der Liste auf das Mülleimer-Icon klicken)
@@ -119,7 +143,7 @@ const StyleForm = ({ show, style, onClose }) => {
           : 'implikationen'
       );
 
-      // Filtere das "index"-te Element raus
+      // Filtert das "index"-te Element raus
       updatedConstraints[arrayKey] = prev.constraints[arrayKey].filter((_, i) => i !== index);
 
       return {
@@ -132,38 +156,45 @@ const StyleForm = ({ show, style, onClose }) => {
   /**
    * Wenn man auf "Speichern" klickt
    */
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
     try {
-      const api = KleiderschrankAPI.getAPI();
+        // API-Instanz holen
+        const api = KleiderschrankAPI.getAPI();
 
-      // Constraints zusammenführen
-      const allConstraints = [
-        ...formData.constraints.kardinalitaeten,
-        ...formData.constraints.mutexe,
-        ...formData.constraints.implikationen
-      ];
+        const submitData = {
+            id: style?.getID(),
+            name: formData.name,
+            features: [...new Set(formData.features.map(f => typeof f === 'object' ? f.getID() : f))],
+            constraints: {
+                kardinalitaeten: formData.constraints.kardinalitaeten.map(k => ({
+                    type: 'kardinalitaet',
+                    min_anzahl: parseInt(k.minAnzahl),
+                    max_anzahl: parseInt(k.maxAnzahl),
+                    bezugsobjekt_id: k.bezugsobjekt.id
+                })),
+                mutexe: formData.constraints.mutexe.map(m => ({
+                    type: 'mutex',
+                    bezugsobjekt1_id: m.bezugsobjekt1.id,
+                    bezugsobjekt2_id: m.bezugsobjekt2.id
+                })),
+                implikationen: formData.constraints.implikationen.map(i => ({
+                    type: 'implikation',
+                    bezugsobjekt1_id: i.bezugsobjekt1.id,
+                    bezugsobjekt2_id: i.bezugsobjekt2.id
+                }))
+            }
+        };
 
-      // JSON fürs Backend
-      const submitData = {
-        name: formData.name,
-        // Features als IDs
-        features: formData.features.map(f => f.getID()),
-        // Constraints als Array; wir haben sie "Roh" in formData
-        constraints: allConstraints
-      };
-
-      // Unterscheide Update vs. Neuerstellung
-      if (style) {
-        await api.updateStyle(style.getID(), submitData);
-      } else {
-        await api.addStyle(submitData);
-      }
-
-      onClose(true);
+        if (style) {
+            await api.updateStyle(style.getID(), submitData);
+        } else {
+            await api.addStyle(submitData);
+        }
+        onClose(true);
     } catch (error) {
-      console.error("Fehler beim Speichern:", error);
+        console.error("Fehler beim Speichern:", error);
     }
-  };
+};
 
   /**
    * Zeigt alle Constraints in einer Liste an, mit Buttons zum Bearbeiten/Löschen

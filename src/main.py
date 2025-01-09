@@ -97,8 +97,8 @@ style = api.inherit('Style', bo, {
     'name': fields.String(attribute='_Style__name', description='Name des Styles'),
     'kleiderschrank_id': fields.Integer(attribute='_Style__kleiderschrank_id',
                                         description='ID des zugehörigen Kleiderschranks'),
-    'features': fields.List(fields.Nested(kleidungstyp), attribute=lambda s: s.get_features_as_list()),
-    'constraints': fields.List(fields.Raw, attribute=lambda s: s.get_constraints_as_list())
+    'features': fields.List(fields.Nested(kleidungstyp), attribute='_Style__features'),
+    'constraints': fields.Raw(attribute=lambda x: x.get_constraints())
 })
 
 
@@ -120,15 +120,11 @@ class PersonListOperations(Resource):
     # @secured
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
-        print("Received payload:", api.payload)
+
+
+        adm = KleiderschrankAdministration()
 
         proposal = Person.from_dict(api.payload)
-
-        print("Created Person object:", {
-            'vorname': proposal.get_vorname(),
-            'nachname': proposal.get_nachname(),
-            'kleiderschrank': proposal.get_kleiderschrank() is not None
-        })
 
         if proposal is not None:
             adm = KleiderschrankAdministration()
@@ -389,10 +385,10 @@ class ClothesListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Hole zuerst den Typ als vollständiges Objekt
+        # Holt zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        # Modifiziert das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -444,10 +440,10 @@ class ClothingItemOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Hole zuerst den Typ als vollständiges Objekt
+        # Holt zuerst den Typ als vollständiges Objekt
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziere das payload so dass es ein Typ-Objekt enthält
+        # Modifiziert das payload so dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -487,7 +483,7 @@ class StyleListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Style-Objekt aus den übertragenen Daten
+        # Erstellt Style-Objekt aus den übertragenen Daten
         proposal = Style.from_dict(api.payload)
 
         if proposal is not None:
@@ -533,22 +529,63 @@ class StyleOperations(Resource):
     @wardrobe_ns.marshal_with(style)
     @wardrobe_ns.expect(style, validate=True)
     #@secured
-    def put(self, id):
-        """Update eines bestimmten Style-Objekts.
+    @wardrobe_ns.route('/styles/<int:id>')
+    class StyleOperations(Resource):
+        @wardrobe_ns.marshal_with(style)
+        def put(self, id):
+            try:
+                adm = KleiderschrankAdministration()
+                existing_style = adm.get_style_by_id(id)
 
-        Die Objekt-ID wird durch den URI-Parameter überschrieben.
-        """
-        adm = KleiderschrankAdministration()
-        s = Style.from_dict(api.payload)
+                # Name und Features aktualisieren
+                existing_style.set_name(api.payload['name'])
+                existing_style._Style__features = []
 
-        if s is not None:
-            """Setze die ID des zu überschreibenden Style-Objekts."""
-            s.set_id(id)
-            adm.save_style(s)
-            return '', 200
-        else:
-            return '', 500
+                # Features hinzufügen
+                for feature_id in api.payload['features']:
+                    existing_style.add_feature(adm.get_kleidungstyp_by_id(feature_id))
 
+                # Constraints zurücksetzen
+                existing_style._Style__constraints = {
+                    'kardinalitaeten': [],
+                    'mutexe': [],
+                    'implikationen': []
+                }
+
+                # Kardinalitäten
+                for k in api.payload['constraints'].get('kardinalitaeten', []):
+                    existing_style.add_constraint({
+                        'type': 'kardinalitaet',
+                        'minAnzahl': k.get('min_anzahl'),
+                        'maxAnzahl': k.get('max_anzahl'),
+                        'bezugsobjekt_id': k.get('bezugsobjekt_id')
+                    })
+
+                # Mutexe
+                for m in api.payload['constraints'].get('mutexe', []):
+                    existing_style.add_constraint({
+                        'type': 'mutex',
+                        'bezugsobjekt1_id': m.get('bezugsobjekt1_id'),
+                        'bezugsobjekt2_id': m.get('bezugsobjekt2_id')
+                    })
+
+                # Implikationen
+                for i in api.payload['constraints'].get('implikationen', []):
+                    existing_style.add_constraint({
+                        'type': 'implikation',
+                        'bezugsobjekt1_id': i.get('bezugsobjekt1_id'),
+                        'bezugsobjekt2_id': i.get('bezugsobjekt2_id')
+                    })
+
+                # Style speichern
+                adm.save_style(existing_style)
+
+                # Das aktualisierte Style-Objekt zurückgeben
+                updated_style = adm.get_style_by_id(id)
+                return updated_style
+
+            except Exception as e:
+                return {'message': str(e)}, 500
 
 @wardrobe_ns.route('/clothing-types')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -575,14 +612,14 @@ class ClothingTypeListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstelle Kleidungstyp-Objekt aus den übertragenen Daten
+        # Erstellt Kleidungstyp-Objekt aus den übertragenen Daten
         proposal = Kleidungstyp.from_dict(api.payload)
-        # Erstelle eine leere Liste für die Style-IDs
+        # Erstellt eine leere Liste für die Style-IDs
         verwendungen = []
 
-        # Gehe durch alle Verwendungen des Kleidungstyps
+        # Geht durch alle Verwendungen des Kleidungstyps
         for verwendung in proposal.get_verwendungen():
-            # Hole die ID jeder Verwendung und füge sie der Liste hinzu
+            # Holt die ID jeder Verwendung und fügt sie der Liste hinzu
             style_id = verwendung.get_id()
             verwendungen.append(style_id)
 
@@ -639,7 +676,7 @@ class ClothingTypeOperations(Resource):
         ct = Kleidungstyp.from_dict(api.payload)
 
         if ct is not None:
-            """Setze die ID des zu überschreibenden Kleidungstyp-Objekts."""
+            """Setzt die ID des zu überschreibenden Kleidungstyp-Objekts."""
             ct.set_id(id)
             adm.save_kleidungstyp(ct)
             return '', 200
@@ -915,20 +952,20 @@ class ImplicationConstraintOperations(Resource):
         ic = Implikation.from_dict(payload)
 
         if ic is not None:
-            # Setze die ID des Constraints
+            # Setzt die ID des Constraints
             ic.set_id(id)
 
-            # Lade den Style basierend auf der Style-ID aus dem Payload
+            # Lädt den Style basierend auf der Style-ID aus dem Payload
             style_id = payload.get('style')
             style = adm.get_style_by_id(style_id)
 
             if not style:
                 return '', 404
 
-            # Setze den Style in der Implikation
+            # Setzt den Style in der Implikation
             ic.set_style(style)
 
-            # Speichere die aktualisierte Implikation
+            # Speichert die aktualisierte Implikation
             adm.save_implikation(ic)
 
             # Erfolgreiche Antwort

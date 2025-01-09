@@ -340,7 +340,7 @@ class KleiderschrankAdministration(object):
     def save_style(self, style):
         """Den gegebenen Style speichern."""
         with StyleMapper() as mapper:
-            mapper.update(style)
+            return mapper.update(style)
 
     def delete_style(self, style):
         """Den gegebenen Style aus unserem System löschen."""
