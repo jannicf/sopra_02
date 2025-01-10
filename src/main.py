@@ -492,20 +492,35 @@ class StyleListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Erstellt Style-Objekt aus den übertragenen Daten
+        # Style-Objekt aus den Daten erstellen
         proposal = Style.from_dict(api.payload)
 
         if proposal is not None:
-            """ Wir erstellen ein Style-Objekt basierend auf den Vorschlagsdaten.
-            Das serverseitig erzeugte Objekt ist das maßgebliche und 
-            wird dem Client zurückgegeben. 
-            """
-            sty = adm.create_style(
-                proposal.get_name()
-            )
-            return sty, 201
+            # Style erstellen
+            sty = adm.create_style(proposal.get_name())
+
+            # Features übernehmen
+            if proposal.get_features():
+                for feature_id in proposal.get_features():
+                    feature = adm.get_kleidungstyp_by_id(feature_id)
+                    if feature:
+                        sty.add_feature(feature)
+
+            # Constraints übernehmen
+            constraints = proposal.get_constraints()
+            for k in constraints.get('kardinalitaeten', []):
+                sty.add_constraint(k)
+            for m in constraints.get('mutexe', []):
+                sty.add_constraint(m)
+            for i in constraints.get('implikationen', []):
+                sty.add_constraint(i)
+
+            # Style mit Features und Constraints speichern
+            adm.save_style(sty)
+
+            # Aktuellen Stand zurückgeben
+            return adm.get_style_by_id(sty.get_id()), 201
         else:
-            # Wenn etwas schiefgeht, werfen wir einen Server-Fehler.
             return '', 500
 
 
