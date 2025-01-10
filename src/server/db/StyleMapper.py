@@ -35,46 +35,44 @@ class StyleMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 style.set_id(1)
 
-        command = "INSERT INTO style (id, name, kleiderschrank_id) VALUES (%s,%s)"
+        command = "INSERT INTO style (id, name, kleiderschrank_id) VALUES (%s,%s,%s)"
         data = (style.get_id(), style.get_name(), style.get_kleiderschrank_id())
         cursor.execute(command, data)
 
-        features = style.get_features()
-        if features:
-            for feature in style.get_features():
-                command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s,%s)"
-                data = (style.get_id(), feature.get_id())
-                cursor.execute(command, data)
-
-        # Constraints einfügen
-        constraints = style.get_constraints()
-        if constraints:
-            for constraint in constraints:
-                constraint.set_style(style)
-                if isinstance(constraint, Kardinalitaet):
-                    command = """INSERT INTO kardinalitaet 
-                        (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id) 
-                        VALUES (%s, %s, %s, %s, %s)"""
-                    data = (constraint.get_id(), constraint.get_min_anzahl(),
-                            constraint.get_max_anzahl(), constraint.get_bezugsobjekt().get_id(),
-                            style.get_id())
+            # Features einfügen
+            features = style.get_features()
+            if features:
+                for feature_id in features:
+                    command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s,%s)"
+                    data = (style.get_id(), feature_id)
                     cursor.execute(command, data)
 
-                elif isinstance(constraint, Mutex):
-                    command = """INSERT INTO mutex 
-                        (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
-                        VALUES (%s, %s, %s, %s)"""
-                    data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
-                            constraint.get_bezugsobjekt2().get_id(), style.get_id())
-                    cursor.execute(command, data)
+            # Constraints einfügen
+            constraints = style.get_constraints()
 
-                elif isinstance(constraint, Implikation):
-                    command = """INSERT INTO implikation 
-                        (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id) 
-                        VALUES (%s, %s, %s, %s)"""
-                    data = (constraint.get_id(), constraint.get_bezugsobjekt1().get_id(),
-                            constraint.get_bezugsobjekt2().get_id(), style.get_id())
-                    cursor.execute(command, data)
+            # Kardinalitäten
+            for k in constraints.get('kardinalitaeten', []):
+                cursor.execute("""
+                    INSERT INTO kardinalitaet (id, min_anzahl, max_anzahl, bezugsobjekt_id, style_id)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (k.get('id'), k.get('minAnzahl'), k.get('maxAnzahl'),
+                      k.get('bezugsobjekt_id'), style.get_id()))
+
+            # Mutexe
+            for m in constraints.get('mutexe', []):
+                cursor.execute("""
+                    INSERT INTO mutex (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id)
+                    VALUES (%s, %s, %s, %s)
+                """, (m.get('id'), m.get('bezugsobjekt1_id'),
+                      m.get('bezugsobjekt2_id'), style.get_id()))
+
+            # Implikationen
+            for i in constraints.get('implikationen', []):
+                cursor.execute("""
+                    INSERT INTO implikation (id, bezugsobjekt1_id, bezugsobjekt2_id, style_id)
+                    VALUES (%s, %s, %s, %s)
+                """, (i.get('id'), i.get('bezugsobjekt1_id'),
+                      i.get('bezugsobjekt2_id'), style.get_id()))
 
         self._cnx.commit()
         cursor.close()
