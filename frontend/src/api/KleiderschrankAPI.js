@@ -482,15 +482,14 @@ updateKleiderschrank = async (kleiderschrank) => {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify({
-                name: styleData.name,
-                features: styleData.features,
-                constraints: styleData.constraints || []
-            }) // Hier wird nur das geschickt was das Backend erwartet
+            body: JSON.stringify(styleData)
         }).then(responseJSON => {
-            return StyleBO.fromJSON([responseJSON])[0];
-        });
-    }
+            let responseStyleBO = StyleBO.fromJSON([responseJSON])[0];
+            return new Promise(function (resolve) {
+                resolve(responseStyleBO);
+        })
+    })
+}
 
     updateStyle(id, styleData) {
         const requestData = {

@@ -314,6 +314,9 @@ class KleiderschrankAdministration(object):
 
     def create_style(self, name, kleiderschrank_id):
         """Einen Style anlegen"""
+        kleiderschrank = self.get_kleiderschrank_by_id(kleiderschrank_id)
+        if not kleiderschrank:
+            raise ValueError(f"Kleiderschrank mit ID {kleiderschrank_id} existiert nicht")
         style = Style()
         style.set_name(name)
         style.set_kleiderschrank_id(kleiderschrank_id)

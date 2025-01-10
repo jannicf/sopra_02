@@ -109,7 +109,7 @@ style = api.inherit('Style', bo, {
     'kleiderschrank_id': fields.Integer(attribute='_Style__kleiderschrank_id',
                                         description='ID des zugehörigen Kleiderschranks'),
     'features': fields.List(fields.Nested(kleidungstyp), attribute='_Style__features'),
-    'constraints': fields.Raw(attribute=lambda x: x.get_constraints())
+    'constraints': fields.Raw(attribute='_Style__constraints')
 })
 
 
@@ -498,8 +498,13 @@ class StyleListOperations(Resource):
         proposal = Style.from_dict(api.payload)
 
         if proposal is not None:
-            # Style erstellen
-            sty = adm.create_style(proposal.get_name())
+            # Hier die kleiderschrank_id aus dem payload holen
+            kleiderschrank_id = api.payload.get('kleiderschrank_id')
+            if kleiderschrank_id is None:
+                return {'message': 'kleiderschrank_id fehlt'}, 400
+
+            # Style mit Namen UND kleiderschrank_id erstellen
+            sty = adm.create_style(proposal.get_name(), kleiderschrank_id)
 
             # Features übernehmen
             if proposal.get_features():
@@ -508,14 +513,9 @@ class StyleListOperations(Resource):
                     if feature:
                         sty.add_feature(feature)
 
-            # Constraints übernehmen
-            constraints = proposal.get_constraints()
-            for k in constraints.get('kardinalitaeten', []):
-                sty.add_constraint(k)
-            for m in constraints.get('mutexe', []):
-                sty.add_constraint(m)
-            for i in constraints.get('implikationen', []):
-                sty.add_constraint(i)
+             # Constraints direkt aus dem proposal übernehmen
+            if hasattr(proposal, '_Style__constraints'):
+                sty._Style__constraints = proposal._Style__constraints
 
             # Style mit Features und Constraints speichern
             adm.save_style(sty)

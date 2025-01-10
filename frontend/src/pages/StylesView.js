@@ -84,7 +84,6 @@ class StylesView extends Component {
   handleFormDialogClosed = (updatedStyle) => {
     if (updatedStyle) {
       // Style wurde erstellt/bearbeitet
-      updatedStyle.setKleiderschrankId(this.state.kleiderschrankId);
       this.loadStyles();
     }
     this.setState({ showFormDialog: false, selectedStyle: null });

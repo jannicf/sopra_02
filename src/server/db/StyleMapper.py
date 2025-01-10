@@ -35,9 +35,9 @@ class StyleMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 style.set_id(1)
 
-        command = "INSERT INTO style (id, name, kleiderschrank_id) VALUES (%s,%s,%s)"
-        data = (style.get_id(), style.get_name(), style.get_kleiderschrank_id())
-        cursor.execute(command, data)
+            command = "INSERT INTO style (id, name, kleiderschrank_id) VALUES (%s,%s,%s)"
+            data = (style.get_id(), style.get_name(), style.get_kleiderschrank_id())
+            cursor.execute(command, data)
 
             # Features einfügen
             features = style.get_features()
@@ -86,7 +86,7 @@ class StyleMapper(Mapper):
 
             # Style Basis-Update
             cursor.execute("UPDATE style SET name=%s, kleiderschrank_id=%s WHERE id=%s",
-                           (style.get_name(), style.get_id(), style.get_kleiderschrank_id()))
+                           (style.get_name(), style.get_kleiderschrank_id(), style.get_id()))
 
             # Features Update
             cursor.execute("DELETE FROM style_kleidungstyp WHERE style_id=%s",

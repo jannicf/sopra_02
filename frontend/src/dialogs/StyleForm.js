@@ -9,7 +9,7 @@ import MutexDialog from './MutexDialog';
 import ImplikationDialog from './ImplikationDialog';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
-const StyleForm = ({ show, style, onClose }) => {
+const StyleForm = ({ show, style, onClose, kleiderschrankId }) => {
   // State für die Eingaben
   const [formData, setFormData] = useState({
     name: '',
@@ -165,6 +165,7 @@ const handleSubmit = async () => {
             id: style?.getID(),
             name: formData.name,
             features: [...new Set(formData.features.map(f => typeof f === 'object' ? f.getID() : f))],
+            kleiderschrank_id: kleiderschrankId,
             constraints: {
                 kardinalitaeten: formData.constraints.kardinalitaeten.map(k => ({
                     type: 'kardinalitaet',

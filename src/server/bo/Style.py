@@ -87,6 +87,10 @@ class Style(bo.BusinessObject):
             }
         return self.__constraints
 
+    def set_constraints(self, constraints):
+        """Setzt die Constraints."""
+        self.__constraints = constraints
+
     def remove_constraint(self, constraint: Constraint):
         """Entfernt einen Constraint aus dem Style"""
         if constraint in self.__constraints:
@@ -175,6 +179,6 @@ class Style(bo.BusinessObject):
                 implikation.set_style(obj)
                 obj.add_constraint(implikation)
 
-        obj.set_kleiderschrank_id(dictionary["kleiderschrank_id"])
+        obj.set_kleiderschrank_id(dictionary.get("kleiderschrank_id"))
 
         return obj
