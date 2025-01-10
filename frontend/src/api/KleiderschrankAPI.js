@@ -572,6 +572,21 @@ updateKleiderschrank = async (kleiderschrank) => {
         }
       }
 
+      getOutfitByKleiderschrankId(kleiderschrankId) {
+        return this.#fetchAdvanced(this.#getOutfitsURL(), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain',
+            }
+        }).then(responseJSON => {
+            let outfitBOs = OutfitBO.fromJSON(responseJSON);
+            // Filtern nach kleiderschrank_id
+            return outfitBOs.filter(outfit =>
+                outfit.getKleiderschrankId() === kleiderschrankId
+            );
+        })
+    }
+
     addOutfit(outfitData) {
         // POST-Anfrage bleibt unverändert
         return this.#fetchAdvanced(this.#addOutfitURL(), {
@@ -580,7 +595,8 @@ updateKleiderschrank = async (kleiderschrank) => {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(outfitData)
+            body: JSON.stringify(outfitData),
+            kleiderschrank_id: outfitData.kleiderschrank_id
         }).then(responseJSON => {
             let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
@@ -590,7 +606,7 @@ updateKleiderschrank = async (kleiderschrank) => {
     }
 
     updateOutfit(outfitBO) {
-        // PUT-Anfrage bleibt unverändert
+
         return this.#fetchAdvanced(this.#updateOutfitURL(outfitBO.getID()), {
             method: 'PUT',
             headers: {
@@ -626,10 +642,11 @@ updateKleiderschrank = async (kleiderschrank) => {
         })
     }
 
-    createOutfitFromBaseItem(basisId, ausgewaehlteIds, styleId) {
+    createOutfitFromBaseItem(basisId, ausgewaehlteIds, styleId, kleiderschrankId) {
         const data = {
             style: styleId,
-            bausteine: [basisId, ...ausgewaehlteIds]  // Kombiniere Basis-ID und ausgewählte IDs
+            bausteine: [basisId, ...ausgewaehlteIds], // Kombiniere Basis-ID und ausgewählte IDs
+            kleiderschrank_id: kleiderschrankId
         };
 
         return this.#fetchAdvanced(this.#addOutfitURL(), {

@@ -74,7 +74,8 @@ kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
 
 outfit = api.inherit('Outfit', bo, {
     'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if x.get_style() else None),
-    'bausteine': fields.List(fields.Integer, attribute=lambda x: x.get_baustein_ids())
+    'bausteine': fields.List(fields.Integer, attribute=lambda x: x.get_baustein_ids()),
+    'kleiderschrank_id': fields.Integer(attribute='_Outfit__kleiderschrank_id')
 })
 
 constraint = api.inherit('Constraint', bo, {
@@ -735,13 +736,26 @@ class OutfitListOperations(Resource):
         kleidungsstuecke = [adm.get_kleidungsstueck_by_id(k_id)
                             for k_id in data['bausteine']]
 
+        # Kleiderschrank ID aus dem ersten Kleidungsstück übernehmen
+        kleiderschrank_id = kleidungsstuecke[0].get_kleiderschrank_id() if kleidungsstuecke else None
+
         # Outfit erstellen
-        outfit = adm.create_outfit_from_selection(kleidungsstuecke, data['style'])
+        outfit = adm.create_outfit_from_selection(kleidungsstuecke, data['style'], kleiderschrank_id)
 
         if outfit:
             return outfit, 201
         return {'message': 'Outfit konnte nicht erstellt werden'}, 400
 
+@wardrobe_ns.route('/outfits/by-kleiderschrank/<int:kleiderschrank_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class OutfitsByKleiderschrankOperations(Resource):
+    @wardrobe_ns.marshal_list_with(outfit)
+    #@secured
+    def get(self, kleiderschrank_id):
+        """Auslesen aller Outfits eines bestimmten Kleiderschranks."""
+        adm = KleiderschrankAdministration()
+        outfits = adm.get_outfit_by_kleiderschrank_id(kleiderschrank_id)
+        return outfits
 
 @wardrobe_ns.route('/outfits/<int:id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')

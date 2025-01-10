@@ -13,6 +13,7 @@ export default class OutfitBO extends BusinessObject {
     super();
     this.bausteine = [];  // Array von KleidungsstueckBO Objekten
     this.style = null;    // StyleBO Objekt
+     this.kleiderschrank_id = null;
   }
 
   /**
@@ -64,6 +65,17 @@ export default class OutfitBO extends BusinessObject {
   }
 
   /**
+   * Gibt die Kleiderschrank_id des Outfits zurück.
+   */
+   setKleiderschrankId(id) {
+        this.kleiderschrank_id = id;
+    }
+
+    getKleiderschrankId() {
+        return this.kleiderschrank_id;
+    }
+
+  /**
    * Konvertiert eine JSON-Antwort in ein OutfitBO Objekt bzw. Array von OutfitBO Objekten.
    *
    * @param {*} outfits - JSON-Daten aus dem Backend
@@ -78,6 +90,7 @@ export default class OutfitBO extends BusinessObject {
         outfits.forEach((o) => {
           let outfit = new OutfitBO();
           outfit.setID(o.id);
+          outfit.setKleiderschrankId(o.kleiderschrank_id);
 
           // Verbesserte Style-Verarbeitung
           if (o.style) {

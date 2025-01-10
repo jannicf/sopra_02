@@ -27,8 +27,8 @@ class OutfitMapper(Mapper):
                 das dei Tabelle leer ist."""
                 outfit.set_id(1)
 
-        command = "INSERT INTO outfit (id, style_id) VALUES (%s, %s)"
-        data = (outfit.get_id(), outfit.get_style().get_id())
+        command = "INSERT INTO outfit (id, style_id, kleiderschrank_id) VALUES (%s, %s, %s)"
+        data = (outfit.get_id(), outfit.get_style().get_id(), outfit.get_kleiderschrank_id())
         cursor.execute(command, data)
 
         # Bausteine (Outfit) separat behandeln
@@ -53,8 +53,8 @@ class OutfitMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptobjekt aktualisieren
-        command = "UPDATE outfit SET style_id = %s WHERE id = %s"
-        data = (outfit.get_style().get_id(), outfit.get_id())
+        command = "UPDATE outfit SET style_id = %s, kleiderschrank_id = %s WHERE id = %s"
+        data = (outfit.get_style().get_id(),outfit.get_kleiderschrank_id(), outfit.get_id())
         cursor.execute(command, data)
 
         # bestehende Verknüpfungen zu Bausteinen löschen
@@ -102,14 +102,15 @@ class OutfitMapper(Mapper):
         result = None
 
         cursor = self._cnx.cursor()
-        command = "SELECT id, style_id FROM outfit WHERE id=%s"
+        command = "SELECT id, style_id, kleiderschrank_id FROM outfit WHERE id=%s"
         cursor.execute(command, (outfit_id,))
         tuples = cursor.fetchall()
 
         try:
-            (id, style_id) = tuples[0]
+            (id, style_id, kleiderschrank_id) = tuples[0]
             outfit = Outfit()
             outfit.set_id(id)
+            outfit.set_kleiderschrank_id(kleiderschrank_id)
 
             # Style-Objekt erstellen und setzen
             style = Style()
@@ -140,6 +141,24 @@ class OutfitMapper(Mapper):
         self._cnx.commit()
         cursor.close()
 
+        return result
+
+    def find_by_kleiderschrank_id(self, kleiderschrank_id):
+        """Alle Outfits eines bestimmten Kleiderschranks laden."""
+        result = []
+        cursor = self._cnx.cursor()
+
+        command = "SELECT id, style_id FROM outfit WHERE kleiderschrank_id=%s"
+        cursor.execute(command, (kleiderschrank_id,))
+        tuples = cursor.fetchall()
+
+        for (id, style_id) in tuples:
+            outfit = self.find_by_id(id)
+            if outfit:
+                result.append(outfit)
+
+        self._cnx.commit()
+        cursor.close()
         return result
 
     def find_all(self):

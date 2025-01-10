@@ -368,12 +368,13 @@ class KleiderschrankAdministration(object):
     Outfit-spezifische Methoden
     """
 
-    def create_outfit(self, style_id):
+    def create_outfit(self, style_id, kleiderschrank_id):
         """Ein Outfit anlegen."""
         outfit = Outfit()
         style = self.get_style_by_id(style_id)
         outfit.set_id(1)
         outfit.set_style(style)
+        outfit.set_kleiderschrank_id(kleiderschrank_id)
 
         with OutfitMapper() as mapper:
             return mapper.insert(outfit)
@@ -382,6 +383,11 @@ class KleiderschrankAdministration(object):
         """Das Outfit mit der gegebenen ID auslesen."""
         with OutfitMapper() as mapper:
             return mapper.find_by_id(number)
+
+    def get_outfit_by_kleiderschrank_id(self, kleiderschrank_id):
+        """Alle Outfits eines bestimmten Kleiderschranks auslesen."""
+        with OutfitMapper() as mapper:
+            return mapper.find_by_kleiderschrank_id(kleiderschrank_id)
 
     def get_all_outfits(self):
         """Alle Outfits auslesen."""
@@ -585,7 +591,7 @@ class KleiderschrankAdministration(object):
 
         return passende_kleidungsstuecke
 
-    def create_outfit_from_selection(self, kleidungsstuecke, style_id):
+    def create_outfit_from_selection(self, kleidungsstuecke, style_id, kleiderschrank_id):
         """Erstellt ein Outfit aus einer Liste von Kleidungsstücken."""
         try:
             # Style laden
@@ -599,7 +605,7 @@ class KleiderschrankAdministration(object):
                     return None
 
             # Neues Outfit erstellen
-            outfit = self.create_outfit(style_id)
+            outfit = self.create_outfit(style_id, kleiderschrank_id)
 
             # Kleidungsstücke hinzufügen
             for kleidungsstueck in kleidungsstuecke:
@@ -642,7 +648,7 @@ class KleiderschrankAdministration(object):
 
         return passende_kleidungsstuecke
 
-    def create_outfit_from_base_item(self, basis_kleidungsstueck_id, ausgewaehlte_kleidungsstuecke, style_id):
+    def create_outfit_from_base_item(self, basis_kleidungsstueck_id, ausgewaehlte_kleidungsstuecke, style_id, kleiderschrank_id):
         """Erstellt ein Outfit aus einer Liste von Kleidungsstücken, die zu einer bestimmten Basis gehört."""
 
         style = self.get_style_by_id(style_id)
@@ -658,7 +664,7 @@ class KleiderschrankAdministration(object):
             if not constraint.check_constraint(alle_kleidungsstuecke):
                 return None  # Bei Constraint-Verletzung KEIN Outfit erstellen
 
-        outfit = self.create_outfit(style_id)
+        outfit = self.create_outfit(style_id, kleiderschrank_id)
         outfit.add_baustein(basis_kleidungsstueck)
 
 

@@ -10,7 +10,6 @@ class OutfitList extends Component {
       outfits: [],
       selectedOutfit: null,
       dialogOpen: false,
-      loading: true,
       error: null
     };
   }
@@ -19,22 +18,18 @@ class OutfitList extends Component {
     this.loadOutfits();
   }
 
-  loadOutfits = async () => {
-    try {
-      const api = KleiderschrankAPI.getAPI();
-      const outfits = await api.getOutfits();
-      this.setState({
-        outfits: outfits,
-        loading: false
-      });
-    } catch (error) {
-      console.error("Fehler beim Laden der Outfits:", error);
-      this.setState({
-        error: error.message,
-        loading: false
-      });
-    }
-  };
+    loadOutfits = async () => {
+        try {
+            const person = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
+            if (person && person.getKleiderschrank()) {
+                const kleiderschrankId = person.getKleiderschrank().getID();
+                const outfits = await KleiderschrankAPI.getAPI().getOutfitByKleiderschrankId(kleiderschrankId);
+                this.setState({ outfits: outfits });
+            }
+        } catch (error) {
+            this.setState({ error: error.message });
+        }
+    };
 
   handleOutfitClick = (outfit) => {
     this.setState({
@@ -50,24 +45,23 @@ class OutfitList extends Component {
     });
   };
 
-  handleOutfitDelete = async (deletedOutfit) => {
-    try {
-      await KleiderschrankAPI.getAPI().deleteOutfit(deletedOutfit.getID());
-      this.setState(prevState => ({
-        outfits: prevState.outfits.filter(outfit => outfit.getID() !== deletedOutfit.getID()),
-        dialogOpen: false,
-        selectedOutfit: null
-      }));
-    } catch (error) {
-      console.error('Fehler beim Löschen:', error);
-    }
-  };
+  // Handler für das Löschen eines Outfits
+    handleOutfitDelete = async (deletedOutfit) => {
+        try {
+            await KleiderschrankAPI.getAPI().deleteOutfit(deletedOutfit.getID());
+            this.loadOutfits(); // Liste neu laden
+        } catch (error) {
+            console.error('Error deleting outfit:', error);
+            this.setState({ error: error.message });
+        }
+    };
 
   render() {
-    const { outfits, selectedOutfit, dialogOpen, loading, error } = this.state;
+    const { outfits, selectedOutfit, dialogOpen, error } = this.state;
 
-    if (loading) {
-      return <Typography>Lade Outfits...</Typography>;
+
+    if (outfits.length === 0) {
+    return <Typography>Keine Outfits vorhanden</Typography>;
     }
 
     if (error) {

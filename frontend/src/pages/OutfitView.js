@@ -46,7 +46,7 @@ class OutfitView extends Component {
         </Typography>
 
         {/* OutfitList für die Anzeige der Outfits */}
-        <OutfitList />
+        <OutfitList user={this.props.user} />
       </div>
     );
   }

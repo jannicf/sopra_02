@@ -7,6 +7,7 @@ class Outfit(bo.BusinessObject):
         super().__init__()
         self.__bausteine = [] # die Bestandteile eines Outfits bestehend aus Kleidungsstücken
         self.__style = None # jedes Outfit hat einen bestimmten Style
+        self.__kleiderschrank_id = None  # ID vom Kleiderschrank
 
     def add_baustein(self, kleidungsstueck: Kleidungsstueck):
         """Fügt ein Kleidungsstück zum Outfit hinzu"""
@@ -33,6 +34,14 @@ class Outfit(bo.BusinessObject):
         """Auslesen des Outfit-Styles"""
         return self.__style
 
+    def set_kleiderschrank_id(self, kleiderschrank_id):
+        """Setzen der Kleiderschrank ID"""
+        self.__kleiderschrank_id = kleiderschrank_id
+
+    def get_kleiderschrank_id(self):
+        """Auslesen der Kleiderschrank ID"""
+        return self.__kleiderschrank_id
+
     def __str__(self) -> str:
         """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
         return "Outfit: {}, {}".format(self.get_id(), self.get_style().get_name())
@@ -43,6 +52,7 @@ class Outfit(bo.BusinessObject):
         obj = Outfit()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_style(dictionary["style"])
+        obj.set_kleiderschrank_id(["kleiderschrank_id"])
         # Wenn bausteine im Dictionary vorhanden sind, diese auch setzen
         if "bausteine" in dictionary and dictionary["bausteine"] is not None:
             for kleidungsstueck in dictionary["bausteine"]:
