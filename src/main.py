@@ -726,25 +726,30 @@ class OutfitListOperations(Resource):
 
     @wardrobe_ns.marshal_with(outfit, code=201)
     @wardrobe_ns.expect(outfit)
-    #@secured
     def post(self):
         """Erstellt ein neues Outfit basierend auf ausgewählten Kleidungsstücken."""
-        adm = KleiderschrankAdministration()
-        data = api.payload
+        try:
+            adm = KleiderschrankAdministration()
+            data = api.payload
 
-        # Kleidungsstücke laden
-        kleidungsstuecke = [adm.get_kleidungsstueck_by_id(k_id)
-                            for k_id in data['bausteine']]
+            # Alle erforderlichen Parameter auslesen
+            style_id = data.get('style')
+            bausteine = data.get('bausteine', [])
+            kleiderschrank_id = data.get('kleiderschrank_id')
 
-        # Kleiderschrank ID aus dem ersten Kleidungsstück übernehmen
-        kleiderschrank_id = kleidungsstuecke[0].get_kleiderschrank_id() if kleidungsstuecke else None
+            if not all([style_id, bausteine, kleiderschrank_id]):
+                return {'message': 'Fehlende Parameter'}, 400
 
-        # Outfit erstellen
-        outfit = adm.create_outfit_from_selection(kleidungsstuecke, data['style'], kleiderschrank_id)
+            # Outfit erstellen
+            outfit = adm.create_outfit_from_selection(bausteine, style_id, kleiderschrank_id)
 
-        if outfit:
-            return outfit, 201
-        return {'message': 'Outfit konnte nicht erstellt werden'}, 400
+            if outfit:
+                return outfit, 201
+            return {'message': 'Outfit konnte nicht erstellt werden'}, 400
+
+        except Exception as e:
+            print(f"Fehler beim Erstellen des Outfits: {str(e)}")  # Debug-Ausgabe
+            return {'message': str(e)}, 500
 
 @wardrobe_ns.route('/outfits/by-kleiderschrank/<int:kleiderschrank_id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
