@@ -17,34 +17,44 @@ class KleidungsstueckBasiertesOutfitView extends Component {
             kleidungsstuecke: [],
             ausgewaehltesBasisKleidungsstueck: null,
             dialogOpen: false,
-            loading: false,
-            error: null
+            error: null,
+            kleiderschrankId: null,
         };
     }
 
     componentDidMount() {
-        this.loadKleidungsstuecke();
+        if (this.props.user && this.props.user.uid) {
+            KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user.uid)
+                .then(person => {
+                    if (person && person.getKleiderschrank()) {
+                        this.setState({
+                            kleiderschrankId: person.getKleiderschrank().getID()
+                        }, () => {
+                            this.loadKleidungsstuecke();
+                        });
+                    }
+                });
+        }
     }
 
     loadKleidungsstuecke = async () => {
         try {
-            this.setState({ loading: true });
-            const kleidungsstuecke = await KleiderschrankAPI.getAPI().getKleidungsstuecke();
 
-            // Filtere Kleidungsstücke ohne Styles heraus
-            const kleidungsstueckeMitStyles = kleidungsstuecke.filter(
-                ks => ks.getTyp()?.getVerwendungen()?.length > 0
-            );
+            if (this.state.kleiderschrankId) {
+                const kleidungsstuecke = await KleiderschrankAPI.getAPI()
+                    .getKleidungsstueckByKleiderschrankId(this.state.kleiderschrankId);
 
-            this.setState({
-                kleidungsstuecke: kleidungsstueckeMitStyles || [],
-                loading: false
-            });
+                const kleidungsstueckeMitStyles = kleidungsstuecke.filter(
+                    ks => ks.getTyp()?.getVerwendungen()?.length > 0
+                );
+
+                this.setState({
+                    kleidungsstuecke: kleidungsstueckeMitStyles || [],
+                });
+            }
         } catch (error) {
-            console.error('Fehler beim Laden der Kleidungsstücke:', error);
             this.setState({
                 error: "Fehler beim Laden der Kleidungsstücke",
-                loading: false
             });
         }
     };
@@ -78,14 +88,8 @@ class KleidungsstueckBasiertesOutfitView extends Component {
             kleidungsstuecke,
             dialogOpen,
             ausgewaehltesBasisKleidungsstueck,
-            loading,
             error
         } = this.state;
-
-        if (loading) {
-            return <Typography>Lädt...</Typography>;
-        }
-
         return (
             <Box sx={{ padding: 2 }}>
                 <Typography variant="h4" gutterBottom>

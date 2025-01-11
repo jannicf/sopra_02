@@ -209,7 +209,9 @@ class App extends React.Component {
 
                         <Route path="/outfits/create-by-item" element={
                             currentUser && userHasProfile ?
-                                <KleidungsstueckBasiertesOutfitView />
+                                <KleidungsstueckBasiertesOutfitView
+                                    user={currentUser}  // sicherstellen dass currentUser übergeben wird
+                                />
                                 :
                                 <Navigate to="/profile" />
                         } />

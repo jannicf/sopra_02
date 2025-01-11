@@ -22,7 +22,6 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
         this.state = {
             ausgewaehlteKleidungsstuecke: [],
             passendeKleidungsstuecke: [],
-            loading: false,
             error: null,
             showStyleSelection: false,
             selectedStyle: null,
@@ -45,27 +44,38 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
         }
     }
 
-    loadPassendeKleidungsstuecke = async () => {
+loadPassendeKleidungsstuecke = async () => {
+    try {
         const { basisKleidungsstueck } = this.props;
         const { selectedStyle } = this.state;
 
         if (!basisKleidungsstueck || !selectedStyle) return;
 
-        try {
-            const vervollstaendigungen = await KleiderschrankAPI.getAPI()
-                .getPossibleOutfitCompletions(basisKleidungsstueck.getID(), selectedStyle.getID());
+        const kleiderschrankId = basisKleidungsstueck.getKleiderschrankId();
 
-            this.setState({
-                passendeKleidungsstuecke: vervollstaendigungen || [],
-                error: null
-            });
-        } catch (error) {
-            console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
-            this.setState({
-                error: "Fehler beim Laden der passenden Kleidungsstücke"
-            });
-        }
-    };
+        // Nur die Kleidungsstücke des eigenen Kleiderschranks laden
+        const alleKleidungsstuecke = await KleiderschrankAPI.getAPI()
+            .getKleidungsstueckByKleiderschrankId(kleiderschrankId);
+
+        // Filter für passende Typen zum Style
+        const styleTypes = selectedStyle.getFeatures();
+        const passendeKleidung = alleKleidungsstuecke.filter(kleidungsstueck =>
+            styleTypes.some(styleType =>
+                styleType.getID() === kleidungsstueck.getTyp().getID()
+            )
+        );
+
+        this.setState({
+            vorgeschlageneKleidung: passendeKleidung,
+            error: null
+        });
+    } catch (error) {
+        console.error('Fehler beim Laden der passenden Kleidungsstücke:', error);
+        this.setState({
+            error: 'Fehler beim Laden der passenden Kleidungsstücke: ' + error.message,
+        });
+    }
+};
 
     handleStyleDialogClose = () => {
         this.setState({

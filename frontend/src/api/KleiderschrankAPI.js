@@ -20,6 +20,9 @@ class KleiderschrankAPI {
     // Lokales Python Backend
     #KleiderschrankServerBaseURL = '/wardrobe';
 
+    // Cache für die Person zur Speicherung
+    static #cachedPerson = null;
+
     /**
      * Getter für die Singleton Instanz
      */
@@ -110,15 +113,23 @@ class KleiderschrankAPI {
     getPersonByGoogleId(id) {
         return this.#fetchAdvanced(this.#getPersonByGoogleIdURL(id))
             .then(responseJSON => {
-                console.log("API Response:", responseJSON);
-                if (responseJSON && responseJSON.id) {
+                if (responseJSON && responseJSON.id && responseJSON.google_id) {
                     const person = PersonBO.fromJSON(responseJSON);
-                    console.log("KleiderschrankAPI: Erstelltes PersonBO:", person);
-                    return person;
+                    if (person && person.getKleiderschrank()) {
+                        KleiderschrankAPI.#cachedPerson = person;
+                        return person;
+                    }
+                }
+
+                if (KleiderschrankAPI.#cachedPerson) {
+                    if (KleiderschrankAPI.#cachedPerson.getGoogleId() == id) {
+                        return KleiderschrankAPI.#cachedPerson;
+                    }
                 }
                 return null;
             });
     }
+
 
     getPerson(id) {
         return this.#fetchAdvanced(this.#getPersonURL(id), {
