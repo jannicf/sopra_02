@@ -105,15 +105,19 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
             const { basisKleidungsstueck } = this.props;
             const { ausgewaehlteKleidungsstuecke, selectedStyle } = this.state;
 
+            const kleiderschrankId = basisKleidungsstueck.getKleiderschrankId();
+
             await KleiderschrankAPI.getAPI().createOutfitFromBaseItem(
                 basisKleidungsstueck.getID(),
                 ausgewaehlteKleidungsstuecke.map(k => k.getID()),
-                selectedStyle.getID()
+                selectedStyle.getID(),
+                kleiderschrankId
             );
 
-            this.setState({ ausgewaehlteKleidungsstuecke: [] });
+            // Nach erfolgreichem Erstellen:
             alert('Outfit wurde erfolgreich erstellt!');
-            this.props.onClose();
+            this.setState({ ausgewaehlteKleidungsstuecke: [] });  // State wird zurückgesetzt
+            this.props.onClose();  // Dialog wird geschlossen
 
         } catch (error) {
             console.error('Fehler beim Erstellen des Outfits:', error);

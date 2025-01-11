@@ -591,18 +591,20 @@ class KleiderschrankAdministration(object):
 
         return passende_kleidungsstuecke
 
-    def create_outfit_from_selection(self, kleidungsstuecke, style_id, kleiderschrank_id):
+    def create_outfit_from_selection(self, kleidungsstuecke_ids, style_id, kleiderschrank_id):
         """Erstellt ein Outfit aus einer Liste von Kleidungsstücken."""
         try:
             # Style laden
             style = self.get_style_by_id(style_id)
             if not style:
-                return None
+                raise ValueError("Style nicht gefunden")
 
-            # Prüfen ob die Auswahl den Style-Constraints entspricht
-            for constraint in style.get_constraints():
-                if not constraint.check_constraint(kleidungsstuecke):
-                    return None
+            # Kleidungsstücke laden
+            kleidungsstuecke = []
+            for k_id in kleidungsstuecke_ids:
+                kleidungsstueck = self.get_kleidungsstueck_by_id(k_id)
+                if kleidungsstueck:
+                    kleidungsstuecke.append(kleidungsstueck)
 
             # Neues Outfit erstellen
             outfit = self.create_outfit(style_id, kleiderschrank_id)
@@ -617,7 +619,7 @@ class KleiderschrankAdministration(object):
             return outfit
         except Exception as e:
             print(f"Fehler beim Erstellen des Outfits: {str(e)}")
-            return None
+            raise e
 
     def get_possible_outfit_completions(self, kleidungsstueck_id, style_id):
         basis_kleidungsstueck = self.get_kleidungsstueck_by_id(kleidungsstueck_id)

@@ -643,25 +643,25 @@ updateKleiderschrank = async (kleiderschrank) => {
     }
 
     createOutfitFromBaseItem(basisId, ausgewaehlteIds, styleId, kleiderschrankId) {
-        const data = {
-            style: styleId,
-            bausteine: [basisId, ...ausgewaehlteIds], // Kombiniere Basis-ID und ausgewählte IDs
-            kleiderschrank_id: kleiderschrankId
-        };
+    const data = {
+        style: styleId,
+        bausteine: [basisId, ...ausgewaehlteIds],
+        kleiderschrank_id: kleiderschrankId
+    };
 
-        return this.#fetchAdvanced(this.#addOutfitURL(), {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(data)
+    return this.#fetchAdvanced(this.#addOutfitURL(), {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json, text/plain',
+            'Content-type': 'application/json',
+        },
+        body: JSON.stringify(data)
         }).then(responseJSON => {
             let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
                 resolve(responseOutfitBO);
             })
-        })
+        });
     }
 
     getPossibleOutfitsForStyle(styleId, wardrobeId) {
