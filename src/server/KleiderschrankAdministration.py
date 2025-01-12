@@ -518,6 +518,11 @@ class KleiderschrankAdministration(object):
         with KleidungstypMapper() as mapper:
             return mapper.find_by_bezeichnung(bezeichnung)
 
+    def get_kleidungstyp_by_kleiderschrank_id(self, kleiderschrank_id):
+        """Alle Kleidungstypen eines bestimmten Kleiderschranks auslesen."""
+        with KleidungstypMapper() as mapper:
+            return mapper.find_by_kleiderschrank_id(kleiderschrank_id)
+
     def get_all_kleidungstypen(self):
         """Alle Kleidungstypen auslesen."""
         with KleidungstypMapper() as mapper:

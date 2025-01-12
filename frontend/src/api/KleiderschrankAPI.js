@@ -61,6 +61,8 @@ class KleiderschrankAPI {
     // URLs für Kleidungstyp (Clothing Types)
     #getKleidungstypURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothing-types/${id}`;
     #getKleidungstypenURL = () => `${this.#KleiderschrankServerBaseURL}/clothing-types`;
+    #getKleidungstypByKleiderschrankIdURL = (kleiderschrankId) =>
+    `${this.#KleiderschrankServerBaseURL}/clothing-types/by-kleiderschrank/${kleiderschrankId}`;
     #addKleidungstypURL = () => `${this.#KleiderschrankServerBaseURL}/clothing-types`;
     #updateKleidungstypURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothing-types/${id}`;
     #deleteKleidungstypURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothing-types/${id}`;
@@ -393,6 +395,17 @@ updateKleiderschrank = async (kleiderschrank) => {
                 })
             })
     }
+
+    getKleidungstypByKleiderschrankId(kleiderschrankId) {
+        return this.#fetchAdvanced(this.#getKleidungstypByKleiderschrankIdURL(kleiderschrankId), {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json, text/plain',
+            }
+        }).then(responseJSON => {
+            return KleidungstypBO.fromJSON(responseJSON);
+        })
+}
 
     addKleidungstyp(kleidungstypData) {
         // Konvertiere die Daten in ein Format, das das Backend erwartet

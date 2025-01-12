@@ -175,6 +175,30 @@ class KleidungstypMapper(Mapper):
         cursor.close()
         return result
 
+    def find_by_kleiderschrank_id(self, kleiderschrank_id):
+        """Suchen eines Kleidungstyps anhand seiner Kleiderschrank_ID.
+
+        :param kleiderschrank_id: Bezeichnung des gesuchten Kleidungstyps
+        :return Kleidungstyp-Objekt oder None
+        """
+        result = None
+        cursor = self._cnx.cursor()
+
+        # Nur die ID abfragen
+        command = "SELECT id FROM kleidungstyp WHERE kleiderschrank_id=%s"
+        cursor.execute(command, (kleiderschrank_id,))
+        tuples = cursor.fetchall()
+
+        try:
+            (id,) = tuples[0]
+            # Vollständiges Objekt über find_by_id laden
+            result = self.find_by_id(id)
+        except IndexError:
+            result = None
+
+        cursor.close()
+        return result
+
     def find_all(self):
         """Auslesen aller Kleidungstypen.
 

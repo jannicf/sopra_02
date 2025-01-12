@@ -710,6 +710,17 @@ class ClothingTypeOperations(Resource):
         else:
             return '', 500
 
+@wardrobe_ns.route('/clothing-types/by-kleiderschrank/<int:kleiderschrank_id>')
+@wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
+class ClothingTypeByKleiderschrankOperations(Resource):
+    @wardrobe_ns.marshal_list_with(kleidungstyp)
+    # @secured
+    def get(self, kleiderschrank_id):
+        """Auslesen aller Kleidungstypen eines bestimmten Kleiderschranks."""
+        adm = KleiderschrankAdministration()
+        clothing_type = adm.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank_id)
+        return clothing_type
+
 
 @wardrobe_ns.route('/outfits')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
