@@ -75,6 +75,8 @@ class KleiderschrankAPI {
     // URLs für Outfits
     #getOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
     #getOutfitsURL = () => `${this.#KleiderschrankServerBaseURL}/outfits`;
+    #getOutfitByKleiderschrankIdURL = (kleiderschrankId) =>
+    `${this.#KleiderschrankServerBaseURL}/outfits/by-kleiderschrank/${kleiderschrankId}`;
     #addOutfitURL = () => `${this.#KleiderschrankServerBaseURL}/outfits`;
     #updateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
     #deleteOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
@@ -583,21 +585,16 @@ updateKleiderschrank = async (kleiderschrank) => {
         }
       }
 
-      getOutfitByKleiderschrankId(kleiderschrankId) {
-        return this.#fetchAdvanced(this.#getOutfitsURL(), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
-            }
-        }).then(responseJSON => {
-            let outfitBOs = OutfitBO.fromJSON(responseJSON);
-            // Filtern nach kleiderschrank_id
-            return outfitBOs.filter(outfit =>
-                outfit.getKleiderschrankId() === kleiderschrankId
-            );
-        })
-    }
-
+    getOutfitByKleiderschrankId(kleiderschrankId) {
+    return this.#fetchAdvanced(this.#getOutfitByKleiderschrankIdURL(kleiderschrankId), {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json, text/plain',
+        }
+    }).then(responseJSON => {
+        return OutfitBO.fromJSON(responseJSON);
+    })
+}
     addOutfit(outfitData) {
         // POST-Anfrage bleibt unverändert
         return this.#fetchAdvanced(this.#addOutfitURL(), {

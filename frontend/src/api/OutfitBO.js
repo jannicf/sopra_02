@@ -92,44 +92,27 @@ export default class OutfitBO extends BusinessObject {
           outfit.setID(o.id);
           outfit.setKleiderschrankId(o.kleiderschrank_id);
 
-          // Verbesserte Style-Verarbeitung
-          if (o.style) {
-            // Wenn style direkt eine ID ist
-            if (typeof o.style === 'number') {
-              const style = new StyleBO();
-              style.setID(o.style);
-              outfit.setStyle(style);
+                      // Style als StyleBO Objekt erstellen
+            if (o.style) {
+                // Wir erstellen ein neues StyleBO mit der ID
+                const style = new StyleBO();
+                style.setID(o.style);
+                outfit.setStyle(style);
             }
-            // Wenn style ein Objekt ist
-            else if (typeof o.style === 'object') {
-              const style = StyleBO.fromJSON([o.style])[0];
-              outfit.setStyle(style);
+
+            // Bausteine (Kleidungsstücke) verarbeiten
+            if (o.bausteine && Array.isArray(o.bausteine)) {
+                o.bausteine.forEach(bausteinId => {
+                    // Für jede ID ein neues KleidungsstueckBO erstellen
+                    const kleidungsstueck = new KleidungsstueckBO();
+                    kleidungsstueck.setID(bausteinId);
+                    outfit.addBaustein(kleidungsstueck);
+                });
             }
-          }
 
-          // Verbesserte Bausteine-Verarbeitung
-          if (o.bausteine && Array.isArray(o.bausteine)) {
-            o.bausteine.forEach(baustein => {
-              // Wenn baustein direkt eine ID ist
-              if (typeof baustein === 'number') {
-                const kleidungsstueck = new KleidungsstueckBO();
-                kleidungsstueck.setID(baustein);
-                outfit.addBaustein(kleidungsstueck);
-              }
-              // Wenn baustein ein Objekt ist
-              else if (typeof baustein === 'object') {
-                const kleidungsstueck = KleidungsstueckBO.fromJSON([baustein])[0];
-                outfit.addBaustein(kleidungsstueck);
-              }
-            });
-          }
-
-          // Debug-Logging für jedes konvertierte Outfit
-          console.log("Konvertiertes Outfit:", {
-            id: outfit.getID(),
-            style: outfit.getStyle(),
-            bausteine: outfit.getBausteine()
-          });
+          console.log("Original Outfit-Daten:", o);  // Zeigt die rohen Daten vom Backend
+          console.log("Style-Daten:", o.style);      // Zeigt nur die Style-Daten
+          console.log("Bausteine-Daten:", o.bausteine); // Zeigt die Bausteine-Daten
 
           result.push(outfit);
         });

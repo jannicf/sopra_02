@@ -135,6 +135,7 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                 <KleidungsstueckBasiertesOutfitDialog
                     show={dialogOpen}
                     basisKleidungsstueck={ausgewaehltesBasisKleidungsstueck}
+                    kleiderschrankId={this.state.kleiderschrankId}
                     onClose={this.handleDialogClose}
                 />
             </Box>

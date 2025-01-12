@@ -10,7 +10,8 @@ class OutfitList extends Component {
       outfits: [],
       selectedOutfit: null,
       dialogOpen: false,
-      error: null
+      error: null,
+      kleiderschrankId: null
     };
   }
 
@@ -20,16 +21,37 @@ class OutfitList extends Component {
 
     loadOutfits = async () => {
         try {
-            const person = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
-            if (person && person.getKleiderschrank()) {
-                const kleiderschrankId = person.getKleiderschrank().getID();
-                const outfits = await KleiderschrankAPI.getAPI().getOutfitByKleiderschrankId(kleiderschrankId);
-                this.setState({ outfits: outfits });
+          // Person und Kleiderschrank laden
+          const person = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
+
+          if (person && person.getKleiderschrank()) {
+            const kleiderschrankId = person.getKleiderschrank().getID();
+            // Outfits laden
+            const outfits = await KleiderschrankAPI.getAPI().getOutfitByKleiderschrankId(kleiderschrankId);
+
+            for(let outfit of outfits) {
+              // Style holen
+              if(outfit.getStyle()) {
+                const style = await KleiderschrankAPI.getAPI().getStyle(outfit.getStyle().getID());
+                outfit.setStyle(style);
+              }
+
+              // Kleidungsstücke holen
+              const bausteine = outfit.getBausteine();
+              for(let baustein of bausteine) {
+                const kleidungsstueck = await KleiderschrankAPI.getAPI().getKleidungsstueck(baustein.getID());
+                outfit.getBausteine()[outfit.getBausteine().indexOf(baustein)] = kleidungsstueck;
+              }
             }
+            this.setState({
+              outfits: outfits,
+              kleiderschrankId: kleiderschrankId
+            });
+          }
         } catch (error) {
-            this.setState({ error: error.message });
+          this.setState({ error: error.message });
         }
-    };
+      };
 
   handleOutfitClick = (outfit) => {
     this.setState({

@@ -195,14 +195,18 @@ class App extends React.Component {
 
                         <Route path="/outfits" element={
                             currentUser && userHasProfile ?
-                                <OutfitView />
+                                <OutfitView
+                                    user={currentUser}
+                                />
                                 :
                                 <Navigate to="/profile" />
                         } />
 
                         <Route path="/outfits/erstellen-nach-style" element={
                             currentUser && userHasProfile ?
-                                <StyleBasiertesOutfitView />
+                                <StyleBasiertesOutfitView
+                                    user={currentUser}
+                                />
                                 :
                                 <Navigate to="/profile" />
                         } />

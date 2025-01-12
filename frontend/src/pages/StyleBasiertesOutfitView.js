@@ -15,8 +15,8 @@ class StyleBasiertesOutfitView extends Component {
             styles: [],                    // Liste aller verfügbaren Styles
             selectedStyle: null,           // Aktuell ausgewählter Style
             showDialog: false,             // Steuert die Anzeige des Dialogs
-            loading: false,                // Ladezustand für API-Anfragen
-            error: null                    // Für eventuelle Fehlermeldungen
+            error: null,                    // Für eventuelle Fehlermeldungen
+            kleiderschrankId: null
         };
     }
 
@@ -24,7 +24,18 @@ class StyleBasiertesOutfitView extends Component {
      * Lädt die verfügbaren Styles beim Mounten der Komponente
      */
     componentDidMount() {
-        this.loadStyles();
+       if (this.props.user && this.props.user.uid) {
+            KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user.uid)
+                .then(person => {
+                    if (person && person.getKleiderschrank()) {
+                        this.setState({
+                            kleiderschrankId: person.getKleiderschrank().getID()
+                        }, () => {
+                            this.loadStyles();
+                        });
+                    }
+                });
+        }
     }
 
     /**
@@ -32,18 +43,23 @@ class StyleBasiertesOutfitView extends Component {
      */
     loadStyles = async () => {
         try {
-            this.setState({ loading: true });
             const api = KleiderschrankAPI.getAPI();
-            const styles = await api.getStyles();
-            this.setState({
-                styles: styles,
-                error: null,
-                loading: false
-            });
+
+            // Nur Styles des eignenen Kleiderschranks laden
+            if (this.state.kleiderschrankId) {
+                const allStyles = await api.getStyles();
+                const filteredStyles = allStyles.filter(style =>
+                    style.getKleiderschrankId() === this.state.kleiderschrankId
+                );
+
+                this.setState({
+                    styles: filteredStyles,
+                    error: null,
+                });
+            }
         } catch (error) {
             this.setState({
                 error: 'Fehler beim Laden der Styles: ' + error.message,
-                loading: false
             });
         }
     };
