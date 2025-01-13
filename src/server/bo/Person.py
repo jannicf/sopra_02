@@ -76,11 +76,9 @@ class Person(bo.BusinessObject):
         obj.set_google_id(dictionary["google_id"])
 
         if "kleiderschrank" in dictionary and dictionary["kleiderschrank"]:
-            print("Creating Kleiderschrank from:", dictionary["kleiderschrank"])  # Debug print
             from .Kleiderschrank import Kleiderschrank
             kleiderschrank = Kleiderschrank()
             kleiderschrank.set_name(dictionary["kleiderschrank"]["name"])
             obj.set_kleiderschrank(kleiderschrank)
-            print("Kleiderschrank set:", obj.get_kleiderschrank() is not None)  # Debug print
 
         return obj

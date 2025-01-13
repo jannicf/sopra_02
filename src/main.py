@@ -631,38 +631,31 @@ class ClothingTypeListOperations(Resource):
     @wardrobe_ns.expect(kleidungstyp)
     #@secured
     def post(self):
-        """Anlegen eines neuen Kleidungstyp-Objekts.
+        """Anlegen eines neuen Kleidungstyp-Objekts."""
+        try:
+            adm = KleiderschrankAdministration()
 
-        **ACHTUNG:** Wir fassen die vom Client gesendeten Daten als Vorschlag auf.
-        Die Vergabe der ID erfolgt serverseitig.
-        *Das korrigierte Objekt wird zurückgegeben.*
-        """
-        adm = KleiderschrankAdministration()
+            # Erstellt Kleidungstyp-Objekt aus den übertragenen Daten
+            proposal = Kleidungstyp.from_dict(api.payload)
+            # Erstellt eine leere Liste für die Style-IDs
+            verwendungen = []
 
-        # Erstellt Kleidungstyp-Objekt aus den übertragenen Daten
-        proposal = Kleidungstyp.from_dict(api.payload)
-        # Erstellt eine leere Liste für die Style-IDs
-        verwendungen = []
+            # Geht durch alle Verwendungen des Kleidungstyps
+            for verwendung in proposal.get_verwendungen():
+                # Holt die ID jeder Verwendung und fügt sie der Liste hinzu
+                style_id = verwendung.get_id()
+                verwendungen.append(style_id)
 
-        # Geht durch alle Verwendungen des Kleidungstyps
-        for verwendung in proposal.get_verwendungen():
-            # Holt die ID jeder Verwendung und fügt sie der Liste hinzu
-            style_id = verwendung.get_id()
-            verwendungen.append(style_id)
-
-        if proposal is not None:
-            """ Wir erstellen ein Kleidungstyp-Objekt basierend auf den Vorschlagsdaten.
-            Das serverseitig erzeugte Objekt ist das maßgebliche und 
-            wird dem Client zurückgegeben. 
-            """
-            clothing_type = adm.create_kleidungstyp(
+            # Diese Zeilen gehören NICHT in die for-Schleife
+            result = adm.create_kleidungstyp(
                 proposal.get_bezeichnung(),
-                verwendungen
+                proposal.get_kleiderschrank_id(),
+                verwendungen  # Hier die Liste der IDs übergeben
             )
-            return clothing_type, 201
-        else:
-            # Wenn etwas schiefgeht, werfen wir einen Server-Fehler.
-            return '', 500
+            return result, 201
+
+        except Exception as e:
+            return {'message': str(e)}, 500
 
 
 @wardrobe_ns.route('/clothing-types/<int:id>')
@@ -714,12 +707,10 @@ class ClothingTypeOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ClothingTypeByKleiderschrankOperations(Resource):
     @wardrobe_ns.marshal_list_with(kleidungstyp)
-    # @secured
     def get(self, kleiderschrank_id):
-        """Auslesen aller Kleidungstypen eines bestimmten Kleiderschranks."""
         adm = KleiderschrankAdministration()
-        clothing_type = adm.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank_id)
-        return clothing_type
+        clothing_types = adm.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank_id)
+        return clothing_types
 
 
 @wardrobe_ns.route('/outfits')

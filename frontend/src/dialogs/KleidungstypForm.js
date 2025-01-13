@@ -69,14 +69,16 @@ class KleidungstypForm extends Component {
 
     handleSubmit = async () => {
         const { kleidungstyp, selectedStyleIds } = this.state;
+        const { kleiderschrankId } = this.props;
         try {
             this.setState({ loading: true });
 
-            // Erstelle ein einfaches Objekt für den API-Request
+            // einfaches Objekt für den API-Request
             const kleidungstypData = {
                 bezeichnung: kleidungstyp.getBezeichnung(),
-                verwendungen: selectedStyleIds,  // Verwende direkt die IDs der ausgewählten Styles
-                id: kleidungstyp.getID() || 0
+                verwendungen: selectedStyleIds,
+                id: kleidungstyp.getID() || 0,
+                kleiderschrank_id: kleiderschrankId
             };
 
             let savedKleidungstyp;

@@ -5,110 +5,120 @@ import StyleBO from "./StyleBO.js";
 * Repräsentiert einen Kleidungstyp im digitalen Kleiderschranksystem.
 */
 export default class KleidungstypBO extends BusinessObject {
- /**
-  * Erstellt ein KleidungstypBO Objekt.
-  */
- constructor() {
-   super();
-   this.bezeichnung = "";
-   this.verwendungen = []; // Array von StyleBO Objekten
- }
+        /**
+        * Erstellt ein KleidungstypBO Objekt.
+        */
+        constructor() {
+        super();
+        this.bezeichnung = "";
+        this.verwendungen = []; // Array von StyleBO Objekten
+        this.kleiderschrank_id = null;
+        }
 
- /**
-  * Setzt die Bezeichnung des Kleidungstyps.
-  *
-  * @param {String} aBezeichnung - Die neue Bezeichnung des Kleidungstyps
-  */
- setBezeichnung(aBezeichnung) {
-   this.bezeichnung = aBezeichnung;
- }
+        /**
+        * Setzt die Bezeichnung des Kleidungstyps.
+        *
+        * @param {String} aBezeichnung - Die neue Bezeichnung des Kleidungstyps
+        */
+        setBezeichnung(aBezeichnung) {
+        this.bezeichnung = aBezeichnung;
+        }
 
- /**
-  * Gibt die Bezeichnung des Kleidungstyps zurück.
-  */
- getBezeichnung() {
-   return this.bezeichnung;
- }
+        /**
+        * Gibt die Bezeichnung des Kleidungstyps zurück.
+        */
+        getBezeichnung() {
+        return this.bezeichnung;
+        }
 
- /**
-  * Fügt einen Style zur Liste der Verwendungen hinzu.
-  * Fügt auch diesem Style den Kleidungstyp hinzu, wenn er noch nicht enthalten ist.
-  *
-  * @param {StyleBO} aStyle - Der hinzuzufügende Style
-  */
- addVerwendung(aStyle) {
-   if (aStyle instanceof StyleBO) {
-     this.verwendungen.push(aStyle);
-     // Auch dem Style den Kleidungstyp hinzufügen, wenn er nicht schon in der Liste ist
-     if (!aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
-       aStyle.addFeature(this);
-     }
-   }
- }
+        setKleiderschrankId(id) {
+            this.kleiderschrank_id = id;
+        }
+        getKleiderschrankId() {
+            return this.kleiderschrank_id;
+        }
 
- /**
-  * Entfernt einen Style aus der Liste der Verwendungen.
-  * Entfernt auch den Kleidungstyp aus diesem Style.
-  *
-  * @param {StyleBO} aStyle - Der zu entfernende Style
-  */
- deleteVerwendung(aStyle) {
-   const index = this.verwendungen.findIndex(v => v.getID() === aStyle.getId());
-   if (index > -1) {
-     this.verwendungen.splice(index, 1);
-     // Auch aus der anderen Richtung löschen
-     if (aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
-       aStyle.removeFeature(this);
-     }
-   }
- }
+        /**
+        * Fügt einen Style zur Liste der Verwendungen hinzu.
+        * Fügt auch diesem Style den Kleidungstyp hinzu, wenn er noch nicht enthalten ist.
+        *
+        * @param {StyleBO} aStyle - Der hinzuzufügende Style
+        */
+        addVerwendung(aStyle) {
+        if (aStyle instanceof StyleBO) {
+         this.verwendungen.push(aStyle);
+         // Auch dem Style den Kleidungstyp hinzufügen, wenn er nicht schon in der Liste ist
+         if (!aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
+           aStyle.addFeature(this);
+         }
+        }
+        }
 
- /**
-  * Gibt alle Verwendungen (Styles) des Kleidungstyps zurück.
-  */
- getVerwendungen() {
-   return this.verwendungen;
- }
+        /**
+        * Entfernt einen Style aus der Liste der Verwendungen.
+        * Entfernt auch den Kleidungstyp aus diesem Style.
+        *
+        * @param {StyleBO} aStyle - Der zu entfernende Style
+        */
+        deleteVerwendung(aStyle) {
+        const index = this.verwendungen.findIndex(v => v.getID() === aStyle.getId());
+        if (index > -1) {
+         this.verwendungen.splice(index, 1);
+         // Auch aus der anderen Richtung löschen
+         if (aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
+           aStyle.removeFeature(this);
+         }
+        }
+        }
 
- /**
-  * Konvertiert eine JSON-Antwort in ein KleidungstypBO Objekt bzw. Array von KleidungstypBO Objekten.
-  *
-  * @param {*} clothingTypes - JSON-Daten aus dem Backend
-  */
- static fromJSON(clothingTypes) {
-   let result = [];
+        /**
+        * Gibt alle Verwendungen (Styles) des Kleidungstyps zurück.
+        */
+        getVerwendungen() {
+        return this.verwendungen;
+        }
 
-   if (Array.isArray(clothingTypes)) {
-     clothingTypes.forEach((k) => {
-       let kleidungstyp = new KleidungstypBO();
-       kleidungstyp.setID(k.id);
-       kleidungstyp.setBezeichnung(k.bezeichnung);
+        /**
+        * Konvertiert eine JSON-Antwort in ein KleidungstypBO Objekt bzw. Array von KleidungstypBO Objekten.
+        *
+        * @param {*} clothingTypes - JSON-Daten aus dem Backend
+        */
+        static fromJSON(clothingTypes) {
+        let result = [];
 
-       // Verwendungen (Styles) konvertieren wenn vorhanden
-       if (k.verwendungen && Array.isArray(k.verwendungen)) {
-         k.verwendungen.forEach(style => {
-           const styleBO = StyleBO.fromJSON([style])[0];
-           kleidungstyp.addVerwendung(styleBO);
+        if (Array.isArray(clothingTypes)) {
+         clothingTypes.forEach((k) => {
+           let kleidungstyp = new KleidungstypBO();
+           kleidungstyp.setID(k.id);
+           kleidungstyp.setBezeichnung(k.bezeichnung);
+           kleidungstyp.setKleiderschrankId(k.kleiderschrank_id);
+
+           // Verwendungen (Styles) konvertieren wenn vorhanden
+           if (k.verwendungen && Array.isArray(k.verwendungen)) {
+             k.verwendungen.forEach(style => {
+               const styleBO = StyleBO.fromJSON([style])[0];
+               kleidungstyp.addVerwendung(styleBO);
+             });
+           }
+
+           result.push(kleidungstyp);
          });
-       }
+        } else if (clothingTypes) {
+         let kleidungstyp = new KleidungstypBO();
+         kleidungstyp.setID(clothingTypes.id);
+         kleidungstyp.setBezeichnung(clothingTypes.bezeichnung);
+         kleidungstyp.setKleiderschrankId(clothingTypes.kleiderschrank_id);
 
-       result.push(kleidungstyp);
-     });
-   } else if (clothingTypes) {
-     let kleidungstyp = new KleidungstypBO();
-     kleidungstyp.setID(clothingTypes.id);
-     kleidungstyp.setBezeichnung(clothingTypes.bezeichnung);
+         if (clothingTypes.verwendungen && Array.isArray(clothingTypes.verwendungen)) {
+           clothingTypes.verwendungen.forEach(style => {
+             const styleBO = StyleBO.fromJSON([style])[0];
+             kleidungstyp.addVerwendung(styleBO);
+           });
+         }
 
-     if (clothingTypes.verwendungen && Array.isArray(clothingTypes.verwendungen)) {
-       clothingTypes.verwendungen.forEach(style => {
-         const styleBO = StyleBO.fromJSON([style])[0];
-         kleidungstyp.addVerwendung(styleBO);
-       });
-     }
+         result.push(kleidungstyp);
+        }
 
-     result.push(kleidungstyp);
-   }
-
-   return result;
- }
-}
+        return result;
+        }
+        }

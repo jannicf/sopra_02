@@ -492,10 +492,11 @@ class KleiderschrankAdministration(object):
     Kleidungstyp-spezifische Methoden
     """
 
-    def create_kleidungstyp(self, bezeichnung, verwendungen=None):
+    def create_kleidungstyp(self, bezeichnung, kleiderschrank_id, verwendungen=None):
         """Einen Kleidungstyp anlegen."""
         kleidungstyp = Kleidungstyp()
         kleidungstyp.set_bezeichnung(bezeichnung)
+        kleidungstyp.set_kleiderschrank_id(kleiderschrank_id)
         kleidungstyp.set_id(1)
 
         # Wenn Verwendungen übergeben wurden, diese hinzufügen

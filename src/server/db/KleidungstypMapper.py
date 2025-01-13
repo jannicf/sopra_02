@@ -33,8 +33,8 @@ class KleidungstypMapper(Mapper):
                 davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
                 kleidungstyp.set_id(1)
 
-        command = "INSERT INTO kleidungstyp (id, bezeichnung) VALUES (%s,%s)"
-        data = (kleidungstyp.get_id(), kleidungstyp.get_bezeichnung())
+        command = "INSERT INTO kleidungstyp (id, bezeichnung, kleiderschrank_id) VALUES (%s,%s,%s)"
+        data = (kleidungstyp.get_id(), kleidungstyp.get_bezeichnung(), kleidungstyp.get_kleiderschrank_id())
         cursor.execute(command, data)
 
         # Verwendungen (Styles) separat behandeln
@@ -62,8 +62,8 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptobjekt aktualisieren
-        command = "UPDATE kleidungstyp SET bezeichnung=%s WHERE id=%s"
-        data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_id())
+        command = "UPDATE kleidungstyp SET bezeichnung=%s, kleiderschrank_id=%s WHERE id=%s"
+        data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_kleiderschrank_id(), kleidungstyp.get_id())
         cursor.execute(command, data)
 
         # Verwendungen (Styles) aktualisieren
@@ -115,16 +115,17 @@ class KleidungstypMapper(Mapper):
         cursor = self._cnx.cursor()
 
         # Hauptabfrage für den Kleidungstyp
-        command = "SELECT id, bezeichnung FROM kleidungstyp WHERE id=%s"
+        command = "SELECT id, bezeichnung, kleiderschrank_id FROM kleidungstyp WHERE id=%s"
         cursor.execute(command, (kleidungstyp_id,))
         tuples = cursor.fetchall()
 
 
         try:
-            (id, bezeichnung) = tuples[0]
+            (id, bezeichnung, kleiderschrank_id) = tuples[0]
             kleidungstyp = Kleidungstyp()
             kleidungstyp.set_id(id)
             kleidungstyp.set_bezeichnung(bezeichnung)
+            kleidungstyp.set_kleiderschrank_id(kleiderschrank_id)
 
             # Abfrage der zugehörigen Verwendungen (Styles)
             verwendung_command = """
@@ -176,29 +177,21 @@ class KleidungstypMapper(Mapper):
         return result
 
     def find_by_kleiderschrank_id(self, kleiderschrank_id):
-        """Suchen eines Kleidungstyps anhand seiner Kleiderschrank_ID.
-
-        :param kleiderschrank_id: Bezeichnung des gesuchten Kleidungstyps
-        :return Kleidungstyp-Objekt oder None
-        """
-        result = None
+        result = []
         cursor = self._cnx.cursor()
 
-        # Nur die ID abfragen
+        # Dann die eigentliche Abfrage
         command = "SELECT id FROM kleidungstyp WHERE kleiderschrank_id=%s"
         cursor.execute(command, (kleiderschrank_id,))
         tuples = cursor.fetchall()
 
-        try:
-            (id,) = tuples[0]
-            # Vollständiges Objekt über find_by_id laden
-            result = self.find_by_id(id)
-        except IndexError:
-            result = None
+        for (id,) in tuples:
+            kleidungstyp = self.find_by_id(id)
+            if kleidungstyp is not None:
+                result.append(kleidungstyp)
 
         cursor.close()
         return result
-
     def find_all(self):
         """Auslesen aller Kleidungstypen.
 

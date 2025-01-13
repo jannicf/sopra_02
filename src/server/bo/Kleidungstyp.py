@@ -8,6 +8,7 @@ class Kleidungstyp(bo.BusinessObject):
         super().__init__()
         self.__bezeichnung = ""  #die Bezeichnung des Kleidungstyps
         self.__verwendungen = []  # in welchen Styles der Kleidungsytp verwendet wird
+        self.__kleiderschrank_id = None  # ID vom Kleiderschrank
 
     def set_bezeichnung(self, bezeichnung):
         """Setzen des Namens vom Kleidungstyp"""
@@ -16,6 +17,14 @@ class Kleidungstyp(bo.BusinessObject):
     def get_bezeichnung(self):
         """Auslesen des Namens vom Kleidungstyp"""
         return self.__bezeichnung
+
+    def set_kleiderschrank_id(self, kleiderschrank_id):
+        """Setzen der Kleiderschrank ID"""
+        self.__kleiderschrank_id = kleiderschrank_id
+
+    def get_kleiderschrank_id(self):
+        """Auslesen der Kleiderschrank ID"""
+        return self.__kleiderschrank_id
 
     def add_verwendung(self, verwendung: Style):
         """Hinzufügen von verwendeten Styles zu bestimmtem Kleidungstyp"""
@@ -56,6 +65,7 @@ class Kleidungstyp(bo.BusinessObject):
         obj = Kleidungstyp()
         obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
         obj.set_bezeichnung(dictionary["bezeichnung"])
+        obj.set_kleiderschrank_id(dictionary.get("kleiderschrank_id"))
         # Wenn verwendungen im Dictionary vorhanden sind, diese auch setzen
         if "verwendungen" in dictionary and dictionary["verwendungen"] is not None:
             for verwendung in dictionary["verwendungen"]:

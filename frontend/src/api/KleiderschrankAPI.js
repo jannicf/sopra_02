@@ -397,14 +397,15 @@ updateKleiderschrank = async (kleiderschrank) => {
     }
 
     getKleidungstypByKleiderschrankId(kleiderschrankId) {
-        return this.#fetchAdvanced(this.#getKleidungstypByKleiderschrankIdURL(kleiderschrankId), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
-            }
-        }).then(responseJSON => {
-            return KleidungstypBO.fromJSON(responseJSON);
-        })
+    return this.#fetchAdvanced(this.#getKleidungstypByKleiderschrankIdURL(kleiderschrankId), {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json, text/plain',
+        }
+    }).then(responseJSON => {
+        const result = KleidungstypBO.fromJSON(responseJSON);
+        return result;
+    })
 }
 
     addKleidungstyp(kleidungstypData) {
@@ -414,7 +415,9 @@ updateKleiderschrank = async (kleiderschrank) => {
             bezeichnung: kleidungstypData.bezeichnung,
             verwendungen: kleidungstypData.verwendungen.map(styleId => ({
                 id: styleId,
-            }))
+
+            })),
+            kleiderschrank_id: kleidungstypData.kleiderschrank_id
         };
 
         return this.#fetchAdvanced(this.#addKleidungstypURL(), {
