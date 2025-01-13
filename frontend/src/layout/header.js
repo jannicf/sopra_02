@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
-import { Paper, Typography, Tabs, Tab, Box, useTheme } from '@mui/material';
+import { Paper, Typography, Tabs, Tab, Box } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import ProfileDropDown from '../components/ProfileDropDown';
+import HomeIcon from '@mui/icons-material/Home';
+import StyleIcon from '@mui/icons-material/Style';
+import CheckroomIcon from '@mui/icons-material/Checkroom';
 
 class Header extends Component {
     constructor(props) {
@@ -24,94 +27,102 @@ class Header extends Component {
             <Paper
                 elevation={0}
                 sx={{
-                    // Getauschte Blautöne im Verlauf
                     background: 'linear-gradient(45deg, #1a237e 30%, #3949ab 90%)',
                     color: 'white',
-                    borderRadius: 0
+                    borderRadius: '10px',
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    marginTop: '10px',
+                    padding: '0 20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flexWrap: 'wrap',
                 }}
             >
                 <Box sx={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    width: '100%'
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    padding: 2,
+                    gap: 2
                 }}>
-                    {/* Oberer Teil mit Logo und Profil */}
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: 2,
-                        position: 'relative'
-                    }}>
-                        {/* Logo links */}
-                        <Box sx={{
-                            position: 'absolute',
-                            left: 16,
-                            zIndex: 1
-                        }}>
-                            <img
-                                src="/logo192.png"
-                                alt="Logo"
-                                style={{
-                                    width: 45,
-                                    height: 45,
-                                }}
-                            />
-                        </Box>
-
-                        {/* Zentrierter Text */}
-                        <Box sx={{
-                            width: '100%',
-                            display: 'flex',
-                            justifyContent: 'center'
-                        }}>
-                            <Typography
-                                variant='h4'
-                                sx={{
-                                    fontWeight: 'bold',
-                                    color: '#90caf9',
-                                    textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
-                                }}
-                            >
-                                Mein digitaler Kleiderschrank
-                            </Typography>
-                        </Box>
-
-                        {/* Profile-Button rechts */}
-                        <Box sx={{
-                            position: 'absolute',
-                            right: 16,
-                            zIndex: 1
-                        }}>
-                            <ProfileDropDown user={user} onLogout={this.props.onLogout} />
-                        </Box>
+                     {/* Logo */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '-10px',}}>
+                        <img
+                            src="/logo192.png"
+                            alt="Logo"
+                            style={{
+                                width: 80,
+                                height: 80,
+                            }}
+                        />
                     </Box>
 
-                    {/* Tabs mit leicht transparentem Hintergrund */}
-                    {user &&
-                        <Paper
-                            sx={{
-                                background: 'rgba(255,255,255,0.95)',
-                                borderRadius: 0
-                            }}
-                        >
+                    {/* Navigation in der App */}
+                    {user ? (
+                        <Box sx={{
+                        flexGrow: 1,
+                        backgroundColor: 'rgba(158, 158, 158, 0.2)',
+                        borderRadius: '25px',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        padding: '8px'
+                    }}>
+
                             <Tabs
-                                indicatorColor='primary'
-                                textColor='primary'
-                                centered
                                 value={this.state.tabindex}
                                 onChange={this.handleTabChange}
+                                textColor="inherit"
+                                TabIndicatorProps={{ sx: { display: 'none' } }} // keine blaue Leiste mehr unten dran
                             >
-                                <Tab label='Kleiderschrank' component={RouterLink} to='/kleiderschrank' />
-                                <Tab label='Styles' component={RouterLink} to='/styles' />
-                                <Tab label='Outfits' component={RouterLink} to='/outfits' />
+                                <Tab
+                                    icon={<HomeIcon />}
+                                    label="Kleiderschrank"
+                                    component={RouterLink}
+                                    to='/kleiderschrank'
+                                />
+                                <Tab
+                                    icon={<StyleIcon />}
+                                    label="Styles"
+                                    component={RouterLink}
+                                    to='/styles'
+                                />
+                                <Tab
+                                    icon={<CheckroomIcon />}
+                                    label="Outfits"
+                                    component={RouterLink}
+                                    to='/outfits'
+                                />
                             </Tabs>
-                        </Paper>
-                    }
+                    </Box>
+                        ):
+
+                        (
+                    <Box sx={{
+                        flexGrow: 1,
+                        display: { xs: 'none', md: 'block' },
+                        textAlign: 'center'
+                    }}>
+                        <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
+                            MEIN
+                        </Typography>
+                        <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
+                            DIGITALER
+                        </Typography>
+                        <Typography variant="h6" sx={{ lineHeight: 1.2 }}>
+                            KLEIDERSCHRANK
+                        </Typography>
+                    </Box>
+                    )}
+
+                    {/* Profile-Button */}
+                    {user && <ProfileDropDown user={user} onLogout={this.props.onLogout}  />}
                 </Box>
             </Paper>
         );
-  }
+    }
 }
 
 export default Header;

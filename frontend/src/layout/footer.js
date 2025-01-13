@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Paper, Typography, Grid, Box, Link, Chip, Tooltip } from '@mui/material';
+import { Paper, Typography, Grid, Box, Link, Chip } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import SchoolIcon from '@mui/icons-material/School';
 
@@ -7,15 +7,6 @@ class Footer extends Component {
   render() {
     const { user } = this.props;
     if (!user) return null;
-
-    const groupMembers = [
-      'Boris Burkert',
-      'Jannic Friese',
-      'Josef Stuby',
-      'Lucas Urban',
-      'Xiaoping Wu',
-      'Yasin Yasar'
-    ];
 
     return (
       <Box sx={{ pb: '48px' }}>
@@ -34,20 +25,15 @@ class Footer extends Component {
             <Grid item xs={12} md={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant="subtitle1" color="primary">
-                  SoPra
+                  SoPra - WS 24/25
                 </Typography>
                 <Chip
-                  label="WiSe 2024/25"
+                  label="Gruppe 02"
                   size="small"
                   color="primary"
                   variant="outlined"
-                  sx={{ height: '20px' }}
+                  sx={{ height: '22.5px' }}
                 />
-                <Tooltip title={groupMembers.join(', ')} placement="top">
-                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                    Gruppe 02
-                  </Typography>
-                </Tooltip>
               </Box>
             </Grid>
 
