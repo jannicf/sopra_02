@@ -542,6 +542,17 @@ updateKleiderschrank = async (kleiderschrank) => {
         })
     }
 
+    deleteStyle = async (id) => {
+        try {
+            const response = await this.#fetchAdvanced(this.#deleteStyleURL(id), {
+                method: 'DELETE'
+            });
+            return response;
+        } catch (error) {
+            console.error("API: Fehler beim Löschen des Styles:", error);
+            throw error;
+        }
+    }
 
 // Outfit-bezogene Methoden
     getOutfit(id) {

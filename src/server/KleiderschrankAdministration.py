@@ -357,8 +357,11 @@ class KleiderschrankAdministration(object):
                 elif isinstance(constraint, Implikation):
                     self.delete_implikation(constraint)
             # Verbindungen zu Kleidungstypen auflösen
-            for kleidungstyp in style.get_features():
-                kleidungstyp.delete_verwendung(style)
+            for kleidungstyp_id in style.get_features():
+                # Das vollständige Kleidungstyp-Objekt holen
+                kleidungstyp = self.get_kleidungstyp_by_id(kleidungstyp_id)
+                if kleidungstyp:
+                    kleidungstyp.delete_verwendung(style)
             # Schließlich den Style selbst löschen
             mapper.delete(style)
 

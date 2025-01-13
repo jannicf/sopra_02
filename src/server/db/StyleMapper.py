@@ -149,15 +149,25 @@ class StyleMapper(Mapper):
         cursor = self._cnx.cursor()
 
         """umgekehrte Reihenfolge der Löschungen um Abhängigkeiten nicht zu verletzen"""
-
-        # Constraints löschen
+        # 1. Erst alle Outfit-Kleidungsstück Verknüpfungen für die betroffenen Outfits löschen
+        delete_outfit_clothes = """
+                    DELETE FROM outfit_kleidungsstueck 
+                    WHERE outfit_id IN (
+                        SELECT id FROM outfit WHERE style_id=%s
+                    )
+                """
+        cursor.execute(delete_outfit_clothes, (style.get_id(),))
+        # 2. Dann die Outfits selbst löschen
+        delete_outfits = "DELETE FROM outfit WHERE style_id=%s"
+        cursor.execute(delete_outfits, (style.get_id(),))
+        # 3. Constraints löschen
         delete_command2 = "DELETE FROM kardinalitaet WHERE style_id=%s"
         cursor.execute(delete_command2, (style.get_id(),))
         delete_command3 = "DELETE FROM mutex WHERE style_id=%s"
         cursor.execute(delete_command3, (style.get_id(),))
         delete_command4 = "DELETE FROM implikation WHERE style_id=%s"
         cursor.execute(delete_command4, (style.get_id(),))
-        # Features löschen
+        # 4. Features löschen
         delete_command = "DELETE FROM style_kleidungstyp WHERE style_id=%s"
         cursor.execute(delete_command, (style.get_id(),))
         #dann erst den Style löschen
