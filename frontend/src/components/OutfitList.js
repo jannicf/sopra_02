@@ -77,7 +77,8 @@ class OutfitList extends Component {
     const { outfits, selectedOutfit, dialogOpen, error } = this.state;
 
     if (outfits.length === 0) {
-      return <Typography>Keine Outfits vorhanden</Typography>;
+      return <Typography variant="body1" align="center" sx={{my: 4, p: 3, bgcolor: 'grey.100', borderRadius: 1}}
+            >Noch keine Outfits vorhanden.</Typography>;
     }
 
     if (error) {

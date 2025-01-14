@@ -111,12 +111,27 @@ class StylesView extends Component {
             Vorstellungen.
         </Typography>
         {/* Liste der Styles */}
-        <StyleList
-          styles={styles}
-          onEdit={this.handleEditClick}
-          onDelete={this.handleDeleteClick}
-        />
-
+          {styles.length > 0 ? (
+            <StyleList
+              styles={styles}
+              onEdit={this.handleEditClick}
+              onDelete={this.handleDeleteClick}
+            />
+          ) : (
+            <Typography
+                variant="body1"
+                align="center"
+                sx={{
+                    my: 4,
+                    p: 3,
+                    bgcolor: 'grey.100',
+                    borderRadius: 1
+                }}
+            >
+                Du hast noch keine Styles erstellt. Füge deinen ersten Style hinzu,
+                indem du auf den "Neuer Style" Button klickst.
+            </Typography>
+          )}
         {/* Button zum Erstellen eines neuen Styles */}
         <Button
           variant="contained"
