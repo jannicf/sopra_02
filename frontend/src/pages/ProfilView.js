@@ -109,7 +109,6 @@ class PersonView extends Component {
     render() {
     const {person, showCreateDialog, showEditDialog, showDeleteDialog, loading} = this.state;
 
-
     if (loading) {
         return <Typography>Lade Profil...</Typography>;
         }
@@ -119,7 +118,6 @@ class PersonView extends Component {
                 <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Profil
                 </Typography>
-
                 {/* Erklärender Text */}
                 <Typography variant="body1" sx={{ mb: 4 }}>
                     Hier kannst du dein Profil verwalten und deine persönlichen Daten anpassen.
