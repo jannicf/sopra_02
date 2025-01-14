@@ -7,8 +7,7 @@ class OutfitView extends Component {
   render() {
     return (
       <div>
-        <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>Meine Outfits</Typography>
-
+          <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>Meine Outfits</Typography>
         {/* Erklärender Text */}
         <Typography variant="body1" sx={{ mb: 4 }}>
             Hier kannst du deine Outfits verwalten. Erstelle neue Outfits oder sieh dir deine bereits erstellten Outfits an.
