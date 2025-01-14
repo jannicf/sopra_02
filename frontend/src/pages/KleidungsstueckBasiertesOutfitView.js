@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Grid,
     Typography,
@@ -9,6 +10,7 @@ import {
 } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import KleidungsstueckBasiertesOutfitDialog from '../dialogs/KleidungsstueckBasiertesOutfitDialog';
+
 
 class KleidungsstueckBasiertesOutfitView extends Component {
     constructor(props) {
@@ -76,12 +78,22 @@ class KleidungsstueckBasiertesOutfitView extends Component {
         });
     };
 
-    handleDialogClose = () => {
+    handleDialogClose = (success) => {
+    if (success) {
+        // Wenn das Outfit erfolgreich erstellt wurde
+        this.setState({
+            dialogOpen: false,
+            ausgewaehltesBasisKleidungsstueck: null
+        }, () => {
+            document.getElementById('outfitsLink').click();
+        });
+    } else {
         this.setState({
             dialogOpen: false,
             ausgewaehltesBasisKleidungsstueck: null
         });
-    };
+    }
+};
 
     render() {
         const {
@@ -131,6 +143,12 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                         </Grid>
                     ))}
                 </Grid>
+
+                <Link
+                to="/outfits"
+                id="outfitsLink"
+                style={{display: 'none'}}
+                />
 
                 <KleidungsstueckBasiertesOutfitDialog
                     show={dialogOpen}

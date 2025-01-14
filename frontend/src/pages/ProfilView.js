@@ -9,7 +9,7 @@ import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import PersonDeleteDialog from "../dialogs/PersonDeleteDialog";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-class PersonView extends Component {
+class ProfilView extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -17,8 +17,7 @@ class PersonView extends Component {
             showCreateDialog: false,
             showEditDialog: false,
             showDeleteDialog: false,
-            error: null,
-            loading: false
+            error: null
         };
     }
 
@@ -53,18 +52,15 @@ class PersonView extends Component {
 
     loadPerson = async () => {
     try {
-        this.setState({loading: true});
         const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
         this.setState({
             person: persons,
-            loading: false,
             error: null
         });
     } catch (error) {
         console.error("ProfilView: Fehler beim Laden der Person:", error);
         this.setState({
             error: error.message,
-            loading: false,
             person: null
             });
         }
@@ -107,12 +103,7 @@ class PersonView extends Component {
     };
 
     render() {
-    const {person, showCreateDialog, showEditDialog, showDeleteDialog, loading} = this.state;
-
-
-    if (loading) {
-        return <Typography>Lade Profil...</Typography>;
-        }
+    const {person, showCreateDialog, showEditDialog, showDeleteDialog} = this.state;
 
         return (
             <div>
@@ -218,4 +209,4 @@ class PersonView extends Component {
     }
 }
 
-export default PersonView;
+export default ProfilView;

@@ -119,9 +119,9 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                 kleiderschrankId
             );
 
-            alert('Outfit wurde erfolgreich erstellt!');
-            this.setState({ ausgewaehlteKleidungsstuecke: [] });
+            // Dialog schließen und zur Outfits-Seite navigieren
             this.props.onClose(true);
+            this.props.navigate('/outfits');
 
         } catch (error) {
             this.setState({
