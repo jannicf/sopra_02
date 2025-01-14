@@ -42,54 +42,37 @@ class Style(bo.BusinessObject):
         return [feature if isinstance(feature, int) else feature.get_id() for feature in self.__features]
 
     def add_constraint(self, constraint):
-        from server.bo.Kardinalitaet import Kardinalitaet
-        from server.bo.Mutex import Mutex
-        from server.bo.Implikation import Implikation
-
-        # Wenn constraint ein dict ist
         if isinstance(constraint, dict):
             constraint_type = constraint.get('type')
             if constraint_type == 'kardinalitaet':
-                self.__constraints['kardinalitaeten'].append(constraint)
-            elif constraint_type == 'mutex':
-                self.__constraints['mutexe'].append(constraint)
-            elif constraint_type == 'implikation':
-                self.__constraints['implikationen'].append(constraint)
-        # Wenn constraint ein BO-Objekt ist
-        else:
-            if isinstance(constraint, Kardinalitaet):
                 self.__constraints['kardinalitaeten'].append({
-                    'type': 'kardinalitaet',
-                    'minAnzahl': constraint.get_min_anzahl(),
-                    'maxAnzahl': constraint.get_max_anzahl(),
-                    'bezugsobjekt_id': constraint.get_bezugsobjekt().get_id()
+                    'minAnzahl': constraint.get('minAnzahl'),
+                    'maxAnzahl': constraint.get('maxAnzahl'),
+                    'bezugsobjekt_id': constraint.get('bezugsobjekt_id')
                 })
-            elif isinstance(constraint, Mutex):
+            elif constraint_type == 'mutex':
                 self.__constraints['mutexe'].append({
-                    'type': 'mutex',
-                    'bezugsobjekt1_id': constraint.get_bezugsobjekt1().get_id(),
-                    'bezugsobjekt2_id': constraint.get_bezugsobjekt2().get_id()
+                    'bezugsobjekt1_id': constraint.get('bezugsobjekt1_id'),
+                    'bezugsobjekt2_id': constraint.get('bezugsobjekt2_id')
                 })
-            elif isinstance(constraint, Implikation):
+            elif constraint_type == 'implikation':
                 self.__constraints['implikationen'].append({
-                    'type': 'implikation',
-                    'bezugsobjekt1_id': constraint.get_bezugsobjekt1().get_id(),
-                    'bezugsobjekt2_id': constraint.get_bezugsobjekt2().get_id()
+                    'bezugsobjekt1_id': constraint.get('bezugsobjekt1_id'),
+                    'bezugsobjekt2_id': constraint.get('bezugsobjekt2_id')
                 })
 
     def get_constraints(self):
         """Gibt alle Constraints in einem JSON-kompatiblen Format zurück"""
-        if not hasattr(self, '__constraints'):
-            self.__constraints = {
-                'kardinalitaeten': [],
-                'mutexe': [],
-                'implikationen': []
-            }
         return self.__constraints
 
     def set_constraints(self, constraints):
         """Setzt die Constraints."""
-        self.__constraints = constraints
+        if isinstance(constraints, dict):
+            self.__constraints = {
+                'kardinalitaeten': constraints.get('kardinalitaeten', []),
+                'mutexe': constraints.get('mutexe', []),
+                'implikationen': constraints.get('implikationen', [])
+            }
 
     def remove_constraint(self, constraint: Constraint):
         """Entfernt einen Constraint aus dem Style"""
@@ -126,11 +109,7 @@ class Style(bo.BusinessObject):
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
-        from server.bo.Kardinalitaet import Kardinalitaet
-        from server.bo.Mutex import Mutex
-        from server.bo.Implikation import Implikation
-
+        from server.bo.Kleidungstyp import Kleidungstyp
         obj = Style()
         obj.set_id(dictionary.get("id"))
         obj.set_name(dictionary["name"])
@@ -142,43 +121,9 @@ class Style(bo.BusinessObject):
                 kleidungstyp.set_id(feature_id)
                 obj.add_feature(kleidungstyp)
 
-        # Constraints verarbeiten
+        # Constraints direkt setzen, wenn sie im Dictionary sind
         if "constraints" in dictionary:
-            # Kardinalitäten
-            for k in dictionary["constraints"].get("kardinalitaeten", []):
-                kardinalitaet = Kardinalitaet()
-                kardinalitaet.set_min_anzahl(k["min_anzahl"])
-                kardinalitaet.set_max_anzahl(k["max_anzahl"])
-                bezugsobjekt = Kleidungstyp()
-                bezugsobjekt.set_id(k["bezugsobjekt_id"])
-                kardinalitaet.set_bezugsobjekt(bezugsobjekt)
-                kardinalitaet.set_style(obj)
-                obj.add_constraint(kardinalitaet)
-
-            # Mutexe
-            for m in dictionary["constraints"].get("mutexe", []):
-                mutex = Mutex()
-                bezugsobjekt1 = Kleidungstyp()
-                bezugsobjekt1.set_id(m["bezugsobjekt1_id"])
-                bezugsobjekt2 = Kleidungstyp()
-                bezugsobjekt2.set_id(m["bezugsobjekt2_id"])
-                mutex.set_bezugsobjekt1(bezugsobjekt1)
-                mutex.set_bezugsobjekt2(bezugsobjekt2)
-                mutex.set_style(obj)
-                obj.add_constraint(mutex)
-
-            # Implikationen
-            for i in dictionary["constraints"].get("implikationen", []):
-                implikation = Implikation()
-                bezugsobjekt1 = Kleidungstyp()
-                bezugsobjekt1.set_id(i["bezugsobjekt1_id"])
-                bezugsobjekt2 = Kleidungstyp()
-                bezugsobjekt2.set_id(i["bezugsobjekt2_id"])
-                implikation.set_bezugsobjekt1(bezugsobjekt1)
-                implikation.set_bezugsobjekt2(bezugsobjekt2)
-                implikation.set_style(obj)
-                obj.add_constraint(implikation)
+            obj.set_constraints(dictionary["constraints"])
 
         obj.set_kleiderschrank_id(dictionary.get("kleiderschrank_id"))
-
         return obj
