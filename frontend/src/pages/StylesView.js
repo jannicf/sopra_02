@@ -218,8 +218,12 @@ class StylesView extends Component {
 
         return (
             <div>
-                <Typography variant="h4" sx={{ mt: 2, mb: 4 }}>
-                    Meine Styles
+                <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>Meine Styles</Typography>
+                {/* Erklärender Text */}
+                <Typography variant="body1" sx={{ mb: 4 }}>
+                    Hier kannst du deine Styles verwalten. Füge neue Styles hinzu,
+                    ordne ihnen verschiedene Kleidungstypen und Regeln zu und organisiere deinen digitalen Kleiderschrank ganz nach deinen
+                    Vorstellungen.
                 </Typography>
 
                 <Grid container spacing={3}>

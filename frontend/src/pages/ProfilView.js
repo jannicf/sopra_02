@@ -109,12 +109,6 @@ class PersonView extends Component {
     render() {
     const {person, showCreateDialog, showEditDialog, showDeleteDialog, loading} = this.state;
 
-    // Schrittweise Überprüfung
-    if (person) {
-        // Prüfen, was der Kleiderschrank tatsächlich ist
-        const kleiderschrank = person.getKleiderschrank();
-        }
-
     if (loading) {
         return <Typography>Lade Profil...</Typography>;
         }
@@ -124,7 +118,10 @@ class PersonView extends Component {
                 <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Profil
                 </Typography>
-
+                {/* Erklärender Text */}
+                <Typography variant="body1" sx={{ mb: 4 }}>
+                    Hier kannst du dein Profil verwalten und deine persönlichen Daten anpassen.
+                </Typography>
                 {person ? (
                     // Wenn Person existiert, zeigen wir die Informationen an
                     <Paper elevation={3} sx={{p: 3, mt: 2}}>
