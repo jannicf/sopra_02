@@ -24,6 +24,11 @@ class Header extends Component {
         const { user } = this.props;
 
         return (
+            <Box sx={{
+                maxWidth: '1200px',  // gleiche Breite wie Container maxWidth='lg'
+                margin: '0 auto',    // zentriert den Header
+                width: '100%'        // nimmt verfügbare Breite ein
+            }}>
             <Paper
                 elevation={0}
                 sx={{
@@ -68,7 +73,8 @@ class Header extends Component {
                         display: 'flex',
                         flexWrap: 'wrap',
                         alignItems: 'center',
-                        padding: '8px'
+                        padding: '8px',
+                        justifyContent: 'space-evenly',
                     }}>
 
                             <Tabs
@@ -76,24 +82,44 @@ class Header extends Component {
                                 onChange={this.handleTabChange}
                                 textColor="inherit"
                                 TabIndicatorProps={{ sx: { display: 'none' } }} // keine blaue Leiste mehr unten dran
+                                sx={{
+                                    width: '100%',
+                                    '& .MuiTabs-flexContainer': {
+                                        justifyContent: 'space-evenly',
+                                    },
+                                    '& .MuiTab-root': {
+                                        flex: 1,     // Jeder Tab nimmt ein Drittel der Breite ein
+                                        maxWidth: 'none',  // Überschreibt die Standard-maxWidth von Tabs
+                                        minWidth: 0,       // Erlaubt dem Tab schmaler zu werden
+                                        fontSize: '1.1rem',      // Größerer Text
+                                        '& .MuiSvgIcon-root': {  // Größeres Icon
+                                            fontSize: '2rem'
+                                        }
+                                    }
+                                }}
                             >
                                 <Tab
                                     icon={<HomeIcon />}
                                     label="Kleiderschrank"
                                     component={RouterLink}
                                     to='/kleiderschrank'
+                                    disableRipple
+                                    sx={{borderRight: '1px solid rgba(255, 255, 255, 0.3)'}}
                                 />
                                 <Tab
                                     icon={<StyleIcon />}
                                     label="Styles"
                                     component={RouterLink}
                                     to='/styles'
+                                    disableRipple
                                 />
                                 <Tab
                                     icon={<CheckroomIcon />}
                                     label="Outfits"
                                     component={RouterLink}
                                     to='/outfits'
+                                    disableRipple
+                                    sx={{borderLeft: '1px solid rgba(255, 255, 255, 0.3)'}}
                                 />
                             </Tabs>
                     </Box>
@@ -118,9 +144,10 @@ class Header extends Component {
                     )}
 
                     {/* Profile-Button */}
-                    {user && <ProfileDropDown user={user} onLogout={this.props.onLogout}  />}
+                    {user && <ProfileDropDown user={user} onLogout={this.props.onLogout} />}
                 </Box>
             </Paper>
+        </Box>
         );
     }
 }

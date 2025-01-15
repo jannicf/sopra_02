@@ -615,21 +615,24 @@ class KleiderschrankAPI {
     })
 }
     addOutfit(outfitData) {
-        // POST-Anfrage bleibt unverändert
+
+        const requestData = {
+            style_id: outfitData.style_id,
+            bausteine: outfitData.bausteine,
+            kleiderschrank_id: outfitData.kleiderschrank_id
+        };
+
         return this.#fetchAdvanced(this.#addOutfitURL(), {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(outfitData),
-            kleiderschrank_id: outfitData.kleiderschrank_id
+            body: JSON.stringify(requestData)
         }).then(responseJSON => {
             let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responseOutfitBO);
-            })
-        })
+            return responseOutfitBO;
+        });
     }
 
     updateOutfit(outfitBO) {

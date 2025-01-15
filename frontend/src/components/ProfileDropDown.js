@@ -28,6 +28,7 @@ class ProfileDropDown extends Component {
             <Box>
                 {/* Avatar Button */}
                 <IconButton
+                    disableRipple
                     onClick={this.toggleMenu}
                     ref={button => this.buttonRef = button}
                 >
@@ -47,10 +48,10 @@ class ProfileDropDown extends Component {
                     onClose={this.toggleMenu}
                     anchorEl={this.buttonRef}
                 >
-                    <MenuItem component={Link} to="/profile" onClick={this.toggleMenu}>
+                    <MenuItem component={Link} to="/profile" onClick={this.toggleMenu} disableRipple>
                         Profil
                     </MenuItem>
-                    <MenuItem onClick={this.handleLogout}>
+                    <MenuItem onClick={this.handleLogout} disableRipple>
                         Ausloggen
                     </MenuItem>
                 </Menu>

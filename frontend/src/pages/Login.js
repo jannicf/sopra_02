@@ -25,7 +25,7 @@ class Login extends Component {
 				<br/>
 				<Grid container justifyContent='center'>
 					<Button variant='contained' color='primary'
-							onClick={this.handleLoginButtonClicked}>Mit Google einloggen
+							onClick={this.handleLoginButtonClicked} disableRipple>Mit Google einloggen
 					</Button>
 				</Grid>
 				<br/>

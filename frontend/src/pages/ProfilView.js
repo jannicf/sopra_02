@@ -123,6 +123,7 @@ class ProfilView extends Component {
                             <Box>
                                 <IconButton
                                     onClick={this.handleEditClick}
+                                    disableRipple
                                     color="primary"
                                     sx={{ mr: 1 }}
                                 >
@@ -130,6 +131,7 @@ class ProfilView extends Component {
                                 </IconButton>
                                 <IconButton
                                     onClick={this.handleDeleteClick}
+                                    disableRipple
                                     color="error"
                                 >
                                     <DeleteIcon/>

@@ -161,7 +161,7 @@ class App extends React.Component {
         <ThemeProvider theme={Theme}>
             <CssBaseline />
             <Router>
-                <Container maxWidth='md' sx={{
+                <Container maxWidth='lg' sx={{
                       display: 'flex',
                       flexDirection: 'column'
                     }}>

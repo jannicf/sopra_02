@@ -286,6 +286,7 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                                                                 <Button
                                                                     color="error"
                                                                     onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
+                                                                    disableRipple
                                                                 >
                                                                     Entfernen
                                                                 </Button>
@@ -301,7 +302,8 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={this.handleClose}>
+                        <Button onClick={this.handleClose}
+                        disableRipple>
                             Abbrechen
                         </Button>
                         <Button
@@ -309,6 +311,7 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                             variant="contained"
                             color="primary"
                             disabled={ausgewaehlteKleidungsstuecke.length === 0}
+                            disableRipple
                         >
                             Outfit erstellen ({ausgewaehlteKleidungsstuecke.length} Teile)
                         </Button>
