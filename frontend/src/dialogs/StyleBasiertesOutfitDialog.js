@@ -87,17 +87,16 @@ class StyleBasiertesOutfitDialog extends Component {
 
     handleOutfitErstellen = async () => {
         try {
-            this.setState({ loading: true });
             const api = KleiderschrankAPI.getAPI();
 
             await api.addOutfit({
-                style: this.props.style.getID(),
-                bausteine: this.state.ausgewaehlteKleidung.map(k => k.getID())
+                style_id: this.props.style.getID(),
+                bausteine: this.state.ausgewaehlteKleidung.map(k => k.getID()),
+                kleiderschrank_id: this.props.kleiderschrankId
             });
 
-            // Zeige Erfolgsmeldung
+            // Erfolgsmeldung
             alert('Outfit wurde erfolgreich erstellt!');
-
             this.props.onClose(true);
         } catch (error) {
             this.setState({
@@ -105,7 +104,7 @@ class StyleBasiertesOutfitDialog extends Component {
                 loading: false
             });
         }
-    };
+    }
 
     render() {
         const { show, style, onClose } = this.props;

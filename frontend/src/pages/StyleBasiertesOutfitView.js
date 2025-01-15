@@ -140,6 +140,7 @@ class StyleBasiertesOutfitView extends Component {
                 <StyleBasiertesOutfitDialog
                     show={showDialog}
                     style={selectedStyle}
+                    kleiderschrankId={this.state.kleiderschrankId}
                     onClose={this.handleDialogClose}
                 />
             </Box>

@@ -734,8 +734,8 @@ class OutfitListOperations(Resource):
             adm = KleiderschrankAdministration()
             data = api.payload
 
-            # Alle erforderlichen Parameter auslesen
-            style_id = data.get('style')
+            # Style ID aus beiden möglichen Quellen akzeptieren
+            style_id = data.get('style_id') or data.get('style')
             bausteine = data.get('bausteine', [])
             kleiderschrank_id = data.get('kleiderschrank_id')
 
@@ -750,7 +750,6 @@ class OutfitListOperations(Resource):
             return {'message': 'Outfit konnte nicht erstellt werden'}, 400
 
         except Exception as e:
-            print(f"Fehler beim Erstellen des Outfits: {str(e)}")  # Debug-Ausgabe
             return {'message': str(e)}, 500
 
 @wardrobe_ns.route('/outfits/by-kleiderschrank/<int:kleiderschrank_id>')
