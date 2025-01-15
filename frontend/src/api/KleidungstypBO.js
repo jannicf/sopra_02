@@ -12,7 +12,7 @@ export default class KleidungstypBO extends BusinessObject {
         super();
         this.bezeichnung = "";
         this.verwendungen = []; // Array von StyleBO Objekten
-        this.kleiderschrank_id = null;
+        this.kleiderschrankId = null;
         }
 
         /**
@@ -32,10 +32,10 @@ export default class KleidungstypBO extends BusinessObject {
         }
 
         setKleiderschrankId(id) {
-            this.kleiderschrank_id = id;
+            this.kleiderschrankId = id;
         }
         getKleiderschrankId() {
-            return this.kleiderschrank_id;
+            return this.kleiderschrankId;
         }
 
         /**

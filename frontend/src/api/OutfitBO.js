@@ -13,7 +13,7 @@ export default class OutfitBO extends BusinessObject {
     super();
     this.bausteine = [];  // Array von KleidungsstueckBO Objekten
     this.style = null;    // StyleBO Objekt
-     this.kleiderschrank_id = null;
+     this.kleiderschrankId = null;
   }
 
   /**
@@ -68,11 +68,11 @@ export default class OutfitBO extends BusinessObject {
    * Gibt die Kleiderschrank_id des Outfits zurück.
    */
    setKleiderschrankId(id) {
-        this.kleiderschrank_id = id;
+        this.kleiderschrankId = id;
     }
 
     getKleiderschrankId() {
-        return this.kleiderschrank_id;
+        return this.kleiderschrankId;
     }
 
   /**
