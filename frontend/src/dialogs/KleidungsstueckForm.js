@@ -35,12 +35,25 @@ class KleidungsstueckForm extends Component {
  }
 
  loadKleidungstypen = async () => {
-   try {
-     const kleidungstypen = await KleiderschrankAPI.getAPI().getKleidungstypen();
-     this.setState({ kleidungstypen });
-   } catch (error) {
-     this.setState({ error: 'Fehler beim Laden der Kleidungstypen' });
-   }
+       try {
+         console.log("Lade Kleidungstypen für Kleiderschrank ID:", this.props.kleiderschrankId);
+         const kleidungstypen = await KleiderschrankAPI.getAPI()
+             .getKleidungstypByKleiderschrankId(this.props.kleiderschrankId);
+         console.log("Geladene Kleidungstypen:", kleidungstypen);
+
+         // Prüfen ob die Kleidungstypen die erwarteten Methoden haben
+         if (kleidungstypen && kleidungstypen.length > 0) {
+           console.log("Erster Kleidungstyp:", {
+             id: kleidungstypen[0].getID(),
+             bezeichnung: kleidungstypen[0].getBezeichnung()
+           });
+         }
+
+         this.setState({ kleidungstypen });
+       } catch (error) {
+         console.error("Fehler beim Laden der Kleidungstypen:", error);
+         this.setState({ error: 'Fehler beim Laden der Kleidungstypen' });
+       }
  }
 
  handleNameChange = (event) => {
@@ -51,8 +64,10 @@ class KleidungsstueckForm extends Component {
 
  handleTypChange = (event) => {
     const selectedTypId = event.target.value;
-
+    console.log("Selected Typ ID:", selectedTypId);
+    console.log("Verfügbare Typen:", this.state.kleidungstypen);
     const selectedTyp = this.state.kleidungstypen.find(typ => typ.getID() === selectedTypId);
+    console.log("Gefundener Typ:", selectedTyp);
 
     if (selectedTyp) {
         const kleidungsstueck = this.state.kleidungsstueck;

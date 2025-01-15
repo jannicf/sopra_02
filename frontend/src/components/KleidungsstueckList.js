@@ -25,6 +25,7 @@ class KleidungsstueckList extends Component {
             kleidungsstueck={kleidungsstueck}
             onDelete={this.handleKleidungsstueckDelete}
             onUpdate={this.props.onUpdate}
+            kleiderschrankId={this.props.kleiderschrankId}
             />
            ))}
             </List>

@@ -9,23 +9,34 @@ class KleidungstypCard extends Component {
         this.state = {
             showEditDialog: false,
             showDeleteDialog: false,
+            kleiderschrank_id: null
         };
     }
 
     handleEditClick = () => {
-        this.setState({ showEditDialog: true });
+        // Hole die kleiderschrank_id vom Kleidungstyp
+        const kleiderschrankId = this.props.kleidungstyp.getKleiderschrankId();
+        console.log("Editing Kleidungstyp with kleiderschrank_id:", kleiderschrankId);
+        this.setState({
+            showEditDialog: true,
+            kleiderschrank_id: kleiderschrankId  // Speichere sie im State
+        });
     }
 
     handleDeleteClick = () => {
         this.setState({ showDeleteDialog: true });
     }
 
-    handleEditDialogClosed = (editedKleidungstyp) => {
-        if (editedKleidungstyp) {
-            this.props.onUpdate();
+    handleEditDialogClosed = async (editedKleidungstyp) => {
+    if (editedKleidungstyp) {
+        try {
+            await this.props.onUpdate();  // Liste neu laden
+        } catch (error) {
+            console.error("Fehler beim Aktualisieren der Liste:", error);
         }
-        this.setState({ showEditDialog: false });
     }
+    this.setState({ showEditDialog: false });
+}
 
     handleDeleteDialogClosed = async (deletedKleidungstyp) => {
         if (deletedKleidungstyp) {
@@ -39,7 +50,7 @@ class KleidungstypCard extends Component {
 
     render() {
         const { kleidungstyp } = this.props;
-        const { showEditDialog, showDeleteDialog } = this.state;
+        const { showEditDialog, showDeleteDialog, kleiderschrankId } = this.state;
 
         return (
             <Card sx={{ mb: 1 }}>
@@ -81,6 +92,7 @@ class KleidungstypCard extends Component {
                 <KleidungstypForm
                     show={showEditDialog}
                     kleidungstyp={kleidungstyp}
+                    kleiderschrankId={kleidungstyp.getKleiderschrankId()}
                     onClose={this.handleEditDialogClosed}
                 />
                 <KleidungstypDeleteDialog

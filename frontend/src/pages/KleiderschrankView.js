@@ -74,41 +74,34 @@ class KleiderschrankView extends Component {
             });
     }
 
-    loadKleidungstypen = () => {
-        this.setState({
-            loadingInProgress: true,
-            error: null
-        });
+    loadKleidungstypen = async () => {
+        try {
+            const person = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
 
-        // Erst alle Kleidungsstücke des Kleiderschranks laden
-        KleiderschrankAPI.getAPI()
-            .getKleidungsstueckByKleiderschrankId(this.state.kleiderschrankId)
-            .then(kleidungsstuecke => {
-                // Set für eindeutige Typ-IDs erstellen
-                const typIds = new Set(kleidungsstuecke.map(k => k.getTyp().getID()));
+            if (person && person.getKleiderschrank()) {
+                const kleiderschrankId = person.getKleiderschrank().getID();
+                console.log("Lade Kleidungstypen für Kleiderschrank ID:", kleiderschrankId);
 
-                // Alle Kleidungstypen laden
-                return KleiderschrankAPI.getAPI().getKleidungstypen()
-                    .then(alleTypen => {
-                        // Nur die Typen behalten, die in unserem Kleiderschrank verwendet werden
-                        const gefilterteTypen = alleTypen.filter(typ =>
-                            typIds.has(typ.getID())
-                        );
+                // Hier die spezifische Funktion zum Laden der Kleidungstypen für einen Kleiderschrank
+                const kleidungstypen = await KleiderschrankAPI.getAPI()
+                    .getKleidungstypByKleiderschrankId(kleiderschrankId);
 
-                        this.setState({
-                            kleidungstypen: gefilterteTypen,
-                            loadingInProgress: false
-                        });
-                    });
-            })
-            .catch(error => {
-                console.error('Error:', error);
+                console.log("Erfolgreich geladene Kleidungstypen:", kleidungstypen);
+
                 this.setState({
-                    error: error.message,
-                    loadingInProgress: false
+                    kleidungstypen: kleidungstypen,
+                    kleiderschrankId: kleiderschrankId,
+                    error: null
                 });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            this.setState({
+                error: error.message,
+                loadingInProgress: false
             });
-    }
+        }
+    };
 
     handleCreateClick = () => {
         this.setState({ showCreateDialog: true });
@@ -207,6 +200,7 @@ class KleiderschrankView extends Component {
                             <KleidungsstueckList
                                 kleidungsstuecke={kleidungsstuecke}
                                 onUpdate={this.loadKleidungsstuecke}
+                                kleiderschrankId={this.state.kleiderschrankId}
                             />
                         ) : (
                             <Typography

@@ -356,6 +356,7 @@ class WardrobeOperations(Resource):
 @wardrobe_ns.param('google_id', 'Die Google ID der Person')
 class PersonsByGoogleIdOperations(Resource):
     @wardrobe_ns.marshal_with(person)
+    #@secured
     def get(self, google_id):
         """Auslesen einer Person anhand der Google ID"""
         adm = KleiderschrankAdministration()
@@ -707,6 +708,7 @@ class ClothingTypeOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ClothingTypeByKleiderschrankOperations(Resource):
     @wardrobe_ns.marshal_list_with(kleidungstyp)
+    #@secured
     def get(self, kleiderschrank_id):
         adm = KleiderschrankAdministration()
         clothing_types = adm.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank_id)

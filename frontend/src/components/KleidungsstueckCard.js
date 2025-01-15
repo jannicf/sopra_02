@@ -75,6 +75,7 @@ class KleidungsstueckCard extends Component {
           show={showEditDialog}
           kleidungsstueck={kleidungsstueck}
           onClose={this.handleEditDialogClosed}
+          kleiderschrankId={this.props.kleiderschrankId}
         />
         <KleidungsstueckDeleteDialog
           show={showDeleteDialog}

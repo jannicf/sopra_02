@@ -7,24 +7,54 @@ import KleidungstypBO from '../api/KleidungstypBO';
 class KleidungstypForm extends Component {
     constructor(props) {
         super(props);
+        const { kleidungstyp, kleiderschrankId } = props;
+
+        // Erstelle eine echte Kopie des Kleidungstyps
+        let initialKleidungstyp;
+        if (kleidungstyp) {
+            initialKleidungstyp = new KleidungstypBO();
+            initialKleidungstyp.setID(kleidungstyp.getID());
+            initialKleidungstyp.setBezeichnung(kleidungstyp.getBezeichnung());
+            initialKleidungstyp.setKleiderschrankId(kleiderschrankId);
+            // Kopiere die Verwendungen
+            kleidungstyp.getVerwendungen().forEach(style => {
+                initialKleidungstyp.addVerwendung(style);
+            });
+        } else {
+            // Erstelle einen neuen leeren Kleidungstyp
+            initialKleidungstyp = new KleidungstypBO();
+            initialKleidungstyp.setID(0);
+            initialKleidungstyp.setBezeichnung('');
+            initialKleidungstyp.setKleiderschrankId(kleiderschrankId);
+        }
+
         this.state = {
-            kleidungstyp: props.kleidungstyp ? props.kleidungstyp : new KleidungstypBO(),
+            kleidungstyp: initialKleidungstyp,
+            selectedStyleIds: kleidungstyp ? kleidungstyp.getVerwendungen().map(style => style.getID()) : [],
             allStyles: [],
-            selectedStyleIds: [],
-            error: null,
-            loading: false
+            loading: false,
+            error: null
         };
     }
 
     componentDidMount() {
         this.loadStyles();
-        // Wenn ein Kleidungstyp zum Bearbeiten übergeben wurde, lade dessen Styles
         if (this.props.kleidungstyp) {
             const selectedStyles = this.props.kleidungstyp.getVerwendungen();
             if (selectedStyles) {
                 this.setState({
                     selectedStyleIds: selectedStyles.map(style => style.getID())
                 });
+            }
+
+            // Stelle sicher, dass die kleiderschrank_id im kleidungstyp gesetzt ist
+            const kleidungstyp = this.state.kleidungstyp;
+            // Prüfe beide möglichen Quellen für die kleiderschrank_id
+            const kleiderschrankId = this.props.kleiderschrank_id || this.props.kleidungstyp.getKleiderschrankId();
+            if (kleiderschrankId) {
+                kleidungstyp.setKleiderschrankId(kleiderschrankId);
+                this.setState({ kleidungstyp });
+                console.log("DEBUG: kleiderschrank_id gesetzt in componentDidMount:", kleiderschrankId);
             }
         }
     }
@@ -67,39 +97,63 @@ class KleidungstypForm extends Component {
         this.setState({ kleidungstyp });
     }
 
-    handleSubmit = async () => {
-        const { kleidungstyp, selectedStyleIds } = this.state;
-        const { kleiderschrankId } = this.props;
-        try {
-            this.setState({ loading: true });
+    // Wenn sich die Props ändern
+    componentDidUpdate(prevProps) {
+        if (this.props.kleidungstyp !== prevProps.kleidungstyp ||
+            this.props.kleiderschrank_id !== prevProps.kleiderschrank_id) {
+            const { kleidungstyp, kleiderschrankId } = this.props;
 
-            // einfaches Objekt für den API-Request
-            const kleidungstypData = {
-                bezeichnung: kleidungstyp.getBezeichnung(),
-                verwendungen: selectedStyleIds,
-                id: kleidungstyp.getID() || 0,
-                kleiderschrank_id: kleiderschrankId
-            };
-
-            let savedKleidungstyp;
-            if (kleidungstyp.getID()) {
-                savedKleidungstyp = await KleiderschrankAPI.getAPI().updateKleidungstyp(kleidungstypData);
-            } else {
-                savedKleidungstyp = await KleiderschrankAPI.getAPI().addKleidungstyp(kleidungstypData);
+            if (kleidungstyp) {
+                kleidungstyp.setKleiderschrankId(kleiderschrankId);
             }
 
-            this.props.onClose(savedKleidungstyp);
-        } catch (error) {
             this.setState({
-                error: 'Fehler beim Speichern des Kleidungstyps',
-                loading: false
+                kleidungstyp: kleidungstyp,
+                selectedStyleIds: kleidungstyp ?
+                    kleidungstyp.getVerwendungen().map(style => style.getID()) : []
             });
         }
     }
 
+    handleSubmit = async () => {
+        const { kleidungstyp } = this.state;
+        try {
+            console.log("Sende Update-Daten:", {
+                bezeichnung: kleidungstyp.getBezeichnung(),
+                verwendungen: kleidungstyp.getVerwendungen().map(style => style.getID()),
+                id: kleidungstyp.getID(),
+                kleiderschrank_id: this.props.kleiderschrankId
+            });
+
+            if (kleidungstyp.getID()) {
+                await KleiderschrankAPI.getAPI().updateKleidungstyp({
+                    id: kleidungstyp.getID(),
+                    bezeichnung: kleidungstyp.getBezeichnung(),
+                    verwendungen: kleidungstyp.getVerwendungen().map(style => style.getID()),
+                    kleiderschrank_id: this.props.kleiderschrankId
+                });
+                this.props.onClose(kleidungstyp);
+            }
+        } catch (error) {
+            console.error("Fehler beim Speichern:", error);
+            this.setState({ error: error.message });
+        }
+    };
+
     render() {
         const { kleidungstyp, allStyles, selectedStyleIds, error, loading } = this.state;
         const { show, onClose } = this.props;
+
+        // Frühe Rückgabe wenn kein kleidungstyp vorhanden
+        if (!kleidungstyp) {
+            return null;
+        }
+
+        // Frühe Rückgabe wenn keine Styles geladen wurden
+        if (!allStyles) {
+            return null;
+        }
+
 
         return (
             <Dialog open={show} onClose={() => onClose(null)} maxWidth="sm" fullWidth>
@@ -121,7 +175,7 @@ class KleidungstypForm extends Component {
                             <InputLabel>Styles</InputLabel>
                             <Select
                                 multiple
-                                value={selectedStyleIds}
+                                value={selectedStyleIds || []}
                                 onChange={this.handleStyleChange}
                                 input={<OutlinedInput label="Styles" />}
                                 renderValue={(selected) => (

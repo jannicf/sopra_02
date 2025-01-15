@@ -55,32 +55,46 @@ class KleidungstypMapper(Mapper):
 
     def update(self, kleidungstyp):
         """
-            Wiederholtes Schreiben eines Kleidungstyp-Objekts in die Datenbank.
+        Wiederholtes Schreiben eines Kleidungstyp-Objekts in die Datenbank.
 
-            :param kleidungstyp: Das Objekt, das in die DB geschrieben werden soll
+        :param kleidungstyp: Das Objekt, das in die DB geschrieben werden soll
+        :return: Das aktualisierte Kleidungstyp-Objekt
+        :raises: Exception wenn ein Datenbankfehler auftritt
         """
         cursor = self._cnx.cursor()
+        try:
+            # Prüfen ob Kleiderschrank existiert
+            cursor.execute("SELECT id FROM kleiderschrank WHERE id=%s",
+                           (kleidungstyp.get_kleiderschrank_id(),))
+            if not cursor.fetchone():
+                raise ValueError(f"Kleiderschrank mit ID {kleidungstyp.get_kleiderschrank_id()} existiert nicht")
 
-        # Hauptobjekt aktualisieren
-        command = "UPDATE kleidungstyp SET bezeichnung=%s, kleiderschrank_id=%s WHERE id=%s"
-        data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_kleiderschrank_id(), kleidungstyp.get_id())
-        cursor.execute(command, data)
+            # Hauptobjekt aktualisieren
+            command = "UPDATE kleidungstyp SET bezeichnung=%s, kleiderschrank_id=%s WHERE id=%s"
+            data = (kleidungstyp.get_bezeichnung(), kleidungstyp.get_kleiderschrank_id(), kleidungstyp.get_id())
+            cursor.execute(command, data)
 
-        # Verwendungen (Styles) aktualisieren
-        # Zuerst vorhandene Verknüpfungen löschen
-        delete_command = "DELETE FROM style_kleidungstyp WHERE kleidungstyp_id=%s"
-        cursor.execute(delete_command, (kleidungstyp.get_id(),))
+            # Verwendungen (Styles) aktualisieren
+            # Zuerst vorhandene Verknüpfungen löschen
+            delete_command = "DELETE FROM style_kleidungstyp WHERE kleidungstyp_id=%s"
+            cursor.execute(delete_command, (kleidungstyp.get_id(),))
 
-        # Neue Verwendungen einfügen
-        verwendungen = kleidungstyp.get_verwendungen()
-        if verwendungen:
-            for verwendung in verwendungen:
-                verknuepfung_command = "INSERT INTO style_kleidungstyp (kleidungstyp_id, style_id) VALUES (%s, %s)"
-                verknuepfung_data = (kleidungstyp.get_id(), verwendung.get_id())
-                cursor.execute(verknuepfung_command, verknuepfung_data)
+            # Neue Verwendungen einfügen
+            verwendungen = kleidungstyp.get_verwendungen()
+            if verwendungen:
+                for verwendung in verwendungen:
+                    verknuepfung_command = "INSERT INTO style_kleidungstyp (kleidungstyp_id, style_id) VALUES (%s, %s)"
+                    verknuepfung_data = (kleidungstyp.get_id(), verwendung.get_id())
+                    cursor.execute(verknuepfung_command, verknuepfung_data)
 
-        self._cnx.commit()
-        cursor.close()
+            self._cnx.commit()
+            return kleidungstyp
+
+        except Exception as e:
+            self._cnx.rollback()
+            raise e
+        finally:
+            cursor.close()
 
     def delete(self, kleidungstyp):
         """
