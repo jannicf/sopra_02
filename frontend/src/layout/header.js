@@ -82,18 +82,21 @@ class Header extends Component {
                                     label="Kleiderschrank"
                                     component={RouterLink}
                                     to='/kleiderschrank'
+                                    disableRipple
                                 />
                                 <Tab
                                     icon={<StyleIcon />}
                                     label="Styles"
                                     component={RouterLink}
                                     to='/styles'
+                                    disableRipple
                                 />
                                 <Tab
                                     icon={<CheckroomIcon />}
                                     label="Outfits"
                                     component={RouterLink}
                                     to='/outfits'
+                                    disableRipple
                                 />
                             </Tabs>
                     </Box>
@@ -118,7 +121,7 @@ class Header extends Component {
                     )}
 
                     {/* Profile-Button */}
-                    {user && <ProfileDropDown user={user} onLogout={this.props.onLogout}  />}
+                    {user && <ProfileDropDown user={user} onLogout={this.props.onLogout} />}
                 </Box>
             </Paper>
         );

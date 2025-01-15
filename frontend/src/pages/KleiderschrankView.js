@@ -187,6 +187,7 @@ class KleiderschrankView extends Component {
                         color="primary"
                         size="large"
                         onClick={() => this.setState({ activeView: 'kleidungsstuecke' })}
+                        disableRipple
                     >
                         Kleidungsstücke
                     </Button>
@@ -195,6 +196,7 @@ class KleiderschrankView extends Component {
                         color="primary"
                         size="large"
                         onClick={() => this.setState({ activeView: 'kleidungstypen' })}
+                        disableRipple
                     >
                         Kleidungstypen
                     </Button>
@@ -228,6 +230,7 @@ class KleiderschrankView extends Component {
                             color="primary"
                             startIcon={<AddIcon />}
                             onClick={this.handleCreateClick}
+                            disableRipple
                             sx={{ position: 'fixed', bottom: '4.5rem', right: '2rem' }}
                         >
                             Neues Kleidungsstück
@@ -261,6 +264,7 @@ class KleiderschrankView extends Component {
                             color="primary"
                             startIcon={<AddIcon />}
                             onClick={this.handleCreateTypClick}
+                            disableRipple
                             sx={{ position: 'fixed', bottom: '4.5rem', right: '2rem' }}
                         >
                             Neuer Kleidungstyp

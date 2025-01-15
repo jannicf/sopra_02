@@ -31,6 +31,7 @@ class OutfitView extends Component {
             component={Link}
             to="/outfits/erstellen-nach-style"
             size="large"
+            disableRipple
           >
             Outfit nach Style erstellen
           </Button>
@@ -42,6 +43,7 @@ class OutfitView extends Component {
             component={Link}
             to="/outfits/create-by-item"
             size="large"
+            disableRipple
           >
             Outfit nach einem bestimmten Kleidungsstück erstellen
           </Button>

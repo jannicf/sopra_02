@@ -122,6 +122,7 @@ class StylesView extends Component {
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={this.handleCreateClick}
+                    disableRipple
                     sx={{
                         position: 'fixed',
                         bottom: '4.5rem',

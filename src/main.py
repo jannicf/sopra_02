@@ -26,7 +26,7 @@ def index():
 
 
 @app.errorhandler(404)
-def not_found(e):
+def not_found():
     return app.send_static_file('index.html')
 
 CORS(app, resources=r'/wardrobe/*')  # Erlaubt CORS für alle Wardrobe-Endpoints

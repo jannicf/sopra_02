@@ -311,6 +311,7 @@ const handleSubmit = async () => {
                 setSelectedConstraint(null);
                 setActiveDialog('kardinalitaet');
               }}
+              disableRipple
               sx={{ mr: 1 }}
             >
               + Kardinalität
@@ -321,6 +322,7 @@ const handleSubmit = async () => {
                 setSelectedConstraint(null);
                 setActiveDialog('mutex');
               }}
+              disableRipple
               sx={{ mr: 1 }}
             >
               + Mutex
@@ -331,6 +333,7 @@ const handleSubmit = async () => {
                 setSelectedConstraint(null);
                 setActiveDialog('implikation');
               }}
+              disableRipple
             >
               + Implikation
             </Button>
@@ -340,11 +343,16 @@ const handleSubmit = async () => {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={() => onClose(false)}>Abbrechen</Button>
+        <Button onClick={() => onClose(false)}
+        disableRipple
+        >
+          Abbrechen
+        </Button>
         <Button
           onClick={handleSubmit}
           variant="contained"
           color="primary"
+          disableRipple
         >
           {style ? 'Speichern' : 'Erstellen'}
         </Button>
