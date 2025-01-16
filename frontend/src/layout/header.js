@@ -22,12 +22,13 @@ class Header extends Component {
     }
     render() {
         const { user } = this.props;
+        const maxWidth = user ? '1200px' : '400px';
 
         return (
             <Box sx={{
-                maxWidth: '1200px',  // gleiche Breite wie Container maxWidth='lg'
-                margin: '0 auto',    // zentriert den Header
-                width: '100%'        // nimmt verfügbare Breite ein
+                maxWidth: maxWidth,
+                margin: '0 auto',
+                width: '100%'
             }}>
             <Paper
                 elevation={0}
@@ -35,7 +36,7 @@ class Header extends Component {
                     background: 'linear-gradient(45deg, #1a237e 30%, #3949ab 90%)',
                     color: 'white',
                     borderRadius: '10px',
-                    maxWidth: '1200px',
+                    maxWidth: maxWidth,
                     margin: '0 auto',
                     marginTop: '10px',
                     padding: '0 20px',

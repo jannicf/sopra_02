@@ -8,6 +8,16 @@ class StyleCard extends Component {
         showDetailsDialog: false
     };
 
+    handleEditClick = (e) => {
+        e.stopPropagation(); // Stoppt das Event hier direkt
+        this.props.onEdit(this.props.style);
+    };
+
+    handleDeleteClick = (e) => {
+        e.stopPropagation(); // Stoppt das Event hier direkt
+        this.props.onDelete(this.props.style);
+    };
+
     handleCloseDetails = () => {
         this.setState({
             showDetailsDialog: false
@@ -148,26 +158,20 @@ class StyleCard extends Component {
                             </Box>
                             <Box>
                                 <IconButton
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEdit(e);
-                                    }}
+                                    onClick={this.handleEditClick}
                                     size="small"
                                     sx={{ mr: 1 }}
                                 >
                                     <EditIcon />
                                 </IconButton>
                                 <IconButton
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDelete(e);
-                                    }}
+                                    onClick={this.handleDeleteClick}
                                     size="small"
                                     color="error"
                                 >
                                     <DeleteIcon />
                                 </IconButton>
-                            </Box>
+                        </Box>
                         </Box>
                     </CardContent>
                 </Card>

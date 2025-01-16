@@ -12,9 +12,9 @@ class StyleList extends Component {
                     <Grid item xs={12} sm={6} md={4} key={style.getID()}>
                         <StyleCard
                             style={style}
-                            onEdit={(e) => onEdit(style, e)}
-                            onDelete={(e) => onDelete(style, e)}
-                            onClick={() => onStyleClick(style)}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onClick={onStyleClick}
                         />
                     </Grid>
                 ))}
