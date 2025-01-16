@@ -48,7 +48,7 @@ class OutfitDeleteDialog extends Component {
           </Button>
           <Button
             onClick={this.handleDelete}
-            color="secondary"
+            color="error"
           >
             Löschen
           </Button>
