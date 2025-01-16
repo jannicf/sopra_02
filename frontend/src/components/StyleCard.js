@@ -2,11 +2,26 @@ import React, { Component } from 'react';
 import { Box, Card, CardContent, IconButton, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class StyleCard extends Component {
     state = {
-        showDetailsDialog: false
+        showDetailsDialog: false,
+        kleidungstypen: []
     };
+
+    componentDidMount() {
+    this.loadKleidungstypen();
+}
+
+loadKleidungstypen = async () => {
+    try {
+        const kleidungstypen = await KleiderschrankAPI.getAPI().getKleidungstypen();
+        this.setState({ kleidungstypen });
+    } catch (error) {
+        console.error("Fehler beim Laden der Kleidungstypen:", error);
+    }
+};
 
     handleCloseDetails = () => {
         this.setState({
@@ -73,33 +88,44 @@ class StyleCard extends Component {
                         <Typography variant="h6" gutterBottom>
                             Constraints:
                         </Typography>
-                        {style.getConstraints().kardinalitaeten?.map((k, index) => (
-                            <Typography
-                                key={`k-${index}`}
-                                color="textSecondary"
-                                sx={{ ml: 2, mb: 1 }}
-                            >
-                                • Kardinalität: {k.minAnzahl} bis {k.maxAnzahl} für Typ "{k.bezugsobjekt_id}"
-                            </Typography>
-                        ))}
-                        {style.getConstraints().mutexe?.map((m, index) => (
-                            <Typography
-                                key={`m-${index}`}
-                                color="textSecondary"
-                                sx={{ ml: 2, mb: 1 }}
-                            >
-                                • Mutex: Typen "{m.bezugsobjekt1_id}" und "{m.bezugsobjekt2_id}" schließen sich aus
-                            </Typography>
-                        ))}
-                        {style.getConstraints().implikationen?.map((i, index) => (
-                            <Typography
-                                key={`i-${index}`}
-                                color="textSecondary"
-                                sx={{ ml: 2, mb: 1 }}
-                            >
-                                • Implikation: Wenn Typ "{i.bezugsobjekt1_id}" gewählt ist, muss auch Typ "{i.bezugsobjekt2_id}" gewählt werden
-                            </Typography>
-                        ))}
+                        {style.getConstraints().kardinalitaeten?.map((k, index) => {
+                            const typ = this.state.kleidungstypen.find(t => t.getID() === k.bezugsobjekt.id);
+                            return (
+                                <Typography
+                                    key={`k-${index}`}
+                                    color="textSecondary"
+                                    sx={{ ml: 2, mb: 1 }}
+                                >
+                                    • Kardinalität: {k.minAnzahl || 0} bis {k.maxAnzahl || 0} für Typ "{typ ? typ.getBezeichnung() : 'Unbekannt'}"
+                                </Typography>
+                            );
+                        })}
+                        {style.getConstraints().mutexe?.map((m, index) => {
+                            const typ1 = this.state.kleidungstypen.find(t => t.getID() === m.bezugsobjekt1.id);
+                            const typ2 = this.state.kleidungstypen.find(t => t.getID() === m.bezugsobjekt2.id);
+                            return (
+                                <Typography
+                                    key={`m-${index}`}
+                                    color="textSecondary"
+                                    sx={{ ml: 2, mb: 1 }}
+                                >
+                                    • Mutex: Typen "{typ1?.getBezeichnung() || 'Unbekannt'}" und "{typ2?.getBezeichnung() || 'Unbekannt'}" schließen sich aus
+                                </Typography>
+                            );
+                        })}
+                        {style.getConstraints().implikationen?.map((i, index) => {
+                            const typ1 = this.state.kleidungstypen.find(t => t.getID() === i.bezugsobjekt1.id);
+                            const typ2 = this.state.kleidungstypen.find(t => t.getID() === i.bezugsobjekt2.id);
+                            return (
+                                <Typography
+                                    key={`i-${index}`}
+                                    color="textSecondary"
+                                    sx={{ ml: 2, mb: 1 }}
+                                >
+                                    • Implikation: Wenn Typ "{typ1?.getBezeichnung() || 'Unbekannt'}" gewählt ist, muss auch Typ "{typ2?.getBezeichnung() || 'Unbekannt'}" gewählt werden
+                                </Typography>
+                            );
+                        })}
                     </Box>
                 </DialogContent>
                 <DialogActions>

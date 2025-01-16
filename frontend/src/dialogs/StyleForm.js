@@ -202,23 +202,25 @@ const handleSubmit = async () => {
    */
   const renderConstraintsList = () => (
     <List>
-      {formData.constraints.kardinalitaeten.map((k, idx) => (
-        <ListItem key={`k-${idx}`}>
-          <ListItemText
-            primary={`Kardinalität: ${k.minAnzahl} bis ${k.maxAnzahl} ` +
-              `${kleidungstypen.find(t => t.getID() === k.bezugsobjekt.id)?.getBezeichnung()}`}
-          />
-          <IconButton onClick={() => {
-            setSelectedConstraint(k);
-            setActiveDialog('kardinalitaet');
-          }}>
-            <EditIcon />
-          </IconButton>
-          <IconButton onClick={() => handleConstraintDelete('kardinalitaet', idx)}>
-            <DeleteIcon />
-          </IconButton>
-        </ListItem>
-      ))}
+      {formData.constraints.kardinalitaeten.map((k, idx) => {
+        const typ = kleidungstypen.find(t => t.getID() === k.bezugsobjekt?.id);
+        return (
+            <ListItem key={`k-${idx}`}>
+                <ListItemText
+                    primary={`Kardinalität: ${k.minAnzahl || 0} bis ${k.maxAnzahl || 0} ${typ ? typ.getBezeichnung() : 'Unbekannt'}`}
+                />
+                <IconButton onClick={() => {
+                    setSelectedConstraint(k);
+                    setActiveDialog('kardinalitaet');
+                }}>
+                    <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleConstraintDelete('kardinalitaet', idx)}>
+                    <DeleteIcon />
+                </IconButton>
+            </ListItem>
+        );
+    })}
 
       {formData.constraints.mutexe.map((m, idx) => (
         <ListItem key={`m-${idx}`}>
