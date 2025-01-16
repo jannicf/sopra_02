@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Grid, Typography, Box, Card, CardContent } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleBasiertesOutfitDialog from '../dialogs/StyleBasiertesOutfitDialog';
+import { Link } from 'react-router-dom';
 
 /**
  * Komponente zur Erstellung von Outfits basierend auf Styles.
@@ -77,15 +78,21 @@ class StyleBasiertesOutfitView extends Component {
     /**
      * Handler für das Schließen des Dialogs
      */
-    handleDialogClose = (outfitCreated = false) => {
-        this.setState({
-            showDialog: false,
-            selectedStyle: null
-        });
-
-        // Wenn ein Outfit erstellt wurde, laden wir die Styles neu
-        if (outfitCreated) {
-            this.loadStyles();
+    handleDialogClose = (success) => {
+        if (success) {
+            // Wenn das Outfit erfolgreich erstellt wurde
+            this.setState({
+                showDialog: false,
+                selectedStyle: null
+            }, () => {
+                // Exakt die gleiche Navigation wie bei KleidungsstueckBasiertesOutfit
+                document.getElementById('outfitsLink').click();
+            });
+        } else {
+            this.setState({
+                showDialog: false,
+                selectedStyle: null
+            });
         }
     };
 
@@ -135,6 +142,12 @@ class StyleBasiertesOutfitView extends Component {
                         </Grid>
                     ))}
                 </Grid>
+
+                <Link
+                to="/outfits"
+                id="outfitsLink"
+                style={{display: 'none'}}
+                />
 
                 {/* Dialog für die Outfit-Erstellung */}
                 <StyleBasiertesOutfitDialog

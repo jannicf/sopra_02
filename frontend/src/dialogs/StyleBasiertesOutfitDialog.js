@@ -95,9 +95,9 @@ class StyleBasiertesOutfitDialog extends Component {
                 kleiderschrank_id: this.props.kleiderschrankId
             });
 
-            // Erfolgsmeldung
-            alert('Outfit wurde erfolgreich erstellt!');
+            // Dialog schließen und zur Outfits-Seite navigieren
             this.props.onClose(true);
+            this.props.navigate('/outfits');
         } catch (error) {
             this.setState({
                 error: 'Fehler beim Erstellen des Outfits: ' + error.message,
