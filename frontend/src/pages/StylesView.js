@@ -65,13 +65,11 @@ class StylesView extends Component {
         this.setState({ selectedStyle: null, showFormDialog: true });
     };
 
-    handleEditClick = (style, event) => {
-        event.stopPropagation();
+    handleEditClick = (style) => {
         this.setState({ selectedStyle: style, showFormDialog: true });
     };
 
-    handleDeleteClick = (style, event) => {
-        event.stopPropagation();
+    handleDeleteClick = (style) => {
         this.setState({ selectedStyle: style, showDeleteDialog: true });
     };
 

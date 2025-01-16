@@ -23,6 +23,16 @@ loadKleidungstypen = async () => {
     }
 };
 
+    handleEditClick = (e) => {
+        e.stopPropagation(); // Stoppt das Event hier direkt
+        this.props.onEdit(this.props.style);
+    };
+
+    handleDeleteClick = (e) => {
+        e.stopPropagation(); // Stoppt das Event hier direkt
+        this.props.onDelete(this.props.style);
+    };
+
     handleCloseDetails = () => {
         this.setState({
             showDetailsDialog: false
@@ -174,26 +184,20 @@ loadKleidungstypen = async () => {
                             </Box>
                             <Box>
                                 <IconButton
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEdit(e);
-                                    }}
+                                    onClick={this.handleEditClick}
                                     size="small"
                                     sx={{ mr: 1 }}
                                 >
                                     <EditIcon />
                                 </IconButton>
                                 <IconButton
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDelete(e);
-                                    }}
+                                    onClick={this.handleDeleteClick}
                                     size="small"
                                     color="error"
                                 >
                                     <DeleteIcon />
                                 </IconButton>
-                            </Box>
+                        </Box>
                         </Box>
                     </CardContent>
                 </Card>
