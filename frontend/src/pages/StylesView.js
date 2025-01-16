@@ -113,22 +113,8 @@ class StylesView extends Component {
                     onEdit={this.handleEditClick}
                     onDelete={this.handleDeleteClick}
                     onStyleClick={this.handleStyleClick}
+                    onCreateClick={this.handleCreateClick}
                 />
-
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={this.handleCreateClick}
-                    disableRipple
-                    sx={{
-                        position: 'fixed',
-                        bottom: '4.5rem',
-                        right: '2rem'
-                    }}
-                >
-                    Neuer Style
-                </Button>
 
                 {showFormDialog && (
                     <StyleForm
