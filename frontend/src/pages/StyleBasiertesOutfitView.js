@@ -3,6 +3,7 @@ import { Grid, Typography, Box, Card, CardContent } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleBasiertesOutfitDialog from '../dialogs/StyleBasiertesOutfitDialog';
 import { Link } from 'react-router-dom';
+import ErrorAlert from "../dialogs/ErrorAlert";
 
 /**
  * Komponente zur Erstellung von Outfits basierend auf Styles.
@@ -30,11 +31,20 @@ class StyleBasiertesOutfitView extends Component {
                 .then(person => {
                     if (person && person.getKleiderschrank()) {
                         this.setState({
-                            kleiderschrankId: person.getKleiderschrank().getID()
+                            kleiderschrankId: person.getKleiderschrank().getID(),
+                            error: null
                         }, () => {
                             this.loadStyles();
                         });
+                    } else {
+                        this.setState({
+                            error: "Kein Kleiderschrank gefunden"
+                        });
                     }
+                }).catch(error => {
+                    this.setState({
+                        error: "Fehler beim Laden des Kleiderschranks: " + error.message
+                    });
                 });
         }
     }
@@ -71,7 +81,8 @@ class StyleBasiertesOutfitView extends Component {
     handleStyleClick = (style) => {
         this.setState({
             selectedStyle: style,
-            showDialog: true
+            showDialog: true,
+            error: null
         });
     };
 
@@ -83,7 +94,8 @@ class StyleBasiertesOutfitView extends Component {
             // Wenn das Outfit erfolgreich erstellt wurde
             this.setState({
                 showDialog: false,
-                selectedStyle: null
+                selectedStyle: null,
+                error: null
             }, () => {
                 // Exakt die gleiche Navigation wie bei KleidungsstueckBasiertesOutfit
                 document.getElementById('outfitsLink').click();
@@ -95,6 +107,10 @@ class StyleBasiertesOutfitView extends Component {
             });
         }
     };
+
+    handleErrorClose = () => {
+        this.setState({ error: null });
+    }
 
     render() {
         const { styles, selectedStyle, showDialog, loading, error } = this.state;
@@ -109,6 +125,12 @@ class StyleBasiertesOutfitView extends Component {
 
         return (
             <Box sx={{ padding: 2 }}>
+                {error && (
+                    <ErrorAlert
+                        message={error}
+                        onClose={this.handleErrorClose}
+                    />
+                )}
                 <Typography variant="h4" gutterBottom>
                     Wähle einen Style
                 </Typography>
@@ -155,6 +177,7 @@ class StyleBasiertesOutfitView extends Component {
                     style={selectedStyle}
                     kleiderschrankId={this.state.kleiderschrankId}
                     onClose={this.handleDialogClose}
+                    onError={(errorMessage) => this.setState({ error: errorMessage })}
                 />
             </Box>
         );

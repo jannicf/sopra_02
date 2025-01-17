@@ -8,6 +8,7 @@ import PersonEditForm from '../dialogs/PersonEditForm';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import PersonDeleteDialog from "../dialogs/PersonDeleteDialog";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ErrorAlert from "../dialogs/ErrorAlert";
 
 class ProfilView extends Component {
     constructor(props) {
@@ -22,29 +23,30 @@ class ProfilView extends Component {
     }
 
     handleDeleteClick = () => {
-        this.setState({showDeleteDialog: true});
+        this.setState({showDeleteDialog: true, error: null});
     }
 
     handleDeleteDialogClosed = async (wasDeleted) => {
-    if (wasDeleted) {
-        // Erst State zurücksetzen
-        this.setState({
-            person: null,
-            showDeleteDialog: false
-        });
-
-        // Dann alle relevanten Cookies löschen
-        document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
-
-        // Kurz warten
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Zur Login-Seite navigieren und neu laden
-        window.location.href = '/'
-    } else {
-        this.setState({showDeleteDialog: false});
+        if (wasDeleted) {
+            try {
+                this.setState({
+                    person: null,
+                    showDeleteDialog: false,
+                    error: null
+                });
+                document.cookie = 'token=;path=/;expires=Thu, 01 Jan 1970 00:00:01 GMT';
+                await new Promise(resolve => setTimeout(resolve, 100));
+                window.location.href = '/';
+            } catch (error) {
+                this.setState({
+                    error: "Fehler beim Löschen des Profils: " + error.message
+                });
+            }
+        } else {
+            this.setState({ showDeleteDialog: false });
         }
     }
+
 
     componentDidMount() {
         this.loadPerson();
@@ -52,61 +54,76 @@ class ProfilView extends Component {
 
     loadPerson = async () => {
     try {
-        const persons = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
+        const person = await KleiderschrankAPI.getAPI().getPersonByGoogleId(this.props.user?.uid);
         this.setState({
-            person: persons,
+            person: person,
             error: null
         });
     } catch (error) {
-        console.error("ProfilView: Fehler beim Laden der Person:", error);
         this.setState({
-            error: error.message,
+            error: "Fehler beim Laden des Profils: " + error.message,
             person: null
             });
         }
     };
 
     handleCreateClick = () => {
-        this.setState({showCreateDialog: true});
+        this.setState({showCreateDialog: true, error: null});
     }
 
     handleEditClick = () => {
-        this.setState({showEditDialog: true});
+        this.setState({showEditDialog: true, error: null});
     }
 
     handleCreateDialogClosed = async (createdPerson) => {
         if (createdPerson) {
-            await this.loadPerson();
-            this.setState({
-                showCreateDialog: false,
-                error: null
-            });
+            try {
+                await this.loadPerson();
+                this.setState({
+                    showCreateDialog: false,
+                    error: null
+                });
+            } catch (error) {
+                this.setState({
+                    error: "Fehler beim Erstellen des Profils: " + error.message
+                });
+            }
         } else {
-            this.setState({showCreateDialog: false});
+            this.setState({ showCreateDialog: false });
         }
     }
 
     handleEditDialogClosed = async (editedPerson) => {
-    if (editedPerson) {
-        // Explizit neu laden, um die aktuellsten Daten vom Server zu bekommen
-        await this.loadPerson();
-
-        // State aktualisieren, um Re-Render zu triggern
-        this.setState({
-            showEditDialog: false
-        });
-    } else {
-        this.setState({
-            showEditDialog: false
-            });
+        if (editedPerson) {
+            try {
+                await this.loadPerson();
+                this.setState({
+                    showEditDialog: false,
+                    error: null
+                });
+            } catch (error) {
+                this.setState({
+                    error: "Fehler beim Aktualisieren des Profils: " + error.message
+                });
+            }
+        } else {
+            this.setState({ showEditDialog: false });
         }
-    };
+    }
+
+
 
     render() {
-    const {person, showCreateDialog, showEditDialog, showDeleteDialog} = this.state;
+    const {person, showCreateDialog, showEditDialog, showDeleteDialog, error} = this.state;
 
         return (
             <div>
+                {error && (
+                    <ErrorAlert
+                        message={error}
+                        onClose={this.handleErrorClose}
+                    />
+                )}
                 <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>
                     Mein Profil
                 </Typography>
@@ -189,6 +206,7 @@ class ProfilView extends Component {
                     show={showCreateDialog}
                     onClose={this.handleCreateDialogClosed}
                     user={this.props.user}
+                    onError={(errorMessage) => this.setState({ error: errorMessage })}
                 />
 
                 {/* Dialog zum Bearbeiten der Person */}
@@ -198,11 +216,13 @@ class ProfilView extends Component {
                         show={showEditDialog}
                         onClose={this.handleEditDialogClosed}
                         person={person}
+                        onError={(errorMessage) => this.setState({ error: errorMessage })}
                     />
                     <PersonDeleteDialog
                         show={showDeleteDialog}
                         onClose={this.handleDeleteDialogClosed}
                         person={person}
+                        onError={(errorMessage) => this.setState({ error: errorMessage })}
                     />
                   </>
                 )}

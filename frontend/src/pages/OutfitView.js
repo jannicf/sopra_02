@@ -3,6 +3,7 @@ import { Typography, Button, Box } from '@mui/material';
 import OutfitList from '../components/OutfitList';
 import { Link } from 'react-router-dom';
 
+
 class OutfitView extends Component {
   render() {
     return (
@@ -21,7 +22,7 @@ class OutfitView extends Component {
             justifyContent: 'center',
             gap: 2,
             mb: 6,
-            mt: 4  // Neuer Abstand nach oben
+            mt: 4
           }}
         >
           {/* Button für Style-basierte Outfit-Erstellung */}
