@@ -166,11 +166,9 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                     fullWidth
                 >
                     <DialogTitle>
-                        <Typography variant="h6">
                             {selectedStyle
                                 ? `Outfit im Style "${selectedStyle.getName()}" erstellen`
                                 : 'Outfit erstellen'}
-                        </Typography>
                     </DialogTitle>
                     <DialogContent>
                         {/* Basis-Kleidungsstück Anzeige */}

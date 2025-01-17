@@ -32,9 +32,7 @@ const OutfitDetailDialog = ({ outfit, open, onClose, onDelete }) => {
         fullWidth
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 1 }}>
-          <Typography variant="h6">
             Outfit Details
-          </Typography>
           <IconButton
             onClick={handleDeleteClick}
             color="error"
