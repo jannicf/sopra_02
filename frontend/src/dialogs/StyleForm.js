@@ -212,10 +212,10 @@ const handleSubmit = async () => {
                 <IconButton onClick={() => {
                     setSelectedConstraint(k);
                     setActiveDialog('kardinalitaet');
-                }}>
+                }} color="primary">
                     <EditIcon />
                 </IconButton>
-                <IconButton onClick={() => handleConstraintDelete('kardinalitaet', idx)}>
+                <IconButton onClick={() => handleConstraintDelete('kardinalitaet', idx)} color="error">
                     <DeleteIcon />
                 </IconButton>
             </ListItem>
@@ -231,10 +231,10 @@ const handleSubmit = async () => {
           <IconButton onClick={() => {
             setSelectedConstraint(m);
             setActiveDialog('mutex');
-          }}>
+          }} color="primary">
             <EditIcon />
           </IconButton>
-          <IconButton onClick={() => handleConstraintDelete('mutex', idx)}>
+          <IconButton onClick={() => handleConstraintDelete('mutex', idx)} color="error">
             <DeleteIcon />
           </IconButton>
         </ListItem>
@@ -249,10 +249,10 @@ const handleSubmit = async () => {
           <IconButton onClick={() => {
             setSelectedConstraint(i);
             setActiveDialog('implikation');
-          }}>
+          }} color="primary">
             <EditIcon />
           </IconButton>
-          <IconButton onClick={() => handleConstraintDelete('implikation', idx)}>
+          <IconButton onClick={() => handleConstraintDelete('implikation', idx)} color="error">
             <DeleteIcon />
           </IconButton>
         </ListItem>
