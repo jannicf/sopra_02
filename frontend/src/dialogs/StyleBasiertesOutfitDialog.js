@@ -21,7 +21,6 @@ class StyleBasiertesOutfitDialog extends Component {
         this.state = {
             verfuegbareKleidung: [],
             ausgewaehlteKleidung: [],
-            loading: false,
             error: null
         };
     }
@@ -56,13 +55,11 @@ class StyleBasiertesOutfitDialog extends Component {
 
             this.setState({
                 verfuegbareKleidung: passendeKleidung,
-                error: null,
-                loading: false
+                error: null
             });
         } catch (error) {
             this.setState({
-                error: 'Fehler beim Laden der Kleidungsstücke: ' + error.message,
-                loading: false
+                error: 'Fehler beim Laden der Kleidungsstücke: ' + error.message
             });
         }
     };
@@ -100,15 +97,14 @@ class StyleBasiertesOutfitDialog extends Component {
             this.props.navigate('/outfits');
         } catch (error) {
             this.setState({
-                error: 'Fehler beim Erstellen des Outfits: ' + error.message,
-                loading: false
+                error: 'Fehler beim Erstellen des Outfits: ' + error.message
             });
         }
     }
 
     render() {
         const { show, style, onClose } = this.props;
-        const { verfuegbareKleidung, ausgewaehlteKleidung, loading, error } = this.state;
+        const { verfuegbareKleidung, ausgewaehlteKleidung, error } = this.state;
 
         return (
             <Dialog

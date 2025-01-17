@@ -17,7 +17,6 @@ class PersonForm extends Component {
                 kleiderschrankName: '', // Direkt integriert, da jede Person einen Kleiderschrank haben muss
             },
             error: null,
-            loading: false,
             touchedFields: {}
         };
     }
@@ -65,7 +64,6 @@ class PersonForm extends Component {
 
     handleSubmit = async () => {
     try {
-        this.setState({ loading: true });
         const api = KleiderschrankAPI.getAPI();
 
         // Person-Daten vorbereiten
@@ -74,9 +72,6 @@ class PersonForm extends Component {
         personBO.setNachname(this.state.formData.nachname);
         personBO.setNickname(this.state.formData.nickname);
         personBO.setGoogleId(this.props.user?.uid);
-
-        // Debug-Log
-        console.log("FormData:", this.state.formData);
 
         // Kleiderschrank vorbereiten
         if (this.state.formData.kleiderschrankName) {
@@ -104,14 +99,12 @@ class PersonForm extends Component {
     } catch (error) {
         console.error('Error in handleSubmit:', error);
         this.setState({ error: error.message });
-    } finally {
-        this.setState({ loading: false });
-        }
+    }
     };
 
     render() {
         const { show, onClose } = this.props;
-        const { formData, errors, touchedFields, loading } = this.state;
+        const { formData, errors, touchedFields } = this.state;
 
         return (
             <Dialog open={show} onClose={() => onClose(null)} maxWidth="sm" fullWidth>
@@ -173,16 +166,15 @@ class PersonForm extends Component {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => onClose(null)} disabled={loading}>
+                    <Button onClick={() => onClose(null)} >
                         Abbrechen
                     </Button>
                     <Button
                         onClick={this.handleSubmit}
                         variant="contained"
                         color="primary"
-                        disabled={loading}
                     >
-                        {loading ? 'Wird erstellt...' : 'Profil erstellen'}
+                        Profil erstellen
                     </Button>
                 </DialogActions>
             </Dialog>

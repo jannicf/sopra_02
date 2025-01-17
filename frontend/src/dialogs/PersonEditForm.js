@@ -17,7 +17,6 @@ class PersonEditForm extends Component {
                 kleiderschrankName: person.getKleiderschrank()?.getName()   || '',
             },
             error: null,
-            loading: false,
             touchedFields: {}
         };
     }
@@ -86,7 +85,7 @@ class PersonEditForm extends Component {
 
     render() {
         const { show, onClose } = this.props;
-        const { formData, errors, touchedFields, loading } = this.state;
+        const { formData, errors, touchedFields } = this.state;
 
         return (
             <Dialog open={show} onClose={() => onClose(null)} maxWidth="sm" fullWidth>
@@ -148,16 +147,15 @@ class PersonEditForm extends Component {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => onClose(null)} disabled={loading}>
+                    <Button onClick={() => onClose(null)} >
                         Abbrechen
                     </Button>
                     <Button
                         onClick={this.handleSubmit}
                         variant="contained"
                         color="primary"
-                        disabled={loading}
                     >
-                        {loading ? 'Wird gespeichert...' : 'Speichern'}
+                       Speichern
                     </Button>
                 </DialogActions>
             </Dialog>

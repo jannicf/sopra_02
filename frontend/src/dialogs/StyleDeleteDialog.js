@@ -9,7 +9,6 @@ class StyleDeleteDialog extends Component {
       affectedOutfits: [],
       affectedKleidungstypen: [],
       affectedKleidungsstuecke: [],
-      loading: false,
       error: null
     };
   }
@@ -53,12 +52,10 @@ class StyleDeleteDialog extends Component {
         affectedOutfits,
         affectedKleidungstypen,
         affectedKleidungsstuecke,
-        loading: false
       });
     } catch (error) {
       this.setState({
         error: "Fehler beim Prüfen der betroffenen Elemente",
-        loading: false
       });
     }
   }
@@ -67,7 +64,6 @@ class StyleDeleteDialog extends Component {
     const { style, onClose } = this.props;
     const { affectedOutfits, affectedKleidungsstuecke, affectedKleidungstypen } = this.state;
 
-    this.setState({ loading: true });
     try {
       const api = KleiderschrankAPI.getAPI();
 
@@ -94,7 +90,6 @@ class StyleDeleteDialog extends Component {
     } catch (error) {
       this.setState({
         error: "Fehler beim Löschen des Styles",
-        loading: false
       });
     }
   }
@@ -105,7 +100,6 @@ class StyleDeleteDialog extends Component {
       affectedOutfits,
       affectedKleidungstypen,
       affectedKleidungsstuecke,
-      loading,
       error
     } = this.state;
 
@@ -139,14 +133,12 @@ class StyleDeleteDialog extends Component {
         <DialogActions>
           <Button
             onClick={() => onClose(null)}
-            disabled={loading}
           >
             Abbrechen
           </Button>
           <Button
             onClick={this.handleDelete}
             color="error"
-            disabled={loading}
           >
             Löschen
           </Button>
