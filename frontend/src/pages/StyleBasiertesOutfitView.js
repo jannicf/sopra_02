@@ -113,11 +113,7 @@ class StyleBasiertesOutfitView extends Component {
     }
 
     render() {
-        const { styles, selectedStyle, showDialog, loading, error } = this.state;
-
-        if (loading) {
-            return <Typography>Lädt...</Typography>;
-        }
+        const { styles, selectedStyle, showDialog, error } = this.state;
 
         if (error) {
             return <Typography color="error">{error}</Typography>;

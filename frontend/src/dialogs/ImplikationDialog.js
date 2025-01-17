@@ -1,90 +1,113 @@
-import React, { useState, useEffect } from 'react';
-import {Dialog, DialogTitle, DialogContent, DialogActions, Button, FormControl, InputLabel, Select, MenuItem, Typography,
-} from '@mui/material';
+import React, { Component } from 'react';
+import {Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, FormControl, InputLabel, Select, MenuItem, Typography} from '@mui/material';
 
-const ImplikationDialog = ({ open, onClose, style, onSave, initialData = null }) => {
-  const [formData, setFormData] = useState({
-    bezugsobjekt1: '',
-    bezugsobjekt2: ''
-  });
+class ImplikationDialog extends Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          formData: {
+            bezugsobjekt1: '',
+            bezugsobjekt2: ''
+          }
+        };
+      }
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        bezugsobjekt1: initialData.bezugsobjekt1?.id || '',
-        bezugsobjekt2: initialData.bezugsobjekt2?.id || ''
-      });
-    }
-  }, [initialData]);
+      componentDidMount() {
+        if (this.props.initialData) {
+          this.setState({
+            formData: {
+              bezugsobjekt1: this.props.initialData.bezugsobjekt1?.id || '',
+              bezugsobjekt2: this.props.initialData.bezugsobjekt2?.id || ''
+            }
+          });
+        }
+      }
 
-  const handleSubmit = () => {
-    onSave({
-      type: 'implikation',
-      bezugsobjekt1_id: formData.bezugsobjekt1,
-      bezugsobjekt2_id: formData.bezugsobjekt2
-    });
-    onClose();
-  };
+      handleSubmit = () => {
+        this.props.onSave({
+          type: 'implikation',
+          bezugsobjekt1_id: this.state.formData.bezugsobjekt1,
+          bezugsobjekt2_id: this.state.formData.bezugsobjekt2
+        });
+        this.props.onClose();
+      }
 
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>
-        {initialData ? 'Implikation bearbeiten' : 'Neue Implikation'}
-      </DialogTitle>
-      <DialogContent>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          Wenn das erste Kleidungstyp vorhanden ist, muss auch das zweite vorhanden sein.
-        </Typography>
+      render() {
+    const { open, onClose, style } = this.props;
+    const { formData } = this.state;
 
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Wenn dieser Kleidungstyp...</InputLabel>
-          <Select
-            value={formData.bezugsobjekt1}
-            onChange={(e) => setFormData({ ...formData, bezugsobjekt1: e.target.value })}
+    return (
+      <Dialog open={open} onClose={onClose}>
+        <DialogTitle>
+          {this.props.initialData ? 'Implikation bearbeiten' : 'Neue Implikation'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="textSecondary" gutterBottom>
+            Wenn das erste Kleidungstyp vorhanden ist, muss auch das zweite vorhanden sein.
+          </Typography>
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Wenn dieser Kleidungstyp...</InputLabel>
+            <Select
+              value={formData.bezugsobjekt1}
+              onChange={(e) => this.setState({
+                formData: {
+                  ...this.state.formData,
+                  bezugsobjekt1: e.target.value
+                }
+              })}
+            >
+              {style?.getFeatures().map((feature) => (
+                <MenuItem
+                  key={feature.getID()}
+                  value={feature.getID()}
+                  disabled={feature.getID() === formData.bezugsobjekt2}
+                >
+                  {feature.getBezeichnung()}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth margin="normal">
+            <InputLabel>...dann auch dieser Kleidungstyp</InputLabel>
+            <Select
+              value={formData.bezugsobjekt2}
+              onChange={(e) => this.setState({
+                formData: {
+                  ...this.state.formData,
+                  bezugsobjekt2: e.target.value
+                }
+              })}
+            >
+              {style?.getFeatures().map((feature) => (
+                <MenuItem
+                  key={feature.getID()}
+                  value={feature.getID()}
+                  disabled={feature.getID() === formData.bezugsobjekt1}
+                >
+                  {feature.getBezeichnung()}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Abbrechen</Button>
+          <Button
+            onClick={this.handleSubmit}
+            variant="contained"
+            color="primary"
+            disabled={!formData.bezugsobjekt1 || !formData.bezugsobjekt2}
           >
-            {style?.getFeatures().map((feature) => (
-              <MenuItem
-                key={feature.getID()}
-                value={feature.getID()}
-                disabled={feature.getID() === formData.bezugsobjekt2}
-              >
-                {feature.getBezeichnung()}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            Speichern
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
+}
 
-        <FormControl fullWidth margin="normal">
-          <InputLabel>...dann auch dieser Kleidungstyp</InputLabel>
-          <Select
-            value={formData.bezugsobjekt2}
-            onChange={(e) => setFormData({ ...formData, bezugsobjekt2: e.target.value })}
-          >
-            {style?.getFeatures().map((feature) => (
-              <MenuItem
-                key={feature.getID()}
-                value={feature.getID()}
-                disabled={feature.getID() === formData.bezugsobjekt1}
-              >
-                {feature.getBezeichnung()}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Abbrechen</Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          color="primary"
-          disabled={!formData.bezugsobjekt1 || !formData.bezugsobjekt2}
-        >
-          Speichern
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
 
 export default ImplikationDialog;

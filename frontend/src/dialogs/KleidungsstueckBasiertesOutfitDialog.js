@@ -1,18 +1,6 @@
 import React, { Component } from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-    Grid,
-    Box,
-    Card,
-    CardContent,
-    Checkbox,
-    Paper
-} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions,
+    Button, Typography, Grid, Box, Card, CardContent, Checkbox, Paper} from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleSelectionDialog from './StyleSelectionDialog';
 

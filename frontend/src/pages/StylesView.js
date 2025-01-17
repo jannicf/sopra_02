@@ -14,7 +14,6 @@ class StylesView extends Component {
             selectedStyle: null,
             showFormDialog: false,
             showDeleteDialog: false,
-            loadingInProgress: false,
             error: null,
             kleiderschrankId: null
         };
@@ -45,7 +44,7 @@ class StylesView extends Component {
     }
 
     loadStyles = () => {
-        this.setState({ loadingInProgress: true, error: null });
+        this.setState({ error: null });
         KleiderschrankAPI.getAPI()
             .getStyles()
             .then(styles => {
@@ -55,14 +54,12 @@ class StylesView extends Component {
 
                 this.setState({
                     styles: filteredStyles,
-                    loadingInProgress: false,
                     error: null
                 });
             })
             .catch(error => {
                 this.setState({
-                    error: "Fehler beim Laden der Styles: " + error.message,
-                    loadingInProgress: false
+                    error: "Fehler beim Laden der Styles: " + error.message
                 });
             });
     };
