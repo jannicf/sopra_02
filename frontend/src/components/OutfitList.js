@@ -100,9 +100,6 @@ class OutfitList extends Component {
         outfits: prevState.outfits.filter(outfit => outfit.getID() !== deletedOutfit.getID())
       }));
 
-      // Dann das Outfit in der Datenbank löschen
-      await KleiderschrankAPI.getAPI().deleteOutfit(deletedOutfit.getID());
-
     } catch (error) {
       // Wenn ein Fehler auftritt, laden wir die komplette Liste neu
       await this.loadOutfits();
@@ -111,16 +108,18 @@ class OutfitList extends Component {
   };
 
   render() {
-    const { outfits, selectedOutfit, dialogOpen, error } = this.state;
+      const { outfits, selectedOutfit, dialogOpen, error } = this.state;
 
-    if (outfits.length === 0) {
-      return <Typography variant="body1" align="center" sx={{my: 4, p: 3, bgcolor: 'grey.100', borderRadius: 1}}
-            >Noch keine Outfits vorhanden.</Typography>;
-    }
+      // Wenn keine Outfits vorhanden sind und kein Fehler beim Löschen aufgetreten ist
+      if (outfits.length === 0) {
+        return <Typography variant="body1" align="center" sx={{my: 4, p: 3, bgcolor: 'grey.100', borderRadius: 1}}
+              >Noch keine Outfits vorhanden.</Typography>;
+      }
 
-    if (error) {
-      return <Typography color="error">Fehler beim Laden: {error}</Typography>;
-    }
+      // Fehler nur anzeigen, wenn es KEINE Outfits gibt UND ein Fehler vorliegt
+      if (error && outfits.length === 0) {
+        return <Typography color="error">Fehler beim Laden: {error}</Typography>;
+      }
 
     return (
       <>
