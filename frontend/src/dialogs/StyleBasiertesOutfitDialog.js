@@ -118,7 +118,7 @@ class StyleBasiertesOutfitDialog extends Component {
                 fullWidth
             >
                 <DialogTitle>
-                    <Typography variant="h6">Wähle passende Kleidungsstücke aus</Typography>
+                    Wähle passende Kleidungsstücke aus
                 </DialogTitle>
 
                 <DialogContent>
