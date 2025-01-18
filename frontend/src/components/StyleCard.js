@@ -65,6 +65,7 @@ loadKleidungstypen = async () => {
                                 onClick={(e) => onEdit(style, e)}
                                 size="small"
                                 sx={{ mr: 1 }}
+                                color="primary"
                             >
                                 <EditIcon />
                             </IconButton>
@@ -187,6 +188,7 @@ loadKleidungstypen = async () => {
                                     onClick={this.handleEditClick}
                                     size="small"
                                     sx={{ mr: 1 }}
+                                    color="primary"
                                 >
                                     <EditIcon />
                                 </IconButton>

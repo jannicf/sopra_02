@@ -467,6 +467,7 @@ class KleiderschrankAPI {
             'Accept': 'application/json, text/plain'
         }
     }).then(responseJSON => {
+        console.log("API Response for style:", responseJSON); // Debug
         // Array von Style-Objekten erstellen
         let styleBOs = StyleBO.fromJSON(responseJSON);
         return new Promise(function (resolve) {
@@ -518,6 +519,7 @@ class KleiderschrankAPI {
             features: Array.isArray(styleData.features) ? styleData.features : [],
             constraints: styleData.constraints // Füge Constraints hinzu
         };
+        console.log('Style update data being sent:', requestData); // Debug log
 
         return this.#fetchAdvanced(this.#updateStyleURL(id), {
             method: 'PUT',

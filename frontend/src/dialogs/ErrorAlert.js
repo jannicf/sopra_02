@@ -2,15 +2,11 @@ import React, { Component } from 'react';
 import { Alert } from '@mui/material';
 
 class ErrorAlert extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     render() {
-        const { message } = this.props;
+        const { message, onClose} = this.props;
 
         return (
-            <Alert>
+            <Alert severity="error" onClose={onClose}>
                 {/* Wenn keine message übergeben wird, kommt die Standrad-Fehlermeldung */}
                 {message || 'Es ist ein Fehler aufgetreten.'}
             </Alert>

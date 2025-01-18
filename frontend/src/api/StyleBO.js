@@ -101,6 +101,7 @@ export default class StyleBO extends BusinessObject {
    * Gibt alle Constraints des Styles zurück.
    */
   getConstraints() {
+      console.log("Returning constraints:", this._constraints); // Debug
     return this._constraints;
   }
 
