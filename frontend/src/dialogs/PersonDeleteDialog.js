@@ -6,6 +6,7 @@ class PersonDeleteDialog extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: false,
       error: null
     };
   }
@@ -14,6 +15,8 @@ class PersonDeleteDialog extends Component {
     const { person, onClose } = this.props;
 
     try {
+        this.setState({ loading: true });
+
         // Person löschen
         await KleiderschrankAPI.getAPI().deletePerson(person);
 
@@ -24,15 +27,17 @@ class PersonDeleteDialog extends Component {
         onClose(true);
 
     } catch (error) {
+        console.error('Fehler beim Löschen des Profils:', error);
         this.setState({
-            error: 'Fehler beim Löschen des Profils. Bitte versuchen Sie es später erneut.'
+            error: 'Fehler beim Löschen des Profils. Bitte versuchen Sie es später erneut.',
+            loading: false
           });
       }
   };
 
   render() {
     const { show, onClose } = this.props;
-    const { error } = this.state;
+    const { loading, error } = this.state;
 
     return (
       <Dialog
@@ -68,6 +73,7 @@ class PersonDeleteDialog extends Component {
         <DialogActions>
           <Button
             onClick={() => onClose(false)}
+            disabled={loading}
           >
             Abbrechen
           </Button>
@@ -75,8 +81,9 @@ class PersonDeleteDialog extends Component {
             onClick={this.handleDelete}
             color="error"
             variant="contained"
+            disabled={loading}
           >
-            Endgültig löschen
+            {loading ? 'Wird gelöscht...' : 'Endgültig löschen'}
           </Button>
         </DialogActions>
       </Dialog>

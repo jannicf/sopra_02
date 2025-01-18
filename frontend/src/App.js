@@ -1,10 +1,11 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { Box, ThemeProvider, Container, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Theme from './Theme';
 import ErrorAlert from './dialogs/ErrorAlert';
+import LoadingProgress from './dialogs/LoadingProgress';
 import Header from './layout/header';
 import Footer from './layout/footer';
 import Login from './pages/Login';
@@ -18,18 +19,26 @@ import About from './pages/About';
 import KleiderschrankAPI from "./api/KleiderschrankAPI";
 import firebaseConfig from './firebase/firebaseconfig';
 
-class App extends Component {
+class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             currentUser: null,
             userHasProfile: false,
             appError: null,
-            authError: null
+            authError: null,
+            authLoading: false
         };
     };
 
+
+    // Login-Vorgang -> Verwendung auf Login-Page (onSignIn)????
     handleSignIn = () => {
+        // Zeigt den LoadingProgress während der Anmeldung
+        this.setState({
+            authLoading: true
+        });
+
         // Firebase initialisieren
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -41,7 +50,8 @@ class App extends Component {
         // Startet den Google-Login-Prozess
         signInWithPopup(auth, provider).catch(error => {
             this.setState({
-                authError: error
+                authError: error,
+                authLoading: false
             });
         });
     }
@@ -69,6 +79,12 @@ class App extends Component {
     // Überwacht den Anmeldestatus des Nutzers
     onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Nutzer ist eingeloggt
+                this.setState({
+                    authLoading: true
+                });
+                console.log("1. Google Auth erfolgreich, User:", user.uid);
+
                 // Token generieren und setzen
                 user.getIdToken().then(token => {
                     // Token zu den Cookies des Browsers hinzufügen
@@ -79,30 +95,44 @@ class App extends Component {
                      * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
                      * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
                     document.cookie = `token=${token};path=/;SameSite=None;Secure`;
-
+                    console.log("2. Token gesetzt:", token);
 
                     // Prüfen ob ein Profil existiert
                     return KleiderschrankAPI.getAPI().getPersonByGoogleId(user.uid)
                         .then(person => {
+                            console.log("3. Person geladen:", person);
                             this.setState({
                                 currentUser: user,
                                 userHasProfile: person !== null,
-                                authError: null
-                            })
+                                authError: null,
+                                authLoading: false
+                            }, () => {
+                                console.log("4. State aktualisiert:", {
+                                    userHasProfile: this.state.userHasProfile,
+                                    authLoading: this.state.authLoading
+                                });
+                            });
                         })
                         .catch(e => {
+                            console.error("3. Fehler beim Laden der Person:", e);
                             this.setState({
                                 currentUser: user,
                                 userHasProfile: false,
-                                authError: e
+                                authError: null,
+                                authLoading: false
+                            }, () => {
+                                console.log("4. State nach Fehler aktualisiert");
                             });
                         });
                 }).catch(e => {
+                    console.error("2. Token-Fehler:", e);
                     this.setState({
-                        authError: e
+                        authError: e,
+                        authLoading: false
                     });
                 });
             } else {
+                console.log("1. Nutzer ausgeloggt");
                 // Der Nutzer ist ausgeloggt -> Token löschen
                 /** Das Cookie "token" verfügt über keinen gültigen Wert für das "SameSite"-Attribut.
                  * Bald werden Cookies ohne das "SameSite"-Attribut oder mit einem ungültigen Wert
@@ -115,14 +145,17 @@ class App extends Component {
                 // Zurücksetzung des ausgeloggten Nutzers
                 this.setState({
                     currentUser: null,
-                    userHasProfile: false
+                    userHasProfile: false,
+                    authLoading: false
+                }, () => {
+                    console.log("2. Logout-State aktualisiert");
                 });
             }
         });
     }
 
     render() {
-    const { currentUser, appError, authError, userHasProfile } = this.state;
+    const { currentUser, appError, authError, authLoading, userHasProfile } = this.state;
 
     return (
         <ThemeProvider theme={Theme}>
@@ -203,6 +236,7 @@ class App extends Component {
                         } />
                     </Routes>
                     </Box>
+                    {authLoading && <LoadingProgress />}
                     {/* Fehlerbehandlung für allgemeine App-Fehler */}
                         {appError && (
                             <ErrorAlert

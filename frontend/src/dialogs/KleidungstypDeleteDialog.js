@@ -7,6 +7,7 @@ class KleidungstypDeleteDialog extends Component {
         super(props);
         this.state = {
             affectedKleidungsstuecke: [],
+            loading: false,
             error: null
         };
     }
@@ -20,6 +21,7 @@ class KleidungstypDeleteDialog extends Component {
     checkAffectedItems = async () => {
         if (!this.props.kleidungstyp) return;
 
+        this.setState({ loading: true });
         try {
             const api = KleiderschrankAPI.getAPI();
             const kleidungsstuecke = await api.getKleidungsstuecke();
@@ -31,18 +33,19 @@ class KleidungstypDeleteDialog extends Component {
 
             this.setState({
                 affectedKleidungsstuecke,
-
+                loading: false
             });
         } catch (error) {
             this.setState({
                 error: "Fehler beim Prüfen der betroffenen Kleidungsstücke",
+                loading: false
             });
         }
     }
 
     render() {
         const { show, kleidungstyp, onClose } = this.props;
-        const { affectedKleidungsstuecke,  error } = this.state;
+        const { affectedKleidungsstuecke, loading, error } = this.state;
 
         return (
             <Dialog open={show} onClose={() => onClose(null)}>
@@ -62,12 +65,13 @@ class KleidungstypDeleteDialog extends Component {
                     {error && <p style={{ color: 'red' }}>{error}</p>}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => onClose(null)} >
+                    <Button onClick={() => onClose(null)} disabled={loading}>
                         Abbrechen
                     </Button>
                     <Button
                         onClick={() => onClose(kleidungstyp)}
                         color="error"
+                        disabled={loading}
                     >
                         Löschen
                     </Button>

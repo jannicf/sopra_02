@@ -25,7 +25,7 @@ class OutfitDeleteDialog extends Component {
   };
 
   render() {
-    const { show } = this.props;
+    const { show, outfit } = this.props;
 
     return (
       <Dialog

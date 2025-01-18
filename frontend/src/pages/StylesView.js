@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Typography } from '@mui/material';
+import { Typography, Button } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import StyleForm from "../dialogs/StyleForm";
 import StyleDeleteDialog from "../dialogs/StyleDeleteDialog";
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleList from '../components/StyleList';
-import ErrorAlert from '../dialogs/ErrorAlert';
 
 class StylesView extends Component {
     constructor(props) {
@@ -14,6 +14,7 @@ class StylesView extends Component {
             selectedStyle: null,
             showFormDialog: false,
             showDeleteDialog: false,
+            loadingInProgress: false,
             error: null,
             kleiderschrankId: null
         };
@@ -26,25 +27,20 @@ class StylesView extends Component {
                 if (person && person.getKleiderschrank()) {
                     const kleiderschrankId = person.getKleiderschrank().getID();
                     this.setState({
-                        kleiderschrankId: kleiderschrankId,
-                        error: null
+                        kleiderschrankId: kleiderschrankId
                     }, () => {
                         this.loadStyles();
-                    });
-                } else {
-                    this.setState({
-                        error: "Kein Kleiderschrank gefunden"
                     });
                 }
             }).catch(error => {
                 this.setState({
-                    error: "Fehler beim Laden des Kleiderschranks: " + error.message
+                    error: "Fehler beim Laden des Kleiderschranks"
                 });
             });
     }
 
     loadStyles = () => {
-        this.setState({ error: null });
+        this.setState({ loadingInProgress: true, error: null });
         KleiderschrankAPI.getAPI()
             .getStyles()
             .then(styles => {
@@ -54,12 +50,13 @@ class StylesView extends Component {
 
                 this.setState({
                     styles: filteredStyles,
-                    error: null
+                    loadingInProgress: false
                 });
             })
             .catch(error => {
                 this.setState({
-                    error: "Fehler beim Laden der Styles: " + error.message
+                    error: error.message,
+                    loadingInProgress: false
                 });
             });
     };
@@ -97,22 +94,12 @@ class StylesView extends Component {
         this.setState({ showDeleteDialog: false, selectedStyle: null });
     };
 
-    handleErrorClose = () => {
-        this.setState({ error: null });
-    }
-
 
     render() {
-        const { styles, selectedStyle, showFormDialog, showDeleteDialog, error } = this.state;
+        const { styles, selectedStyle, showFormDialog, showDeleteDialog } = this.state;
 
         return (
             <div>
-                {error && (
-                    <ErrorAlert
-                        message={error}
-                        onClose={this.handleErrorClose}
-                    />
-                )}
                 <Typography variant="h4" gutterBottom sx={{ mt: 2 }}>Meine Styles</Typography>
                 {/* Erklärender Text */}
                 <Typography variant="body1" sx={{ mb: 4 }}>

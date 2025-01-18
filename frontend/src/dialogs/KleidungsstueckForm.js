@@ -16,7 +16,8 @@ class KleidungsstueckForm extends Component {
     this.state = {
         kleidungsstueck: initialKleidungsstueck,
         kleidungstypen: [],
-        error: null
+        error: null,
+        loading: false
     };
  }
 
@@ -117,13 +118,16 @@ class KleidungsstueckForm extends Component {
     } catch (error) {
         console.error('Error during submit:', error);
         this.setState({
-            error: 'Fehler beim Speichern des Kleidungsstücks'
+            error: 'Fehler beim Speichern des Kleidungsstücks',
+            loading: false
         });
+    } finally {
+        this.setState({loading: false});
     }
  }
 
  render() {
-        const { kleidungsstueck, kleidungstypen, error } = this.state;
+        const { kleidungsstueck, kleidungstypen, error, loading } = this.state;
         const { show, onClose } = this.props;
 
         return (
@@ -160,7 +164,7 @@ class KleidungsstueckForm extends Component {
                     <Button onClick={() => onClose(null)}>Abbrechen</Button>
                     <Button
                         onClick={this.handleSubmit}
-                        disabled={!kleidungsstueck.getName() || !kleidungsstueck.getTyp()}
+                        disabled={loading || !kleidungsstueck.getName() || !kleidungsstueck.getTyp()}
                     >
                         Speichern
                     </Button>

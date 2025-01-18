@@ -10,7 +10,6 @@ import {
 } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import KleidungsstueckBasiertesOutfitDialog from '../dialogs/KleidungsstueckBasiertesOutfitDialog';
-import ErrorAlert from "../dialogs/ErrorAlert";
 
 
 class KleidungsstueckBasiertesOutfitView extends Component {
@@ -31,17 +30,11 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                 .then(person => {
                     if (person && person.getKleiderschrank()) {
                         this.setState({
-                            kleiderschrankId: person.getKleiderschrank().getID(),
-                            error: null
+                            kleiderschrankId: person.getKleiderschrank().getID()
                         }, () => {
                             this.loadKleidungsstuecke();
                         });
                     }
-                })
-                .catch(error => {
-                    this.setState({
-                        error: "Fehler beim Laden der Kleiderschrankdaten: " + error.message
-                    });
                 });
         }
     }
@@ -59,12 +52,11 @@ class KleidungsstueckBasiertesOutfitView extends Component {
 
                 this.setState({
                     kleidungsstuecke: kleidungsstueckeMitStyles || [],
-                    error: null
                 });
             }
         } catch (error) {
             this.setState({
-                error: "Fehler beim Laden der Kleidungsstücke: " + error.message
+                error: "Fehler beim Laden der Kleidungsstücke",
             });
         }
     };
@@ -91,8 +83,7 @@ class KleidungsstueckBasiertesOutfitView extends Component {
         // Wenn das Outfit erfolgreich erstellt wurde
         this.setState({
             dialogOpen: false,
-            ausgewaehltesBasisKleidungsstueck: null,
-            error: null
+            ausgewaehltesBasisKleidungsstueck: null
         }, () => {
             document.getElementById('outfitsLink').click();
         });
@@ -104,10 +95,6 @@ class KleidungsstueckBasiertesOutfitView extends Component {
     }
 };
 
-    handleErrorClose = () => {
-        this.setState({ error: null });
-    }
-
     render() {
         const {
             kleidungsstuecke,
@@ -117,12 +104,6 @@ class KleidungsstueckBasiertesOutfitView extends Component {
         } = this.state;
         return (
             <Box sx={{ padding: 2 }}>
-                {error && (
-                    <ErrorAlert
-                        message={error}
-                        onClose={this.handleErrorClose}
-                    />
-                )}
                 <Typography variant="h4" gutterBottom>
                     Wähle ein Basis-Kleidungsstück
                 </Typography>
@@ -174,7 +155,6 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                     basisKleidungsstueck={ausgewaehltesBasisKleidungsstueck}
                     kleiderschrankId={this.state.kleiderschrankId}
                     onClose={this.handleDialogClose}
-                    onError={(errorMessage) => this.setState({ error: errorMessage })}
                 />
             </Box>
         );

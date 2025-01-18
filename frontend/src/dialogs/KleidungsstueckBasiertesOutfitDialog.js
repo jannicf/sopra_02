@@ -1,6 +1,18 @@
 import React, { Component } from 'react';
-import {Dialog, DialogTitle, DialogContent, DialogActions,
-    Button, Typography, Grid, Box, Card, CardContent, Checkbox, Paper} from '@mui/material';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Typography,
+    Grid,
+    Box,
+    Card,
+    CardContent,
+    Checkbox,
+    Paper
+} from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleSelectionDialog from './StyleSelectionDialog';
 
@@ -154,9 +166,11 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                     fullWidth
                 >
                     <DialogTitle>
+                        <Typography variant="h6">
                             {selectedStyle
                                 ? `Outfit im Style "${selectedStyle.getName()}" erstellen`
                                 : 'Outfit erstellen'}
+                        </Typography>
                     </DialogTitle>
                     <DialogContent>
                         {/* Basis-Kleidungsstück Anzeige */}

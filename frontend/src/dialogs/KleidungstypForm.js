@@ -32,6 +32,7 @@ class KleidungstypForm extends Component {
             kleidungstyp: initialKleidungstyp,
             selectedStyleIds: kleidungstyp ? kleidungstyp.getVerwendungen().map(style => style.getID()) : [],
             allStyles: [],
+            loading: false,
             error: null
         };
     }
@@ -140,7 +141,7 @@ class KleidungstypForm extends Component {
     };
 
     render() {
-        const { kleidungstyp, allStyles, selectedStyleIds, error } = this.state;
+        const { kleidungstyp, allStyles, selectedStyleIds, error, loading } = this.state;
         const { show, onClose } = this.props;
 
         // Frühe Rückgabe wenn kein kleidungstyp vorhanden
@@ -208,7 +209,7 @@ class KleidungstypForm extends Component {
                     </Button>
                     <Button
                         onClick={this.handleSubmit}
-                        disabled={!kleidungstyp.getBezeichnung()}
+                        disabled={loading || !kleidungstyp.getBezeichnung()}
                         variant="contained"
                         color="primary"
                     >
