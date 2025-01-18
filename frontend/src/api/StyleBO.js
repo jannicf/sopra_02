@@ -151,8 +151,8 @@ export default class StyleBO extends BusinessObject {
                 // Kardinalitäten
                 if (Array.isArray(s.constraints.kardinalitaeten)) {
                     style._constraints.kardinalitaeten = s.constraints.kardinalitaeten.map((k) => ({
-                        minAnzahl: k.min_anzahl,
-                        maxAnzahl: k.max_anzahl,
+                        minAnzahl: k.minAnzahl,
+                        maxAnzahl: k.maxAnzahl,
                         bezugsobjekt: { id: k.bezugsobjekt_id },
                     }));
                 }
