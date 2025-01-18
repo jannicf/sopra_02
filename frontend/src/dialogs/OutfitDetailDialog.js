@@ -1,81 +1,115 @@
-import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Chip, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import OutfitDeleteDialog from './OutfitDeleteDialog';
 
-class OutfitDetailDialog extends Component {
-  render() {
-    const { open, onClose, style } = this.props;
-    const { formData } = this.state;
+const OutfitDetailDialog = ({ outfit, open, onClose, onDelete }) => {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-    return (
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle>
-          {this.props.initialData ? 'Implikation bearbeiten' : 'Neue Implikation'}
+  if (!outfit) return null;
+
+  const style = outfit.getStyle();
+  const kleidungsstuecke = outfit.getBausteine() || [];
+
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteDialogClose = (shouldDelete) => {
+    setShowDeleteDialog(false);
+    if (shouldDelete) {
+      onDelete(outfit);
+      onClose();
+    }
+  };
+
+  return (
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pr: 1 }}>
+          <Typography variant="h6">
+            Outfit Details
+          </Typography>
+          <IconButton
+            onClick={handleDeleteClick}
+            color="error"
+            size="large"
+            aria-label="delete outfit"
+          >
+            <DeleteIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            Wenn das erste Kleidungstyp vorhanden ist, muss auch das zweite vorhanden sein.
+          {/* Style Info */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Style:
+            </Typography>
+            {style && (
+              <Chip
+                label={style.getName()}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+          </Box>
+
+          {/* Kleidungsstücke */}
+          <Typography variant="subtitle1" gutterBottom>
+            Kleidungsstücke:
           </Typography>
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Wenn dieser Kleidungstyp...</InputLabel>
-            <Select
-              value={formData.bezugsobjekt1}
-              onChange={(e) => this.setState({
-                formData: {
-                  ...this.state.formData,
-                  bezugsobjekt1: e.target.value
-                }
-              })}
-            >
-              {style?.getFeatures().map((feature) => (
-                <MenuItem
-                  key={feature.getID()}
-                  value={feature.getID()}
-                  disabled={feature.getID() === formData.bezugsobjekt2}
+          {kleidungsstuecke.length > 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {kleidungsstuecke.map((kleidungsstueck, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    p: 2,
+                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                    borderRadius: 1
+                  }}
                 >
-                  {feature.getBezeichnung()}
-                </MenuItem>
+                  <Typography variant="subtitle2">
+                    {kleidungsstueck.getName() || 'Unbenannt'}
+                  </Typography>
+                  <Box display="flex" gap={1} mt={1}>
+                    {kleidungsstueck.getTyp() && (
+                      <Chip
+                        label={`Typ: ${kleidungsstueck.getTyp().getBezeichnung()}`}
+                        size="small"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                </Box>
               ))}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>...dann auch dieser Kleidungstyp</InputLabel>
-            <Select
-              value={formData.bezugsobjekt2}
-              onChange={(e) => this.setState({
-                formData: {
-                  ...this.state.formData,
-                  bezugsobjekt2: e.target.value
-                }
-              })}
-            >
-              {style?.getFeatures().map((feature) => (
-                <MenuItem
-                  key={feature.getID()}
-                  value={feature.getID()}
-                  disabled={feature.getID() === formData.bezugsobjekt1}
-                >
-                  {feature.getBezeichnung()}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+            </Box>
+          ) : (
+            <Typography color="textSecondary">
+              Keine Kleidungsstücke vorhanden
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Abbrechen</Button>
-          <Button
-            onClick={this.handleSubmit}
-            variant="contained"
-            color="primary"
-            disabled={!formData.bezugsobjekt1 || !formData.bezugsobjekt2}
-          >
-            Speichern
+          <Button onClick={onClose}>
+            Schließen
           </Button>
         </DialogActions>
       </Dialog>
-    );
-  }
-}
+
+      {/* Delete Confirmation Dialog */}
+      <OutfitDeleteDialog
+        show={showDeleteDialog}
+        outfit={outfit}
+        onClose={handleDeleteDialogClose}
+      />
+    </>
+  );
+};
 
 export default OutfitDetailDialog;

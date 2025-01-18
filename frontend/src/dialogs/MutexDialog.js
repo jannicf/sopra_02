@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
+  Button, FormControl, InputLabel, Select, MenuItem, Typography} from '@mui/material';
 
 class MutexDialog extends Component {
   constructor(props) {

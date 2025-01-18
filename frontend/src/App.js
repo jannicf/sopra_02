@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { Box, ThemeProvider, Container, CssBaseline } from '@mui/material';
@@ -18,7 +18,7 @@ import About from './pages/About';
 import KleiderschrankAPI from "./api/KleiderschrankAPI";
 import firebaseConfig from './firebase/firebaseconfig';
 
-class App extends React.Component {
+class App extends Component {
     constructor(props) {
         super(props);
         this.state = {

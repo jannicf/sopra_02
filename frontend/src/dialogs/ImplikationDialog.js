@@ -33,7 +33,7 @@ class ImplikationDialog extends Component {
         this.props.onClose();
       }
 
-      render() {
+  render() {
     const { open, onClose, style } = this.props;
     const { formData } = this.state;
 
