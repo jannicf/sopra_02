@@ -28,5 +28,5 @@ class BinaryConstraint(Constraint):
         return self.__bezugsobjekt2
 
     @abstractmethod
-    def check_constraint(self):
+    def check_constraint(self, kleidungsstuecke):
         pass

@@ -18,7 +18,7 @@ class Constraint(BusinessObject):
         return self._style
 
     @abstractmethod
-    def check_constraint(self):
+    def check_constraint(self, kleidungsstuecke):
         """
         Überprüft, ob das Constraint erfüllt ist.
 

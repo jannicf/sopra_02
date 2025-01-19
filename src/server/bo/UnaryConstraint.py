@@ -20,5 +20,5 @@ class UnaryConstraint(Constraint):
         return self.__bezugsobjekt
 
     @abstractmethod
-    def check_constraint(self):
+    def check_constraint(self, kleidungsstuecke):
         pass
