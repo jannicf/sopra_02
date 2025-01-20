@@ -135,7 +135,11 @@ class StyleBasiertesOutfitView extends Component {
                                         Features: {style.getFeatures().length} Kleidungstypen
                                     </Typography>
                                     <Typography color="textSecondary">
-                                        Constraints: {style.getConstraints().length} Regeln
+                                        Regeln: {
+                                            (style.getConstraints()?.kardinalitaeten?.length) +
+                                            (style.getConstraints()?.mutexe?.length) +
+                                            (style.getConstraints()?.implikationen?.length)
+                                        }
                                     </Typography>
                                 </CardContent>
                             </Card>
