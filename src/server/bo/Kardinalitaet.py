@@ -37,7 +37,7 @@ class Kardinalitaet(UnaryConstraint):
         if not self.get_bezugsobjekt():
             return True
 
-        anzahl = 0
+        anzahl = 0 # wie viele Kleidungsstuecke vom Typ des Bezugsobjekts sind, das überprüft werden soll
 
         for kleidungsstueck in kleidungsstuecke:
 
