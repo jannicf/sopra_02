@@ -16,102 +16,48 @@ class PersonForm extends Component {
                 nickname: '',
                 kleiderschrankName: '', // Direkt integriert, da jede Person einen Kleiderschrank haben muss
             },
-            error: null,
-            loading: false,
-            touchedFields: {}
+            error: null
         };
     }
 
-    // Validierung der Eingabefelder
-    validateForm = () => {
-        const { formData } = this.state;
-        let isValid = true;
-        let errors = {};
-
-        // Pflichtfelder prüfen
-        if (!formData.vorname.trim()) {
-            errors.vorname = 'Vorname ist erforderlich';
-            isValid = false;
-        }
-        if (!formData.nachname.trim()) {
-            errors.nachname = 'Nachname ist erforderlich';
-            isValid = false;
-        }
-        if (!formData.nickname.trim()) {
-            errors.nickname = 'Nickname ist erforderlich';
-            isValid = false;
-        }
-        if (!formData.kleiderschrankName.trim()) {
-            errors.kleiderschrankName = 'Kleiderschrankname ist erforderlich';
-            isValid = false;
-        }
-
-        this.setState({ errors });
-        return isValid;
-    };
 
     handleInputChange = (field) => (event) => {
         this.setState({
             formData: {
                 ...this.state.formData,
                 [field]: event.target.value
-            },
-            touchedFields: {
-                ...this.state.touchedFields,
-                [field]: true
             }
         });
     };
 
     handleSubmit = async () => {
     try {
-        this.setState({ loading: true });
-        const api = KleiderschrankAPI.getAPI();
+            const api = KleiderschrankAPI.getAPI();
+            const { formData } = this.state;
 
-        // Person-Daten vorbereiten
-        const personBO = new PersonBO();
-        personBO.setVorname(this.state.formData.vorname);
-        personBO.setNachname(this.state.formData.nachname);
-        personBO.setNickname(this.state.formData.nickname);
-        personBO.setGoogleId(this.props.user?.uid);
+            // Person-Daten vorbereiten
+            const personBO = new PersonBO();
+            personBO.setVorname(formData.vorname);
+            personBO.setNachname(formData.nachname);
+            personBO.setNickname(formData.nickname);
+            personBO.setGoogleId(this.props.user?.uid);
 
-        // Debug-Log
-        console.log("FormData:", this.state.formData);
-
-        // Kleiderschrank vorbereiten
-        if (this.state.formData.kleiderschrankName) {
-            console.log("Erstelle Kleiderschrank mit Name:", this.state.formData.kleiderschrankName);
+            // Kleiderschrank vorbereiten
             const kleiderschrankBO = new KleiderschrankBO();
-            kleiderschrankBO.setName(this.state.formData.kleiderschrankName);
+            kleiderschrankBO.setName(formData.kleiderschrankName);
             personBO.setKleiderschrank(kleiderschrankBO);
 
-            // Debug-Log
-            console.log("PersonBO mit Kleiderschrank:", {
-                vorname: personBO.getVorname(),
-                nachname: personBO.getNachname(),
-                kleiderschrank: personBO.getKleiderschrank()
-            });
-        }
-
-        // Person erstellen
-        const createdPerson = await api.addPerson(personBO);
-
-        // Debug-Log
-        console.log("Erstellte Person:", createdPerson);
-        if (createdPerson) {
+            const createdPerson = await api.addPerson(personBO);
             this.props.onClose(createdPerson);
-        }
-    } catch (error) {
-        console.error('Error in handleSubmit:', error);
-        this.setState({ error: error.message });
-    } finally {
-        this.setState({ loading: false });
+        } catch (error) {
+            this.setState({ error: error.message });
         }
     };
 
+
     render() {
         const { show, onClose } = this.props;
-        const { formData, errors, touchedFields, loading } = this.state;
+        const { formData, error } = this.state;
 
         return (
             <Dialog open={show} onClose={() => onClose(null)} maxWidth="sm" fullWidth>
@@ -125,8 +71,6 @@ class PersonForm extends Component {
                             label="Vorname"
                             value={formData.vorname}
                             onChange={this.handleInputChange('vorname')}
-                            error={touchedFields.vorname && !!errors?.vorname}
-                            helperText={touchedFields.vorname && errors?.vorname}
                             margin="normal"
                             required
                         />
@@ -135,8 +79,6 @@ class PersonForm extends Component {
                             label="Nachname"
                             value={formData.nachname}
                             onChange={this.handleInputChange('nachname')}
-                            error={touchedFields.nachname && !!errors?.nachname}
-                            helperText={touchedFields.nachname && errors?.nachname}
                             margin="normal"
                             required
                         />
@@ -145,8 +87,6 @@ class PersonForm extends Component {
                             label="Nickname"
                             value={formData.nickname}
                             onChange={this.handleInputChange('nickname')}
-                            error={touchedFields.nickname && !!errors?.nickname}
-                            helperText={touchedFields.nickname && errors?.nickname}
                             margin="normal"
                             required
                         />
@@ -159,30 +99,29 @@ class PersonForm extends Component {
                             label="Name des Kleiderschranks"
                             value={formData.kleiderschrankName}
                             onChange={this.handleInputChange('kleiderschrankName')}
-                            error={touchedFields.kleiderschrankName && !!errors?.kleiderschrankName}
-                            helperText={touchedFields.kleiderschrankName && errors?.kleiderschrankName}
                             margin="normal"
                             required
                         />
 
-                        {this.state.error && (
+                        {error && (
                             <Typography color="error" sx={{ mt: 2 }}>
-                                {this.state.error}
+                                {error}
                             </Typography>
                         )}
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => onClose(null)} disabled={loading}>
+                    <Button onClick={() => onClose(null)}>
                         Abbrechen
                     </Button>
                     <Button
                         onClick={this.handleSubmit}
                         variant="contained"
                         color="primary"
-                        disabled={loading}
+                        disabled={!formData.vorname || !formData.nachname ||
+                                !formData.nickname || !formData.kleiderschrankName}
                     >
-                        {loading ? 'Wird erstellt...' : 'Profil erstellen'}
+                        Profil erstellen
                     </Button>
                 </DialogActions>
             </Dialog>
