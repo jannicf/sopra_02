@@ -1,3 +1,5 @@
+# übernommen aus der Vorlage von Prof. Thies aus 'PythonBankBeispiel-RELEASE_1.2.2'
+
 from abc import ABC
 
 

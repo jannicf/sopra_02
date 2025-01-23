@@ -118,26 +118,33 @@ class KleidungsstueckBasiertesOutfitView extends Component {
                     {kleidungsstuecke.map((kleidungsstueck) => (
                         <Grid item xs={12} sm={6} md={4} key={kleidungsstueck.getID()}>
                             <Card
-                                onClick={() => this.handleBasisKleidungsstueckAuswahl(kleidungsstueck)}
                                 sx={{
+                                    p: 2,
                                     cursor: 'pointer',
+                                    borderRadius: 2,
                                     '&:hover': {
-                                        boxShadow: 3,
-                                        transform: 'scale(1.02)',
-                                        transition: 'all 0.2s ease-in-out'
+                                        transform: 'translateY(-2px)',
+                                        transition: 'all 0.2s'
                                     }
                                 }}
+                                onClick={() => this.handleBasisKleidungsstueckAuswahl(kleidungsstueck)}
                             >
-                                <CardContent>
-                                    <Typography variant="h6">
-                                        {kleidungsstueck.getName()}
-                                    </Typography>
-                                    <Typography color="textSecondary">
-                                        Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
-                                    </Typography>
-                                    <Typography color="textSecondary">
-                                        Verfügbare Styles: {kleidungsstueck.getTyp()?.getVerwendungen()?.map(style => style.getName()).join(', ') || 'Keine'}
-                                    </Typography>
+                                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Box>
+                                            <Typography variant="h6">
+                                                {kleidungsstueck.getName()}
+                                            </Typography>
+                                            <Typography color="textSecondary">
+                                                Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
+                                            </Typography>
+                                            <Typography color="textSecondary">
+                                                Styles: {
+                                                    kleidungsstueck.getTyp()?.getVerwendungen()?.length || 0
+                                                }
+                                            </Typography>
+                                        </Box>
+                                    </Box>
                                 </CardContent>
                             </Card>
                         </Grid>

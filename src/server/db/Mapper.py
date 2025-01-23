@@ -1,3 +1,6 @@
+# übernommen aus der Vorlage von Prof. Thies aus 'PythonBankBeispiel-RELEASE_1.2.2'
+# lediglich an unsere Datenbankverbindung angepasst
+
 from abc import ABC, abstractmethod
 import mysql.connector as connector
 from contextlib import AbstractContextManager

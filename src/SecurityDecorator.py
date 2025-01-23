@@ -1,3 +1,5 @@
+# größtenteils übernommen aus der Vorlage von Prof. Thies aus 'PythonBankBeispiel-RELEASE_1.2.2'
+
 from flask import request
 from google.auth.transport import requests
 import google.oauth2.id_token
