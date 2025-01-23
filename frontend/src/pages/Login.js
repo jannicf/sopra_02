@@ -21,7 +21,7 @@ class Login extends Component {
 	render() {
 		return (
 			<div>
-				<Typography sx={{marginTop: 4}} align='center' variant='h2'>Herzlich Wilkommen</Typography>
+				<Typography sx={{marginTop: 4}} align='center' variant='h2'>Herzlich Willkommen</Typography>
 				<Typography sx={{marginTop: 2}} align='center' variant='h2'>bei Ihrem digitalen Kleiderschrank</Typography>
 				<Typography sx={{marginTop: 4}} align='center' variant='h6'>Bitte loggen Sie sich zur Nutzung der App ein</Typography>
 				<br/>

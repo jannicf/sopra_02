@@ -9,28 +9,33 @@ class StyleList extends Component {
 
         return (
             <Grid container spacing={3}>
-                {/* Neue Style Kachel mit exakt gleicher Struktur wie StyleCard */}
+                {/* Neue Style Kachel */}
                 <Grid item xs={12} sm={6} md={4}>
                     <Card
                         sx={{
                             cursor: 'pointer',
+                            height: '100%',
+                            p: 2,
+                            borderRadius: 2,
+                            boxShadow: 2,
+                            bgcolor: 'primary.main',
+                            color: 'white',
                             '&:hover': {
-                                boxShadow: 3,
-                                transform: 'scale(1.02)',
-                                transition: 'all 0.2s ease-in-out'
+                                transform: 'translateY(-2px)',
+                                transition: 'all 0.2s'
                             }
                         }}
                         onClick={onCreateClick}
                     >
-                        <CardContent>
+                        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                             <Box sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                             }}>
-                                <AddIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                                <Typography variant="h6" color="primary">
+                                <AddIcon sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+                                <Typography variant="h6" color="white">
                                     Neuer Style
                                 </Typography>
                             </Box>

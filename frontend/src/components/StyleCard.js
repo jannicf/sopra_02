@@ -152,62 +152,63 @@ loadKleidungstypen = async () => {
         return (
             <>
                 <Card
-                    sx={{
-                        cursor: 'pointer',
-                        '&:hover': {
-                            boxShadow: 3,
-                            transform: 'scale(1.02)',
-                            transition: 'all 0.2s ease-in-out'
-                        }
-                    }}
-                    onClick={() => this.setState({ showDetailsDialog: true })}
-                >
-                    <CardContent>
-                        <Box sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start'
-                        }}>
-                            <Box>
-                                <Typography variant="h6">
-                                    {style.getName()}
-                                </Typography>
-                                <Typography color="textSecondary">
-                                    Features: {style.getFeatures().length}
-                                </Typography>
-                                <Typography color="textSecondary">
-                                    Constraints: {
-                                        (style.getConstraints().kardinalitaeten?.length || 0) +
-                                        (style.getConstraints().mutexe?.length || 0) +
-                                        (style.getConstraints().implikationen?.length || 0)
-                                    }
-                                </Typography>
-                            </Box>
-                            <Box>
-                                <IconButton
-                                    onClick={this.handleEditClick}
-                                    size="small"
-                                    sx={{ mr: 1 }}
-                                    color="primary"
-                                >
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton
-                                    onClick={this.handleDeleteClick}
-                                    size="small"
-                                    color="error"
-                                >
-                                    <DeleteIcon />
-                                </IconButton>
+                sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    '&:hover': {
+                        transform: 'translateY(-2px)',
+                        transition: 'all 0.2s'
+                    }
+                }}
+                onClick={() => this.setState({ showDetailsDialog: true })}
+            >
+                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}> {/* Hier ist die Änderung */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box>
+                            <Typography variant="h6">
+                                {style.getName()}
+                            </Typography>
+                            <Typography color="textSecondary">
+                                Features: {style.getFeatures().length}
+                            </Typography>
+                            <Typography color="textSecondary">
+                                Constraints: {
+                                    (style.getConstraints().kardinalitaeten?.length || 0) +
+                                    (style.getConstraints().mutexe?.length || 0) +
+                                    (style.getConstraints().implikationen?.length || 0)
+                                }
+                            </Typography>
                         </Box>
+                        <Box>
+                            <IconButton
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(style);
+                                }}
+                                sx={{ color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                                disableRipple
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(style);
+                                }}
+                                sx={{ color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                                disableRipple
+                            >
+                                <DeleteIcon />
+                            </IconButton>
                         </Box>
-                    </CardContent>
-                </Card>
+                    </Box>
+                </CardContent>
+            </Card>
 
-                {this.renderStyleDetailsDialog()}
-            </>
-        );
-    }
+            {this.renderStyleDetailsDialog()}
+        </>
+    );
+}
 }
 
 export default StyleCard;
