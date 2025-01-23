@@ -32,7 +32,6 @@ class App extends React.Component {
     };
 
 
-    // Login-Vorgang -> Verwendung auf Login-Page (onSignIn)????
     handleSignIn = () => {
         // Zeigt den LoadingProgress während der Anmeldung
         this.setState({
@@ -140,7 +139,7 @@ class App extends React.Component {
                  * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
                  * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
                  * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
-                document.cookie = `token=${token};path=/;SameSite=None;Secure`;
+                document.cookie = 'token=;path=/;SameSite=None;Secure';
 
                 // Zurücksetzung des ausgeloggten Nutzers
                 this.setState({

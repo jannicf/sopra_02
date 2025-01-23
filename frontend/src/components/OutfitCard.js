@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
+import {Card, CardContent, Typography, Box, IconButton} from '@mui/material';
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const OutfitCard = ({ outfit, onClick }) => {
   const style = outfit.getStyle();
@@ -7,38 +8,44 @@ const OutfitCard = ({ outfit, onClick }) => {
 
   return (
     <Card
-      onClick={() => onClick(outfit)}
       sx={{
-        cursor: 'pointer',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        p: 2,
+        borderRadius: 2,
         '&:hover': {
-          boxShadow: 3,
-          transform: 'scale(1.02)',
-          transition: 'all 0.2s ease-in-out'
+          transform: 'translateY(-2px)',
+          transition: 'all 0.2s'
         }
       }}
+      onClick={() => onClick(outfit)}
     >
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Outfit {outfit.getID()}
-        </Typography>
-
-        {style && (
-          <Box sx={{ mb: 2 }}>
-            <Chip
-              label={`Style: ${style.getName()}`}
-              color="primary"
-              variant="outlined"
-              size="small"
-            />
+      <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box>
+            <Typography variant="h6">
+              Outfit {outfit.getID()}
+            </Typography>
+            {style && (
+              <Typography color="textSecondary">
+                Style: {style.getName()}
+              </Typography>
+            )}
+            <Typography color="textSecondary">
+              {bausteine.length} Kleidungsstücke
+            </Typography>
           </Box>
-        )}
-
-        <Typography color="textSecondary">
-          {bausteine.length} Kleidungsstücke
-        </Typography>
+          <Box>
+            <IconButton
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick(outfit);
+              }}
+              sx={{ color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+              disableRipple
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

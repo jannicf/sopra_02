@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Button, Grid, Typography } from '@mui/material';
+import {Box, Button, Grid, Typography} from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
 
 /**
  * Renders a landing page for users who are not logged in. Provides a log in button
@@ -20,18 +21,42 @@ class Login extends Component {
 	render() {
 		return (
 			<div>
-				<Typography sx={{margin: 2}} align='center' variant='h2'>Wilkommen beim digitalen Kleiderschrank</Typography>
-				<Typography sx={{margin: 2}} align='center' variant='h6'>Bitte loggen Sie sich zur Nutzung der App ein</Typography>
+				<Typography sx={{marginTop: 4}} align='center' variant='h2'>Herzlich Willkommen</Typography>
+				<Typography sx={{marginTop: 2}} align='center' variant='h2'>bei Ihrem digitalen Kleiderschrank</Typography>
+				<Typography sx={{marginTop: 4}} align='center' variant='h6'>Bitte loggen Sie sich zur Nutzung der App ein</Typography>
 				<br/>
 				<Grid container justifyContent='center'>
-					<Button variant='contained' color='primary'
-							onClick={this.handleLoginButtonClicked} disableRipple>Mit Google einloggen
-					</Button>
-				</Grid>
-				<br/>
-			</div>
-		);
-	}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.handleLoginButtonClicked}
+                        sx={{
+							marginTop: 2,
+                            width: 300,
+                            p: 2,
+                            textAlign: 'center',
+                            borderRadius: 2,
+                            boxShadow: 2,
+                            bgcolor: 'primary.main',
+                            '&:hover': {
+                                transform: 'translateY(-2px)',
+                                transition: 'all 0.2s'
+                            }
+                        }}
+                        disableRipple
+                    >
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <GoogleIcon sx={{ color: 'white', fontSize: '2rem' }} />
+                            <Typography sx={{ mt: 1, color: 'white' }}>
+                                Mit Google einloggen
+                            </Typography>
+                        </Box>
+                    </Button>
+                </Grid>
+                <br/>
+            </div>
+        );
+    }
 }
 
 export default Login;

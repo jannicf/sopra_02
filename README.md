@@ -43,11 +43,23 @@ ___
 ___
 ### Voraussetzungen
 ___
-xyz
+- Node.js (Version 18 oder höher) -> [hier herunterladen](https://nodejs.org/)
 ___
 ### Installation
 ___
-xyz
+1) Ins frontend-Verzeichnis wechseln
+```
+cd frontend
+```
+2) Abhängigkeiten in der package.json installieren
+```
+npm install
+```
+3) Entwicklungsserver starten
+```
+npm start
+```
+
 ___
 
 # Backend Setup
@@ -55,21 +67,80 @@ ___
 ___
 ### Voraussetzungen
 ___
-xyz
+- Python (Version 3.9 oder höher) -> [hier herunterladen](https://www.python.org/downloads/)
 ___
 ### Installation
 ___
-xyz
+1) Ins src-Verzeichnis wechseln
+```
+cd src
+```
+2) Virtuelle Umgebung erstellen
+```
+python -m venv venv
+```
+3) Virtuelle Umgebung aktivieren für Windows
+```
+venv\Scripts\activate 
+```
+4) Virtuelle Umgebung aktivieren für Unix
+```
+source venv/bin/activate
+```
+5) requirements.txt installieren
+```
+pip install -r requirements.txt
+```
+6) main.py starten
+```
+python main.py
+```
 ___
 
 # Datenbank
 
 ___
-xyz
+Lokale DB
+- mySQL installieren -> [hier herunterladen](https://dev.mysql.com/downloads/mysql/)
+- Datenbankinstanz erstellen
+- Datenbank erstellen
+- sopra_db_dump.sql importieren
+
+Google Cloud SQL
+- Google Cloud SDK installieren -> [hier herunterladen](https://cloud.google.com/sdk)
+- Google Cloud Proxy konfigurieren -> [siehe Google-Dokumentation](https://cloud.google.com/sdk/docs/proxy-settings) 
+1) Anmeldung bei gcloud
+```
+gcloud auth login
+```
+2) Auswahl des Projekts
+```
+gcloud config set project civil-array-440815-m3
+```
+3) Proxy starten
+```
+./cloud_sql_proxy -instances=civil-array-440815-m3:europe-west3:sopra-db-instanz=tcp:3306
+```
 ___
 
 # Deployment
 
 ___
-xyz
+1) Ins frontend-Verzeichnis wechseln
+```
+cd frontend
+```
+2) Frontend aufbauen
+```
+npm run build
+```
+- Build-Ordner aus dem Frontend in src verschieben
+3) App deployen
+```
+gcloud app deploy
+```
+4) App aufrufen
+```
+gcloud app browse
+```
 ___

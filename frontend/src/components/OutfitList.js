@@ -129,6 +129,7 @@ class OutfitList extends Component {
               <OutfitCard
                 outfit={outfit}
                 onClick={this.handleOutfitClick}
+                onDelete={this.handleOutfitDelete}
               />
             </Grid>
           ))}
