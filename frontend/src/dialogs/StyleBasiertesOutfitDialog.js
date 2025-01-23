@@ -38,17 +38,19 @@ class StyleBasiertesOutfitDialog extends Component {
         }
     }
 
+    // In der loadPassendeKleidung Methode:
     loadPassendeKleidung = async () => {
         try {
             this.setState({ loading: true });
             const api = KleiderschrankAPI.getAPI();
 
-            // Get all clothing items
+            // Hole alle Kleidungstücke
             const alleKleidungsstuecke = await api.getKleidungsstuecke();
 
-            // Filter for items that match the style's clothing types
+            // Filtere nach Kleiderschrank ID und Style-Typen
             const styleTypes = this.props.style.getFeatures();
             const passendeKleidung = alleKleidungsstuecke.filter(kleidungsstueck =>
+                kleidungsstueck.getKleiderschrankId() === this.props.kleiderschrankId && // Prüfe Kleiderschrank ID
                 styleTypes.some(styleType =>
                     styleType.getID() === kleidungsstueck.getTyp().getID()
                 )
@@ -86,25 +88,38 @@ class StyleBasiertesOutfitDialog extends Component {
     };
 
     handleOutfitErstellen = async () => {
-        try {
-            const api = KleiderschrankAPI.getAPI();
+    try {
+        const api = KleiderschrankAPI.getAPI();
 
-            await api.addOutfit({
-                style_id: this.props.style.getID(),
-                bausteine: this.state.ausgewaehlteKleidung.map(k => k.getID()),
-                kleiderschrank_id: this.props.kleiderschrankId
-            });
-
-            // Dialog schließen und zur Outfits-Seite navigieren
-            this.props.onClose(true);
-            this.props.navigate('/outfits');
-        } catch (error) {
+        if (this.state.ausgewaehlteKleidung.length === 0) {
             this.setState({
-                error: 'Fehler beim Erstellen des Outfits: ' + error.message,
-                loading: false
+                error: 'Bitte wählen Sie mindestens ein Kleidungsstück aus.'
             });
+            return;
         }
+
+        const response = await api.addOutfit({
+            style_id: this.props.style.getID(),
+            bausteine: this.state.ausgewaehlteKleidung.map(k => k.getID()),
+            kleiderschrank_id: this.props.kleiderschrankId
+        });
+
+        // Bei Erfolg Dialog schließen und zur Outfits-Seite navigieren
+        this.props.onClose(true);
+
+    } catch (error) {
+        // Angepasste Fehlermeldung
+        let errorMessage = 'Das Outfit erfüllt nicht die Style-Constraints';
+        if (error.response) {
+            errorMessage = error.response.data?.message || errorMessage;
+        }
+
+        this.setState({
+            error: errorMessage,
+            loading: false
+        });
     }
+};
 
     render() {
         const { show, style, onClose } = this.props;
@@ -243,6 +258,14 @@ class StyleBasiertesOutfitDialog extends Component {
                         </Grid>
                     </Grid>
                 </DialogContent>
+
+                {error && (
+                    <Box sx={{ px: 3, pb: 2 }}>
+                        <Typography color="error">
+                            {error}
+                        </Typography>
+                    </Box>
+                )}
 
                 <DialogActions>
                     <Button onClick={() => onClose(false)}>
