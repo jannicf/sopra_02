@@ -73,9 +73,9 @@ kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
 })
 
 outfit = api.inherit('Outfit', bo, {
-    'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if x.get_style() else None),
-    'bausteine': fields.List(fields.Integer, attribute=lambda x: x.get_baustein_ids()),
-    'kleiderschrank_id': fields.Integer(attribute='_Outfit__kleiderschrank_id')
+    'style': fields.Integer(attribute=lambda x: x.get_style().get_id() if hasattr(x, 'get_style') and x.get_style() else None),
+    'bausteine': fields.List(fields.Integer, attribute=lambda x: x.get_baustein_ids() if hasattr(x, 'get_baustein_ids') else []),
+    'kleiderschrank_id': fields.Integer(attribute=lambda x: x.get_kleiderschrank_id() if hasattr(x, 'get_kleiderschrank_id') else None)
 })
 
 constraint = api.inherit('Constraint', bo, {
@@ -736,23 +736,21 @@ class OutfitListOperations(Resource):
             adm = KleiderschrankAdministration()
             data = api.payload
 
-            # Style ID aus beiden möglichen Quellen akzeptieren
             style_id = data.get('style_id') or data.get('style')
             bausteine = data.get('bausteine', [])
             kleiderschrank_id = data.get('kleiderschrank_id')
 
-            if not all([style_id, bausteine, kleiderschrank_id]):
-                return {'message': 'Fehlende Parameter'}, 400
-
-            # Outfit erstellen
             outfit = adm.create_outfit_from_selection(bausteine, style_id, kleiderschrank_id)
 
-            if outfit:
-                return outfit, 201
-            return {'message': 'Outfit konnte nicht erstellt werden'}, 400
+            # Wenn kein Outfit erstellt wurde (z.B. wegen Constraints)
+            if outfit is None:
+                return {'message': 'Das Outfit konnte nicht erstellt werden'}, 400
+
+            # Nur wenn ein valides Outfit erstellt wurde
+            return outfit, 201
 
         except Exception as e:
-            return {'message': str(e)}, 500
+            return {'message': 'Das Outfit konnte nicht erstellt werden'}, 400
 
 @wardrobe_ns.route('/outfits/by-kleiderschrank/<int:kleiderschrank_id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')

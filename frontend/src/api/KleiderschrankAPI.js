@@ -616,26 +616,28 @@ class KleiderschrankAPI {
         return OutfitBO.fromJSON(responseJSON);
     })
 }
-    addOutfit(outfitData) {
-
-        const requestData = {
-            style_id: outfitData.style_id,
-            bausteine: outfitData.bausteine,
-            kleiderschrank_id: outfitData.kleiderschrank_id
-        };
-
-        return this.#fetchAdvanced(this.#addOutfitURL(), {
+    addOutfit = async (outfitData) => {
+    try {
+        const response = await this.#fetchAdvanced(this.#addOutfitURL(), {
             method: 'POST',
             headers: {
                 'Accept': 'application/json, text/plain',
                 'Content-type': 'application/json',
             },
-            body: JSON.stringify(requestData)
-        }).then(responseJSON => {
-            let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
-            return responseOutfitBO;
+            body: JSON.stringify(outfitData)
         });
+
+        // Wenn die Antwort kein Outfit enthält (z.B. bei Constraint-Verletzung)
+        if (!response || response.message) {
+            throw new Error(response.message || 'Das Outfit konnte nicht erstellt werden');
+        }
+
+        return OutfitBO.fromJSON([response])[0];
+    } catch (error) {
+        // Fehler weiterwerfen, damit er in der UI behandelt werden kann
+        throw error;
     }
+};
 
     updateOutfit(outfitBO) {
 
