@@ -8,7 +8,6 @@ Verbindungsfehler der Datenbank führt, weil die Mapper sich immer wieder selbst
 der Mapper durch eine ausführlichere Implementierung mit SQL-Statements ersetzt, was zwar aufwendiger
 daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht."""
 
-
 class KleidungstypMapper(Mapper):
 
     def insert(self, kleidungstyp):
@@ -132,7 +131,6 @@ class KleidungstypMapper(Mapper):
         command = "SELECT id, bezeichnung, kleiderschrank_id FROM kleidungstyp WHERE id=%s"
         cursor.execute(command, (kleidungstyp_id,))
         tuples = cursor.fetchall()
-
 
         try:
             (id, bezeichnung, kleiderschrank_id) = tuples[0]

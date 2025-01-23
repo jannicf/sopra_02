@@ -1,7 +1,6 @@
 from server.bo import BusinessObject as bo
 from server.bo.Constraint import Constraint
 
-
 class Style(bo.BusinessObject):
 
     def __init__(self):

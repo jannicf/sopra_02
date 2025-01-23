@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from server.bo.Constraint import Constraint
 
-
 class BinaryConstraint(Constraint):
     def __init__(self):
         """

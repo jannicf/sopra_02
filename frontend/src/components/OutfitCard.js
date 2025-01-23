@@ -25,6 +25,7 @@ const OutfitCard = ({ outfit, onClick, onDelete }) => {
       <Card
         sx={{
           p: 2,
+          cursor: 'pointer',
           borderRadius: 2,
           '&:hover': {
             transform: 'translateY(-2px)',
