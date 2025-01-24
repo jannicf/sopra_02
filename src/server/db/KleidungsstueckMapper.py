@@ -97,7 +97,6 @@ class KleidungsstueckMapper(Mapper):
                 kleidungsstueck.set_typ(typ)
             kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
 
-
             result = kleidungsstueck
         except IndexError:
             """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
@@ -123,7 +122,6 @@ class KleidungsstueckMapper(Mapper):
         cursor.execute(command, (name,))
         tuples = cursor.fetchall()
 
-
         for (id, name, typ_id, kleiderschrank_id) in tuples:
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
@@ -132,7 +130,6 @@ class KleidungsstueckMapper(Mapper):
                 typ = kleidungstyp_mapper.find_by_id(typ_id)
                 kleidungsstueck.set_typ(typ)
             kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
-
 
             result.append(kleidungsstueck)
 
@@ -155,7 +152,6 @@ class KleidungsstueckMapper(Mapper):
         cursor.execute(command, (typ.get_id(),))
         tuples = cursor.fetchall()
 
-
         for (id, name, typ_id, kleiderschrank_id) in tuples:
             kleidungsstueck = Kleidungsstueck()
             kleidungsstueck.set_id(id)
@@ -164,8 +160,8 @@ class KleidungsstueckMapper(Mapper):
                 typ = kleidungstyp_mapper.find_by_id(typ_id)
                 kleidungsstueck.set_typ(typ)
             kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
-            result.append(kleidungsstueck)
 
+            result.append(kleidungsstueck)
 
         self._cnx.commit()
         cursor.close()
@@ -194,25 +190,12 @@ class KleidungsstueckMapper(Mapper):
                 kleidungsstueck.set_typ(typ)
             kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
 
-
             result.append(kleidungsstueck)
 
         self._cnx.commit()
         cursor.close()
 
         return result
-
-    def delete_by_kleiderschrank_id(self, kleiderschrank_id):
-        """
-        Löscht alle Kleidungsstücke, die mit einem bestimmten Kleiderschrank verknüpft sind.
-        :param kleiderschrank_id: ID des Kleiderschranks
-        """
-        cursor = self._cnx.cursor()
-        # SQL-Abfrage mit sicherem Platzhalter
-        query = "DELETE FROM kleidungsstueck WHERE kleiderschrank_id = %s"
-        cursor.execute(query, (kleiderschrank_id,))
-        self._cnx.commit()
-        cursor.close()
 
     def find_all(self):
         """Auslesen aller Kleidungsstücke unseres Systems.
@@ -233,6 +216,7 @@ class KleidungsstueckMapper(Mapper):
                 typ = kleidungstyp_mapper.find_by_id(typ_id)
                 kleidungsstueck.set_typ(typ)
             kleidungsstueck.set_kleiderschrank_id(kleiderschrank_id)
+
             result.append(kleidungsstueck)
 
         self._cnx.commit()

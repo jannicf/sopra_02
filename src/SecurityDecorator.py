@@ -1,3 +1,5 @@
+# größtenteils übernommen aus der Vorlage von Prof. Thies aus 'PythonBankBeispiel-RELEASE_1.2.2'
+
 from flask import request
 from google.auth.transport import requests
 import google.oauth2.id_token
@@ -49,11 +51,10 @@ def secured(function):
                     person = adm.get_person_by_google_id(google_user_id)
                     if person is not None:
                         """Fall: Der Benutzer ist unserem System bereits bekannt.
-                        Wir aktualisieren Namen und Nickname für den Fall, dass sich
-                        diese in Firebase geändert haben."""
+                        Wir aktualisieren den Namen für den Fall, dass sich
+                        dieser in Firebase geändert hat."""
                         person.set_vorname(vorname)
                         person.set_nachname(nachname)
-                        person.set_nickname(nickname)
                         adm.save_person(person)
                     else:
                         """Fall: Erster Login des Benutzers.

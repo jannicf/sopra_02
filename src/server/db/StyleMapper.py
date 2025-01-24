@@ -1,10 +1,7 @@
 from server.db.Mapper import Mapper
 from server.bo.Style import Style
-from server.bo.Kardinalitaet import Kardinalitaet
-from server.bo.Mutex import Mutex
-from server.bo.Implikation import Implikation
 from server.bo.Kleidungstyp import Kleidungstyp
-from server.db.KleidungstypMapper import KleidungstypMapper
+
 
 """In dieser Klasse könnte man durch die Nutzung von with-statements die jeweils benötigten Mapper
 direkt aufrufen, um die benötigten Daten zu laden bzw. zu verändern. Da dies jedoch zu einem
