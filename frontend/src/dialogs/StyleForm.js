@@ -34,14 +34,14 @@ const StyleForm = ({ show, style, onClose, kleiderschrankId }) => {
   useEffect(() => {
     const loadKleidungstypen = async () => {
       try {
-        const allTypes = await KleiderschrankAPI.getAPI().getKleidungstypen();
+        const allTypes = await KleiderschrankAPI.getAPI().getKleidungstypByKleiderschrankId(kleiderschrankId);
         setKleidungstypen(allTypes);
       } catch (error) {
         console.error("Fehler beim Laden der Kleidungstypen:", error);
       }
     };
     loadKleidungstypen();
-  }, []);
+  }, [kleiderschrankId]);
 
 
   useEffect(() => {
@@ -281,7 +281,7 @@ const handleSubmit = async () => {
           <InputLabel>Features</InputLabel>
           <Select
             multiple
-            value={formData.features.map(f => f.getID())}
+            value={formData.features.map(f => typeof f === 'object' ? f.getID() : f)}
             onChange={(e) => {
               const selectedIDs = e.target.value; // Array von IDs
               const selectedTypes = kleidungstypen.filter(typ => selectedIDs.includes(typ.getID()));
@@ -290,7 +290,12 @@ const handleSubmit = async () => {
             renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {formData.features.map((feature) => (
-                  <Chip key={feature.getID()} label={feature.getBezeichnung()} />
+                  <Chip
+                      key={typeof feature === 'object' ? feature.getID() : feature}
+                      label={typeof feature === 'object' ? feature.getBezeichnung() : kleidungstypen.find(
+                          kt => kt.getID() === feature)?.getBezeichnung()
+                  }
+                  />
                 ))}
               </Box>
             )}
