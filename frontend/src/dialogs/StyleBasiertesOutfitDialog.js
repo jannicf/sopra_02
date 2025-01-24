@@ -305,7 +305,10 @@ class StyleBasiertesOutfitDialog extends Component {
                     borderColor: 'divider',
                     background: 'linear-gradient(to right, #f5f5f5, #ffffff)'
                 }}>
-                    <Button onClick={() => onClose(false)}>
+                    <Button onClick={() => {
+                        this.setState({ ausgewaehlteKleidung: [] });
+                        onClose(false);
+                    }}>
                         Abbrechen
                     </Button>
                     <Button
