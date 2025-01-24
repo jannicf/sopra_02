@@ -88,12 +88,12 @@ class ProfilView extends Component {
 
     handleEditDialogClosed = async (editedPerson) => {
     if (editedPerson) {
-        // Explizit neu laden, um die aktuellsten Daten vom Server zu bekommen
-        await this.loadPerson();
+        // Wir laden die Person NICHT neu, sondern nutzen die editierte Version
 
         // State aktualisieren, um Re-Render zu triggern
         this.setState({
-            showEditDialog: false
+            showEditDialog: false,
+            person: editedPerson
         });
     } else {
         this.setState({
