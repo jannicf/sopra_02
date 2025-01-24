@@ -52,7 +52,7 @@ class KleiderschrankMapper(Mapper):
     def delete(self, kleiderschrank):
         """Löschen der Daten eines Kleiderschrank-Objekts aus der Datenbank.
 
-                :param Kleiderschrank das aus der DB zu löschende "Objekt"
+                :param kleiderschrank das aus der DB zu löschende "Objekt"
                 """
         cursor = self._cnx.cursor()
 

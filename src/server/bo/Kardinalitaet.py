@@ -1,5 +1,4 @@
 from server.bo.UnaryConstraint import UnaryConstraint
-from server.bo.Kleidungstyp import Kleidungstyp
 
 class Kardinalitaet(UnaryConstraint):
 

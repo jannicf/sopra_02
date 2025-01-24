@@ -27,7 +27,6 @@ class KleiderschrankAdministration(object):
     def __init__(self):
         pass
 
-
     """
        Constraint-spezifische Methoden
        """
@@ -161,7 +160,6 @@ class KleiderschrankAdministration(object):
         """Die gegebene Implikations-Beziehung aus unserem System löschen."""
         with ImplikationMapper() as mapper:
             mapper.delete(implikation)
-
 
     """
     Person-spezifische Methoden
@@ -307,7 +305,6 @@ class KleiderschrankAdministration(object):
         with KleiderschrankMapper() as mapper:
             mapper.delete(kleiderschrank)
 
-
     """
     Style-spezifische Methoden
     """
@@ -364,8 +361,6 @@ class KleiderschrankAdministration(object):
                     kleidungstyp.delete_verwendung(style)
             # Schließlich den Style selbst löschen
             mapper.delete(style)
-
-
 
     """
     Outfit-spezifische Methoden
@@ -489,7 +484,6 @@ class KleiderschrankAdministration(object):
 
             # Kleidungsstück direkt löschen ohne vorher die kleiderschrank_id zu ändern
             mapper.delete(kleidungsstueck)
-
 
     """
     Kleidungstyp-spezifische Methoden
@@ -699,7 +693,6 @@ class KleiderschrankAdministration(object):
 
         outfit = self.create_outfit(style_id, kleiderschrank_id)
         outfit.add_baustein(basis_kleidungsstueck)
-
 
         # Füge NUR die vom Nutzer ausgewählten Kleidungsstücke hinzu
         for kleidungsstueck in ausgewaehlte_kleidungsstuecke:

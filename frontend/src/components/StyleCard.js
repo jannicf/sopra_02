@@ -154,6 +154,7 @@ loadKleidungstypen = async () => {
                 <Card
                 sx={{
                     p: 2,
+                    cursor: 'pointer',
                     borderRadius: 2,
                     '&:hover': {
                         transform: 'translateY(-2px)',
@@ -162,7 +163,7 @@ loadKleidungstypen = async () => {
                 }}
                 onClick={() => this.setState({ showDetailsDialog: true })}
             >
-                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}> {/* Hier ist die Änderung */}
+                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Box>
                             <Typography variant="h6">
