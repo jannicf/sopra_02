@@ -12,7 +12,8 @@ import {
     CardContent,
     Checkbox,
     Paper,
-    Chip
+    Alert,
+    AlertTitle
 } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleIcon from '@mui/icons-material/Style';
@@ -145,6 +146,20 @@ class StyleBasiertesOutfitDialog extends Component {
                 </DialogTitle>
 
                 <DialogContent sx={{ pt: 3 }}>
+                    {error && (
+                       <Alert
+                           severity="warning"
+                           sx={{ mb: 3 }}
+                           action={
+                               <Button color="inherit" size="small" onClick={() => this.setState({error: null})}>
+                                   VERSTANDEN
+                               </Button>
+                           }
+                       >
+                           <AlertTitle>Outfit kann nicht erstellt werden</AlertTitle>
+                           {error}
+                       </Alert>
+                    )}
                     {/* Style Info */}
                     <Box sx={{ mb: 4 }}>
                         <Paper
@@ -170,12 +185,6 @@ class StyleBasiertesOutfitDialog extends Component {
                             </Box>
                         </Paper>
                     </Box>
-
-                    {error && (
-                        <Typography color="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Typography>
-                    )}
 
                     <Grid container spacing={3}>
                         {/* Verfügbare Kleidungsstücke */}
@@ -289,14 +298,6 @@ class StyleBasiertesOutfitDialog extends Component {
                         </Grid>
                     </Grid>
                 </DialogContent>
-
-                {error && (
-                    <Box sx={{ px: 3, pb: 2 }}>
-                        <Typography color="error">
-                            {error}
-                        </Typography>
-                    </Box>
-                )}
 
                 <DialogActions sx={{
                     px: 3,
