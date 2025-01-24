@@ -235,6 +235,7 @@ class KleiderschrankView extends Component {
                         {kleidungstypen.length > 0 ? (
                             <KleidungstypList
                                 kleidungstypen={kleidungstypen}
+                                kleiderschrankId={this.state.kleiderschrankId}
                                 onUpdate={this.loadKleidungstypen}
                                 onDelete={this.handleDeleteKleidungstyp}
                             />

@@ -9,18 +9,19 @@ class KleidungstypCard extends Component {
         this.state = {
             showEditDialog: false,
             showDeleteDialog: false,
-            kleiderschrank_id: null
+            kleiderschrankId: props.kleiderschrankId
         };
     }
 
     handleEditClick = () => {
-        // Hole die kleiderschrank_id vom Kleidungstyp
-        const kleiderschrankId = this.props.kleidungstyp.getKleiderschrankId();
-        console.log("Editing Kleidungstyp with kleiderschrank_id:", kleiderschrankId);
-        this.setState({
-            showEditDialog: true,
-            kleiderschrank_id: kleiderschrankId  // Speichere sie im State
+        const { kleidungstyp } = this.props;
+        console.log("Edit Kleidungstyp:", {
+            id: kleidungstyp.getID(),
+            bezeichnung: kleidungstyp.getBezeichnung(),
+            verwendungen: kleidungstyp.getVerwendungen(),
+            kleiderschrankId: kleidungstyp.getKleiderschrankId()
         });
+        this.setState({ showEditDialog: true });
     }
 
     handleDeleteClick = () => {
@@ -28,29 +29,40 @@ class KleidungstypCard extends Component {
     }
 
     handleEditDialogClosed = async (editedKleidungstyp) => {
-    if (editedKleidungstyp) {
-        try {
-            await this.props.onUpdate();  // Liste neu laden
-        } catch (error) {
-            console.error("Fehler beim Aktualisieren der Liste:", error);
+        if (editedKleidungstyp && this.props.onUpdate) {
+            try {
+                await this.props.onUpdate();
+            } catch (error) {
+                console.error("Fehler beim Aktualisieren der Liste:", error);
+            }
         }
-    }
-    this.setState({ showEditDialog: false });
-}
+        this.setState({ showEditDialog: false });
+    };
 
     handleDeleteDialogClosed = async (deletedKleidungstyp) => {
-        if (deletedKleidungstyp) {
-            // Rufe die übergebene onDelete-Funktion auf
-            await this.props.onDelete(deletedKleidungstyp);
-            // Nach erfolgreichem Löschen die Liste aktualisieren
-            this.props.onUpdate();
-        }
         this.setState({ showDeleteDialog: false });
-    }
+        if (deletedKleidungstyp && this.props.onDelete) {
+            try {
+                await this.props.onDelete(deletedKleidungstyp);
+                if (this.props.onUpdate) {
+                    await this.props.onUpdate();
+                }
+            } catch (error) {
+                console.error("Fehler beim Löschen:", error);
+            }
+        }
+    };
 
     render() {
-        const { kleidungstyp } = this.props;
-        const { showEditDialog, showDeleteDialog, kleiderschrankId } = this.state;
+        const { kleidungstyp, kleiderschrankId } = this.props;
+        const { showEditDialog, showDeleteDialog } = this.state;
+        const verwendungen = kleidungstyp.getVerwendungen();
+
+        console.log("KleidungstypCard render:", {
+            id: kleidungstyp.getID(),
+            bezeichnung: kleidungstyp.getBezeichnung(),
+            verwendungen: verwendungen
+        });
 
         return (
             <Card sx={{ mb: 1 }}>
@@ -62,9 +74,9 @@ class KleidungstypCard extends Component {
                                     <Typography variant="h6" gutterBottom>
                                         {kleidungstyp.getBezeichnung()}
                                     </Typography>
-                                    {kleidungstyp.getVerwendungen().length > 0 && (
+                                    {verwendungen && verwendungen.length > 0 ? (
                                         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-                                            {kleidungstyp.getVerwendungen().map(style => (
+                                            {verwendungen.map(style => (
                                                 <Chip
                                                     key={style.getID()}
                                                     label={style.getName()}
@@ -74,6 +86,10 @@ class KleidungstypCard extends Component {
                                                 />
                                             ))}
                                         </Box>
+                                    ) : (
+                                        <Typography color="textSecondary" variant="body2">
+                                            Keine Styles zugeordnet
+                                        </Typography>
                                     )}
                                 </Box>
                                 <ButtonGroup variant="text" size="small">
@@ -92,8 +108,9 @@ class KleidungstypCard extends Component {
                 <KleidungstypForm
                     show={showEditDialog}
                     kleidungstyp={kleidungstyp}
-                    kleiderschrankId={kleidungstyp.getKleiderschrankId()}
+                    kleiderschrankId={kleiderschrankId}
                     onClose={this.handleEditDialogClosed}
+                    onUpdate={this.props.onUpdate}
                 />
                 <KleidungstypDeleteDialog
                     show={showDeleteDialog}

@@ -500,12 +500,11 @@ class KleiderschrankAdministration(object):
         kleidungstyp = Kleidungstyp()
         kleidungstyp.set_bezeichnung(bezeichnung)
         kleidungstyp.set_kleiderschrank_id(kleiderschrank_id)
-        kleidungstyp.set_id(1)
 
-        # Wenn Verwendungen übergeben wurden, diese hinzufügen
+        # Verwendungen übergeben
         if verwendungen:
-            for verwendung_id in verwendungen:
-                style = self.get_style_by_id(verwendung_id)
+            for style_id in verwendungen:
+                style = self.get_style_by_id(style_id)
                 if style:
                     kleidungstyp.add_verwendung(style)
 
@@ -535,7 +534,8 @@ class KleiderschrankAdministration(object):
     def save_kleidungstyp(self, kleidungstyp):
         """Den gegebenen Kleidungstyp speichern."""
         with KleidungstypMapper() as mapper:
-            mapper.update(kleidungstyp)
+            result = mapper.update(kleidungstyp)
+            return result
 
     def delete_kleidungstyp(self, kleidungstyp):
         """Den gegebenen Kleidungstyp aus unserem System löschen."""

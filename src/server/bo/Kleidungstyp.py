@@ -44,6 +44,8 @@ class Kleidungstyp(bo.BusinessObject):
 
     def get_verwendungen(self):
         """Auslesen der Verwendungen des Kleidungstyps"""
+        if self.__verwendungen is None:
+            self.__verwendungen = []
         return self.__verwendungen
 
     def __eq__(self, other):
@@ -61,16 +63,18 @@ class Kleidungstyp(bo.BusinessObject):
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        """Umwandeln eines Python dict() in einen Kleidungstyp()."""
         obj = Kleidungstyp()
-        obj.set_id(dictionary["id"])  # eigentlich Teil von BusinessObject !
-        obj.set_bezeichnung(dictionary["bezeichnung"])
-        obj.set_kleiderschrank_id(dictionary.get("kleiderschrank_id"))
-        # Wenn verwendungen im Dictionary vorhanden sind, diese auch setzen
-        if "verwendungen" in dictionary and dictionary["verwendungen"] is not None:
-            for verwendung in dictionary["verwendungen"]:
-                if isinstance(verwendung, dict):
-                    style = Style()
-                    style.set_id(verwendung["id"])
-                    obj.add_verwendung(style)
+        obj.set_id(dictionary.get('id', 0))  # Default 0 wenn keine ID
+        obj.set_bezeichnung(dictionary.get('bezeichnung'))
+        obj.set_kleiderschrank_id(dictionary.get('kleiderschrank_id'))
+
+        # Verwendungen verarbeiten
+        verwendungen = dictionary.get('verwendungen', [])
+        if isinstance(verwendungen, list):
+            for v in verwendungen:
+                if isinstance(v, dict) and 'id' in v:
+                    obj.add_verwendung(v['id'])
+                elif isinstance(v, int):
+                    obj.add_verwendung(v)
+
         return obj

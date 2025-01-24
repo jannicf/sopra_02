@@ -13,15 +13,23 @@ class KleidungstypList extends Component {
     }
 
     render() {
-        const { kleidungstypen } = this.props;
+        const { kleidungstypen, kleiderschrankId } = this.props;
+       console.log("KleidungstypList - Kleidungstypen mit Verwendungen:",
+            this.props.kleidungstypen.map(kt => ({
+                id: kt.getID(),
+                bezeichnung: kt.getBezeichnung(),
+                verwendungen: kt.getVerwendungen()
+            }))
+        );
 
         return (
             <List>
                 {kleidungstypen.map(kleidungstyp => (
                     <KleidungstypCard
-                        key={kleidungstyp.getID()}
+                        key={`kleidungstyp-${kleidungstyp.getID()}-${kleidungstyp.getBezeichnung()}`}
                         kleidungstyp={kleidungstyp}
-                        onDelete={this.handleKleidungstypDelete}
+                        kleiderschrankId={kleiderschrankId}
+                        onDelete={this.props.onDelete}
                         onUpdate={this.props.onUpdate}
                     />
                 ))}

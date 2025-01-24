@@ -44,14 +44,19 @@ export default class KleidungstypBO extends BusinessObject {
         *
         * @param {StyleBO} aStyle - Der hinzuzufügende Style
         */
-        addVerwendung(aStyle) {
-        if (aStyle instanceof StyleBO) {
-         this.verwendungen.push(aStyle);
-         // Auch dem Style den Kleidungstyp hinzufügen, wenn er nicht schon in der Liste ist
-         if (!aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
-           aStyle.addFeature(this);
-         }
-        }
+         addVerwendung(aStyle) {
+            // Sicherstellen, dass verwendungen immer ein Array ist
+            if (!this.verwendungen) {
+                this.verwendungen = [];
+            }
+
+            if (aStyle instanceof StyleBO) {
+                this.verwendungen.push(aStyle);
+                // Auch dem Style den Kleidungstyp hinzufügen, wenn er nicht schon in der Liste ist
+                if (!aStyle.getFeatures().some(feature => feature.getID() === this.getID())) {
+                    aStyle.addFeature(this);
+                }
+            }
         }
 
         /**
@@ -75,7 +80,7 @@ export default class KleidungstypBO extends BusinessObject {
         * Gibt alle Verwendungen (Styles) des Kleidungstyps zurück.
         */
         getVerwendungen() {
-        return this.verwendungen;
+            return this.verwendungen || [];
         }
 
         /**
@@ -86,39 +91,46 @@ export default class KleidungstypBO extends BusinessObject {
         static fromJSON(clothingTypes) {
         let result = [];
 
+        // Falls ein Array von Kleidungstypen zurückkommt:
         if (Array.isArray(clothingTypes)) {
-         clothingTypes.forEach((k) => {
-           let kleidungstyp = new KleidungstypBO();
-           kleidungstyp.setID(k.id);
-           kleidungstyp.setBezeichnung(k.bezeichnung);
-           kleidungstyp.setKleiderschrankId(k.kleiderschrank_id);
+            clothingTypes.forEach(k => {
+                let kleidungstyp = new KleidungstypBO();
+                // Hier ID + Bezeichnung + KleiderschrankId setzen
+                kleidungstyp.setID(k.id);
+                kleidungstyp.setBezeichnung(k.bezeichnung);
+                kleidungstyp.setKleiderschrankId(k.kleiderschrank_id);
 
-           // Verwendungen (Styles) konvertieren wenn vorhanden
-           if (k.verwendungen && Array.isArray(k.verwendungen)) {
-             k.verwendungen.forEach(style => {
-               const styleBO = StyleBO.fromJSON([style])[0];
-               kleidungstyp.addVerwendung(styleBO);
-             });
-           }
+                // Wenn "Verwendungen" wirklich eine Liste von Style-Objekten ist
+                if (Array.isArray(k.verwendungen)) {
+                    k.verwendungen.forEach(styleObj => {
+                        const style = new StyleBO();
+                        style.setID(styleObj.id);
+                        style.setName(styleObj.name);
+                        kleidungstyp.addVerwendung(style);
+                    });
+                }
 
-           result.push(kleidungstyp);
-         });
-        } else if (clothingTypes) {
-         let kleidungstyp = new KleidungstypBO();
-         kleidungstyp.setID(clothingTypes.id);
-         kleidungstyp.setBezeichnung(clothingTypes.bezeichnung);
-         kleidungstyp.setKleiderschrankId(clothingTypes.kleiderschrank_id);
-
-         if (clothingTypes.verwendungen && Array.isArray(clothingTypes.verwendungen)) {
-           clothingTypes.verwendungen.forEach(style => {
-             const styleBO = StyleBO.fromJSON([style])[0];
-             kleidungstyp.addVerwendung(styleBO);
-           });
-         }
-
-         result.push(kleidungstyp);
+                result.push(kleidungstyp);
+            });
         }
+        // Falls nur ein einzelner Kleidungstyp als Objekt zurückkommt:
+        else if (clothingTypes && typeof clothingTypes === 'object') {
+            let k = clothingTypes;
+            let kleidungstyp = new KleidungstypBO();
+            kleidungstyp.setID(k.id);
+            kleidungstyp.setBezeichnung(k.bezeichnung);
+            kleidungstyp.setKleiderschrankId(k.kleiderschrank_id);
 
+            if (Array.isArray(k.verwendungen)) {
+                k.verwendungen.forEach(styleData => {
+                    const style = new StyleBO();
+                    style.setID(styleData.id);
+                    style.setName(styleData.name);
+                    kleidungstyp.addVerwendung(style);
+                });
+            }
+            result.push(kleidungstyp);
+        }
         return result;
-        }
-        }
+    }
+}

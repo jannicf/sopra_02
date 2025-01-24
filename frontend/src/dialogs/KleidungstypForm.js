@@ -5,139 +5,168 @@ import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import KleidungstypBO from '../api/KleidungstypBO';
 
 class KleidungstypForm extends Component {
-    constructor(props) {
+        constructor(props) {
         super(props);
         const { kleidungstyp, kleiderschrankId } = props;
 
-        // Erstelle eine echte Kopie des Kleidungstyps
-        let initialKleidungstyp;
-        if (kleidungstyp) {
-            initialKleidungstyp = new KleidungstypBO();
-            initialKleidungstyp.setID(kleidungstyp.getID());
-            initialKleidungstyp.setBezeichnung(kleidungstyp.getBezeichnung());
-            initialKleidungstyp.setKleiderschrankId(kleiderschrankId);
-            // Kopiere die Verwendungen
-            kleidungstyp.getVerwendungen().forEach(style => {
-                initialKleidungstyp.addVerwendung(style);
-            });
-        } else {
-            // Erstelle einen neuen leeren Kleidungstyp
-            initialKleidungstyp = new KleidungstypBO();
-            initialKleidungstyp.setID(0);
-            initialKleidungstyp.setBezeichnung('');
-            initialKleidungstyp.setKleiderschrankId(kleiderschrankId);
-        }
+         console.log("Constructor Input:", {
+        originalKleidungstyp: kleidungstyp ? {
+            id: kleidungstyp.getID(),
+            bezeichnung: kleidungstyp.getBezeichnung()
+        } : null,
+        kleiderschrankId
+    });
 
-        this.state = {
-            kleidungstyp: initialKleidungstyp,
-            selectedStyleIds: kleidungstyp ? kleidungstyp.getVerwendungen().map(style => style.getID()) : [],
-            allStyles: [],
-            loading: false,
-            error: null
-        };
+    // Erstelle eine echte Kopie des Kleidungstyps
+    let initialKleidungstyp;
+    if (kleidungstyp) {
+        initialKleidungstyp = new KleidungstypBO();
+        initialKleidungstyp.setID(kleidungstyp.getID());
+        initialKleidungstyp.setBezeichnung(kleidungstyp.getBezeichnung());
+        initialKleidungstyp.setKleiderschrankId(kleiderschrankId);
+
+        // Verwendungen kopieren
+        const verwendungen = kleidungstyp.getVerwendungen() || [];
+        verwendungen.forEach(style => {
+            initialKleidungstyp.addVerwendung(style);
+        });
+    } else {
+        initialKleidungstyp = new KleidungstypBO();
+        initialKleidungstyp.setBezeichnung('');
+        initialKleidungstyp.setKleiderschrankId(kleiderschrankId);
     }
 
-    componentDidMount() {
-        this.loadStyles();
-        if (this.props.kleidungstyp) {
-            const selectedStyles = this.props.kleidungstyp.getVerwendungen();
-            if (selectedStyles) {
-                this.setState({
-                    selectedStyleIds: selectedStyles.map(style => style.getID())
-                });
-            }
+    this.state = {
+        kleidungstyp: initialKleidungstyp,
+        selectedStyleIds: kleidungstyp ?
+            (kleidungstyp.getVerwendungen() || []).map(style => style.getID()) : [],
+        allStyles: [],
+        error: null
+    };
+}
 
-            // Stelle sicher, dass die kleiderschrank_id im kleidungstyp gesetzt ist
-            const kleidungstyp = this.state.kleidungstyp;
-            // Prüfe beide möglichen Quellen für die kleiderschrank_id
-            const kleiderschrankId = this.props.kleiderschrank_id || this.props.kleidungstyp.getKleiderschrankId();
-            if (kleiderschrankId) {
-                kleidungstyp.setKleiderschrankId(kleiderschrankId);
-                this.setState({ kleidungstyp });
-                console.log("DEBUG: kleiderschrank_id gesetzt in componentDidMount:", kleiderschrankId);
+    componentDidMount() {
+        this.loadStyles();  // Styles beim ersten Laden holen
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.kleidungstyp !== prevProps.kleidungstyp) {
+            const { kleidungstyp, kleiderschrankId } = this.props;
+
+            if (kleidungstyp) {
+                const updatedKleidungstyp = new KleidungstypBO();
+                updatedKleidungstyp.setID(kleidungstyp.getID());
+                updatedKleidungstyp.setBezeichnung(kleidungstyp.getBezeichnung());
+                updatedKleidungstyp.setKleiderschrankId(kleiderschrankId);
+
+                // Verwendungen kopieren
+                const verwendungen = kleidungstyp.getVerwendungen() || [];
+                verwendungen.forEach(style => {
+                    updatedKleidungstyp.addVerwendung(style);
+                });
+
+                this.setState({
+                    kleidungstyp: updatedKleidungstyp,
+                    selectedStyleIds: verwendungen.map(style => style.getID())
+                });
             }
         }
     }
 
     loadStyles = async () => {
         try {
-            const styles = await KleiderschrankAPI.getAPI().getStyles();
-            this.setState({ allStyles: styles });
+            const api = KleiderschrankAPI.getAPI();
+            console.log("Lade Styles für Kleiderschrank ID:", this.props.kleiderschrankId);
+            const styles = await api.getStyles();
+            const filteredStyles = styles.filter(style =>
+                style.getKleiderschrankId() === this.props.kleiderschrankId
+            );
+            console.log("Gefilterte Styles:", filteredStyles);
+            this.setState({ allStyles: filteredStyles });
         } catch (error) {
+            console.error("Fehler beim Laden der Styles:", error);
             this.setState({ error: 'Fehler beim Laden der Styles' });
         }
-    }
+    };
 
     handleBezeichnungChange = (event) => {
-        const kleidungstyp = this.state.kleidungstyp;
-        kleidungstyp.setBezeichnung(event.target.value);
-        this.setState({ kleidungstyp });
-    }
-
-    handleStyleChange = (event) => {
-        const selectedStyleIds = event.target.value;
-        this.setState({ selectedStyleIds });
-
-        // Aktualisiere die Verwendungen des KleidungstypBO
-        const kleidungstyp = this.state.kleidungstyp;
-        const selectedStyles = this.state.allStyles.filter(
-            style => selectedStyleIds.includes(style.getID())
-        );
-
-        // Leere die vorhandenen Verwendungen
-        while (kleidungstyp.getVerwendungen().length > 0) {
-            kleidungstyp.getVerwendungen().pop();
-        }
-
-        // Füge die ausgewählten Styles hinzu
-        selectedStyles.forEach(style => {
-            kleidungstyp.getVerwendungen().push(style);
+        const { kleidungstyp } = this.state;
+        console.log("Vor Bezeichnungsänderung:", {
+            id: kleidungstyp.getID(),
+            bezeichnung: kleidungstyp.getBezeichnung()
         });
 
-        this.setState({ kleidungstyp });
-    }
+        const updatedKleidungstyp = new KleidungstypBO();
+        updatedKleidungstyp.setID(kleidungstyp.getID());
+        updatedKleidungstyp.setBezeichnung(event.target.value);
+        updatedKleidungstyp.setKleiderschrankId(kleidungstyp.getKleiderschrankId());
 
-    // Wenn sich die Props ändern
-    componentDidUpdate(prevProps) {
-        if (this.props.kleidungstyp !== prevProps.kleidungstyp ||
-            this.props.kleiderschrank_id !== prevProps.kleiderschrank_id) {
-            const { kleidungstyp, kleiderschrankId } = this.props;
+        // Verwendungen kopieren
+        kleidungstyp.getVerwendungen().forEach(style => {
+            updatedKleidungstyp.addVerwendung(style);
+        });
 
-            if (kleidungstyp) {
-                kleidungstyp.setKleiderschrankId(kleiderschrankId);
+        console.log("Nach Bezeichnungsänderung:", {
+            id: updatedKleidungstyp.getID(),
+            bezeichnung: updatedKleidungstyp.getBezeichnung()
+        });
+
+        this.setState({ kleidungstyp: updatedKleidungstyp });
+    };
+
+    handleStyleChange = (event) => {
+        const selectedIds = event.target.value;
+        const kleidungstyp = this.state.kleidungstyp;
+
+        // Verwendungen zurücksetzen
+        kleidungstyp.verwendungen = [];
+
+        // Neue Styles hinzufügen
+        selectedIds.forEach(id => {
+            const style = this.state.allStyles.find(s => s.getID() === id);
+            if (style) {
+                kleidungstyp.addVerwendung(style);
             }
+        });
 
-            this.setState({
-                kleidungstyp: kleidungstyp,
-                selectedStyleIds: kleidungstyp ?
-                    kleidungstyp.getVerwendungen().map(style => style.getID()) : []
-            });
-        }
-    }
+        this.setState({
+            kleidungstyp,
+            selectedStyleIds: selectedIds
+        });
+    };
 
-    handleSubmit = async () => {
+ handleSubmit = async () => {
+      try {
         const { kleidungstyp } = this.state;
-        try {
-            console.log("Sende Update-Daten:", {
-                bezeichnung: kleidungstyp.getBezeichnung(),
-                verwendungen: kleidungstyp.getVerwendungen().map(style => style.getID()),
-                id: kleidungstyp.getID(),
-                kleiderschrank_id: this.props.kleiderschrankId
-            });
+        const { kleiderschrankId } = this.props;
 
-            if (kleidungstyp.getID()) {
-                await KleiderschrankAPI.getAPI().updateKleidungstyp({
-                    id: kleidungstyp.getID(),
-                    bezeichnung: kleidungstyp.getBezeichnung(),
-                    verwendungen: kleidungstyp.getVerwendungen().map(style => style.getID()),
-                    kleiderschrank_id: this.props.kleiderschrankId
-                });
-                this.props.onClose(kleidungstyp);
-            }
-        } catch (error) {
-            console.error("Fehler beim Speichern:", error);
-            this.setState({ error: error.message });
+        // requestData mit id + bezeichnung + verwendungen
+        const requestData = {
+          id: kleidungstyp.getID(),  // <-- ganz wichtig!
+          bezeichnung: kleidungstyp.getBezeichnung().trim(),
+          kleiderschrank_id: kleiderschrankId,
+          verwendungen: this.state.selectedStyleIds  // [5,7] etc.
+        };
+
+        console.log("Request data being sent:", JSON.stringify(requestData, null, 2));
+
+        // POST oder PUT?
+        let result = null;
+        if (requestData.id) {
+          // vorhandene ID => Update
+          result = await KleiderschrankAPI.getAPI().updateKleidungstyp(requestData);
+        } else {
+          // keine ID => Neuanlegen
+          result = await KleiderschrankAPI.getAPI().addKleidungstyp(requestData);
         }
+
+        // Schließe Dialog und gebe das neue/aktualisierte Objekt weiter
+        this.props.onClose(result);
+
+      } catch (error) {
+        console.error("Fehler beim Speichern:", error);
+        this.setState({ error: error.message });
+      }
     };
 
     render() {

@@ -32,7 +32,8 @@ def not_found():
 CORS(app, resources=r'/wardrobe/*')  # Erlaubt CORS für alle Wardrobe-Endpoints
 
 api = Api(app, version='1.0', title='Digitaler Kleiderschrank API',
-          description='Eine API zur Verwaltung digitaler Kleiderschränke')
+          description='Eine API zur Verwaltung digitaler Kleiderschränke',
+          validate=True)
 
 
 # Namespace für alle Kleiderschrank-bezogenen Operationen
@@ -49,6 +50,11 @@ kleiderschrank_model = api.inherit('Kleiderschrank', bo, {
     'eigentuemer_id': fields.Integer(description='ID des Eigentümers')
 })
 
+style_reference = api.model('StyleReference', {
+    'id': fields.Integer(required=True),
+    'name': fields.String(required=True)
+})
+
 person = api.inherit('Person', bo, {
     'vorname': fields.String(attribute='_Person__vorname', description='Vorname der Person'),
     'nachname': fields.String(attribute='_Person__nachname', description='Nachname der Person'),
@@ -63,8 +69,17 @@ style = api.inherit('Style', bo, {
 
 kleidungstyp = api.inherit('Kleidungstyp', bo, {
     'bezeichnung': fields.String(attribute='_Kleidungstyp__bezeichnung', description='Bezeichnung des Kleidungstyps'),
-    'verwendungen': fields.List(fields.Nested(style), attribute='_Kleidungstyp__verwendungen', description='Styles des Kleidungstyps')
+    'verwendungen': fields.List(fields.Nested(style), attribute='_Kleidungstyp__verwendungen'),
+    'kleiderschrank_id': fields.Integer(description='ID des zugehörigen Kleiderschranks')
 })
+
+kleidungstyp_request = api.inherit('KleidungstypRequest', bo, {
+    'bezeichnung': fields.String(attribute='_Kleidungstyp__bezeichnung', required=True),
+    # Hier nur Integer-Liste:
+    'verwendungen': fields.List(fields.Integer, description='Liste von Style-IDs'),
+    'kleiderschrank_id': fields.Integer(description='ID des zugehörigen Kleiderschranks')
+})
+
 
 kleidungsstueck = api.inherit('Kleidungsstueck', bo, {
     'name': fields.String(attribute='_Kleidungsstueck__name', description='Name des Kleidungsstücks'),
@@ -109,7 +124,6 @@ style = api.inherit('Style', bo, {
     'name': fields.String(attribute='_Style__name', description='Name des Styles'),
     'kleiderschrank_id': fields.Integer(attribute='_Style__kleiderschrank_id',
                                         description='ID des zugehörigen Kleiderschranks'),
-    'features': fields.List(fields.Nested(kleidungstyp), attribute='_Style__features'),
     'constraints': fields.Raw(attribute='_Style__constraints')
 })
 
@@ -626,37 +640,22 @@ class ClothingTypeListOperations(Resource):
         Sollten keine Kleidungstypen verfügbar sein, so wird eine leere Sequenz zurückgegeben."""
         adm = KleiderschrankAdministration()
         clothing_types_list = adm.get_all_kleidungstypen()
-        return clothing_types_list
+        return clothing_types_list, 200
 
     @wardrobe_ns.marshal_with(kleidungstyp, code=201)
-    @wardrobe_ns.expect(kleidungstyp)
+    @wardrobe_ns.expect(kleidungstyp_request, validate=True)
     #@secured
     def post(self):
-        """Anlegen eines neuen Kleidungstyp-Objekts."""
-        try:
-            adm = KleiderschrankAdministration()
+        """Erstellen eines neuen Kleidungstyp-Objekts."""
+        adm = KleiderschrankAdministration()
+        data = api.payload # Das übergebende Objekt
 
-            # Erstellt Kleidungstyp-Objekt aus den übertragenen Daten
-            proposal = Kleidungstyp.from_dict(api.payload)
-            # Erstellt eine leere Liste für die Style-IDs
-            verwendungen = []
-
-            # Geht durch alle Verwendungen des Kleidungstyps
-            for verwendung in proposal.get_verwendungen():
-                # Holt die ID jeder Verwendung und fügt sie der Liste hinzu
-                style_id = verwendung.get_id()
-                verwendungen.append(style_id)
-
-            # Diese Zeilen gehören NICHT in die for-Schleife
-            result = adm.create_kleidungstyp(
-                proposal.get_bezeichnung(),
-                proposal.get_kleiderschrank_id(),
-                verwendungen  # Hier die Liste der IDs übergeben
-            )
-            return result, 201
-
-        except Exception as e:
-            return {'message': str(e)}, 500
+        new_type = adm.create_kleidungstyp(
+            bezeichnung=data['bezeichnung'],
+            kleiderschrank_id=data['kleiderschrank_id'],
+            verwendungen=data.get('verwendungen', [])
+        )
+        return new_type, 201
 
 
 @wardrobe_ns.route('/clothing-types/<int:id>')
@@ -672,7 +671,7 @@ class ClothingTypeOperations(Resource):
         """
         adm = KleiderschrankAdministration()
         clothing_type = adm.get_kleidungstyp_by_id(id)
-        return clothing_type
+        return clothing_type, 200
 
     #@secured
     def delete(self, id):
@@ -686,23 +685,30 @@ class ClothingTypeOperations(Resource):
         return '', 200
 
     @wardrobe_ns.marshal_with(kleidungstyp)
-    @wardrobe_ns.expect(kleidungstyp, validate=True)
-    #@secured
+    @wardrobe_ns.expect(kleidungstyp_request, validate=True)
+    @secured
     def put(self, id):
-        """Update eines bestimmten Kleidungstyp-Objekts.
-
-        Die Objekt-ID wird durch den URI-Parameter überschrieben.
-        """
+        """Update eines bestimmten Kleidungstyp-Objekts."""
         adm = KleiderschrankAdministration()
-        ct = Kleidungstyp.from_dict(api.payload)
 
-        if ct is not None:
-            """Setzt die ID des zu überschreibenden Kleidungstyp-Objekts."""
-            ct.set_id(id)
-            adm.save_kleidungstyp(ct)
-            return '', 200
-        else:
-            return '', 500
+        data = api.payload
+        existing_type = adm.get_kleidungstyp_by_id(id)
+        if not existing_type:
+            return {'message': 'Kleidungstyp nicht gefunden'}, 404
+
+        # Aktualisieren
+        existing_type.set_bezeichnung(data['bezeichnung'])
+        existing_type.set_kleiderschrank_id(data['kleiderschrank_id'])
+
+        # Alte Verwendungen raus, neue rein
+        existing_type._Kleidungstyp__verwendungen = []
+        for style_id in data.get('verwendungen', []):
+            style_obj = adm.get_style_by_id(style_id)
+            if style_obj:
+                existing_type.add_verwendung(style_obj)
+
+        updated_type = adm.save_kleidungstyp(existing_type)
+        return updated_type, 200
 
 @wardrobe_ns.route('/clothing-types/by-kleiderschrank/<int:kleiderschrank_id>')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -712,7 +718,7 @@ class ClothingTypeByKleiderschrankOperations(Resource):
     def get(self, kleiderschrank_id):
         adm = KleiderschrankAdministration()
         clothing_types = adm.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank_id)
-        return clothing_types
+        return clothing_types, 200
 
 
 @wardrobe_ns.route('/outfits')
