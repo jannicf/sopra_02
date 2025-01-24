@@ -131,7 +131,6 @@ class PersonMapper(Mapper):
         cursor.execute(command, (vorname,))
         tuples = cursor.fetchall()
 
-
         for (id, vorname, nachname, nickname, google_id) in tuples:
             person = Person()
             person.set_id(id)
@@ -159,7 +158,6 @@ class PersonMapper(Mapper):
         command = "SELECT id, vorname, nachname, nickname, google_id FROM person WHERE nachname=%s"
         cursor.execute(command, (nachname,))
         tuples = cursor.fetchall()
-
 
         for (id, vorname, nachname, nickname, google_id) in tuples:
             person = Person()

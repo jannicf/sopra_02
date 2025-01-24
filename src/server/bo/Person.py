@@ -1,6 +1,6 @@
 from server.bo import BusinessObject as bo
-class Person(bo.BusinessObject):
 
+class Person(bo.BusinessObject):
 
     def __init__(self):
         super().__init__()
@@ -9,7 +9,6 @@ class Person(bo.BusinessObject):
         self.__nickname = ""  # Der Nickname des Benutzers.
         self.__google_id = ""  # Die Google ID.
         self.__kleiderschrank = None  # Der Kleiderschrank des Benutzers.
-
 
     def get_vorname(self):
         """Auslesen des Vornamens."""

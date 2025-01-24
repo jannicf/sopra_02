@@ -1,7 +1,6 @@
 from server.bo import BusinessObject as bo
 from server.bo.Style import Style   #Style importieren um Style-Objekte speichern zu können
 
-
 class Kleidungstyp(bo.BusinessObject):
 
     def __init__(self):

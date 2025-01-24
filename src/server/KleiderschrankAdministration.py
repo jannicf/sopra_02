@@ -27,7 +27,6 @@ class KleiderschrankAdministration(object):
     def __init__(self):
         pass
 
-
     """
        Constraint-spezifische Methoden
        """
@@ -161,7 +160,6 @@ class KleiderschrankAdministration(object):
         """Die gegebene Implikations-Beziehung aus unserem System löschen."""
         with ImplikationMapper() as mapper:
             mapper.delete(implikation)
-
 
     """
     Person-spezifische Methoden
@@ -307,7 +305,6 @@ class KleiderschrankAdministration(object):
         with KleiderschrankMapper() as mapper:
             mapper.delete(kleiderschrank)
 
-
     """
     Style-spezifische Methoden
     """
@@ -364,8 +361,6 @@ class KleiderschrankAdministration(object):
                     kleidungstyp.delete_verwendung(style)
             # Schließlich den Style selbst löschen
             mapper.delete(style)
-
-
 
     """
     Outfit-spezifische Methoden
@@ -490,7 +485,6 @@ class KleiderschrankAdministration(object):
             # Kleidungsstück direkt löschen ohne vorher die kleiderschrank_id zu ändern
             mapper.delete(kleidungsstueck)
 
-
     """
     Kleidungstyp-spezifische Methoden
     """
@@ -575,9 +569,24 @@ class KleiderschrankAdministration(object):
         if not style:
             return False
 
-        # Jede Constraint-Klasse handhabt ihre Prüfung selbst -> Polymorphie
-        for constraint in style.get_constraints():
-            if not constraint.check_constraint(outfit.get_bausteine()):
+        bausteine = outfit.get_bausteine()
+
+        # Kardinalitäts-Constraints prüfen
+        kardinalitaeten = self.get_all_kardinalitaeten_by_style(style)
+        for kardinalitaet in kardinalitaeten:
+            if not kardinalitaet.check_constraint(bausteine):
+                return False
+
+        # Mutex-Constraints prüfen
+        mutexe = self.get_all_mutex_by_style(style)
+        for mutex in mutexe:
+            if not mutex.check_constraint(bausteine):
+                return False
+
+        # Implikations-Constraints prüfen
+        implikationen = self.get_all_implikationen_by_style(style)
+        for implikation in implikationen:
+            if not implikation.check_constraint(bausteine):
                 return False
 
         return True
@@ -606,7 +615,7 @@ class KleiderschrankAdministration(object):
             # Style laden
             style = self.get_style_by_id(style_id)
             if not style:
-                raise ValueError("Style nicht gefunden")
+                return None
 
             # Kleidungsstücke laden
             kleidungsstuecke = []
@@ -616,19 +625,26 @@ class KleiderschrankAdministration(object):
                     kleidungsstuecke.append(kleidungsstueck)
 
             # Neues Outfit erstellen
-            outfit = self.create_outfit(style_id, kleiderschrank_id)
+            outfit = Outfit()
+            outfit.set_style(style)
+            outfit.set_kleiderschrank_id(kleiderschrank_id)
 
             # Kleidungsstücke hinzufügen
             for kleidungsstueck in kleidungsstuecke:
                 outfit.add_baustein(kleidungsstueck)
 
-            # Outfit speichern
-            self.save_outfit(outfit)
+            # Constraints prüfen
+            if not self.check_outfit_constraints(outfit):
+                # Bei Constraint-Verletzung einfach None zurückgeben statt Exception
+                return None
 
-            return outfit
+            # Outfit in die Datenbank einfügen
+            with OutfitMapper() as mapper:
+                return mapper.insert(outfit)
+
         except Exception as e:
             print(f"Fehler beim Erstellen des Outfits: {str(e)}")
-            raise e
+            return None
 
     def get_possible_outfit_completions(self, kleidungsstueck_id, style_id):
         basis_kleidungsstueck = self.get_kleidungsstueck_by_id(kleidungsstueck_id)
@@ -677,7 +693,6 @@ class KleiderschrankAdministration(object):
 
         outfit = self.create_outfit(style_id, kleiderschrank_id)
         outfit.add_baustein(basis_kleidungsstueck)
-
 
         # Füge NUR die vom Nutzer ausgewählten Kleidungsstücke hinzu
         for kleidungsstueck in ausgewaehlte_kleidungsstuecke:

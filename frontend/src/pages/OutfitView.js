@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Typography, Button, Box } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import OutfitList from '../components/OutfitList';
 import { Link } from 'react-router-dom';
 
@@ -19,9 +20,9 @@ class OutfitView extends Component {
           sx={{
             display: 'flex',
             justifyContent: 'center',
-            gap: 2,
+            gap: 3,
             mb: 6,
-            mt: 4  // Neuer Abstand nach oben
+            mt: 4  // Abstand nach oben
           }}
         >
           {/* Button für Style-basierte Outfit-Erstellung */}
@@ -30,22 +31,65 @@ class OutfitView extends Component {
             color="primary"
             component={Link}
             to="/outfits/erstellen-nach-style"
-            size="large"
+            sx={{
+              px: 4,
+              py: 2,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontSize: '1.1rem',
+              boxShadow: 2,
+              width: 370,
+              '&:hover': {
+                boxShadow: 4,
+                transform: 'translateY(-2px)',
+                transition: 'all 0.2s'
+              }
+            }}
             disableRipple
           >
-            Outfit nach Style erstellen
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box>
+                <AddIcon fontSize="large"/>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                Outfit nach Style erstellen
+              </Box>
+            </Box>
           </Button>
 
           {/* Button für Kleidungsstück-basierte Outfit-Erstellung */}
           <Button
-            variant="contained"
-            color="secondary"
+            variant="outlined"
+            color="primary"
             component={Link}
             to="/outfits/create-by-item"
-            size="large"
+            sx={{
+              px: 4,
+              py: 2,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontSize: '1.1rem',
+              boxShadow: 2,
+              width: 370,
+              backgroundColor: 'background.paper',
+              '&:hover': {
+                boxShadow: 4,
+                transform: 'translateY(-2px)',
+                transition: 'all 0.2s',
+                backgroundColor: 'background.paper'
+
+              }
+            }}
             disableRipple
           >
-            Outfit nach einem bestimmten Kleidungsstück erstellen
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <Box >
+                <AddIcon fontSize="large"/>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                Outfit nach Kleidungsstück erstellen
+              </Box>
+            </Box>
           </Button>
         </Box>
 

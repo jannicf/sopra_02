@@ -11,10 +11,15 @@ import {
     Card,
     CardContent,
     Checkbox,
-    Paper
+    Paper,
+    Alert,
+    AlertTitle
 } from '@mui/material';
-import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import StyleSelectionDialog from './StyleSelectionDialog';
+import KleiderschrankAPI from '../api/KleiderschrankAPI';
+import LockIcon from '@mui/icons-material/Lock';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import StyleIcon from '@mui/icons-material/Style';
 
 class KleidungsstueckBasiertesOutfitDialog extends Component {
     constructor(props) {
@@ -125,7 +130,7 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
 
         } catch (error) {
             this.setState({
-                error: "Fehler beim Erstellen des Outfits"
+                error: 'Das Outfit erfüllt nicht die Style-Constraints'
             });
         }
     };
@@ -165,155 +170,239 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                     maxWidth="lg"
                     fullWidth
                 >
-                    <DialogTitle>
-                        <Typography variant="h6">
-                            {selectedStyle
-                                ? `Outfit im Style "${selectedStyle.getName()}" erstellen`
-                                : 'Outfit erstellen'}
+                    <DialogTitle sx={{
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                        pb: 2,
+                        background: 'linear-gradient(to right, #f5f5f5, #ffffff)'
+                    }}>
+                        <Typography variant="h5" sx={{ fontWeight: 500 }}>
+                            Outfit erstellen
                         </Typography>
                     </DialogTitle>
-                    <DialogContent>
-                        {/* Basis-Kleidungsstück Anzeige */}
-                        {basisKleidungsstueck && (
+
+                    <DialogContent sx={{ pt: 3 }}>
+                        {error && (
+                            <Alert
+                                severity="warning"
+                                sx={{ mb: 3 }}
+                                action={
+                                    <Button color="inherit" size="small" onClick={() => this.setState({error: null})}>
+                                        VERSTANDEN
+                                    </Button>
+                                }
+                            >
+                                <AlertTitle>Outfit kann nicht erstellt werden</AlertTitle>
+                                {error}
+                            </Alert>
+                        )}
+                        {/* Info Bereich */}
+                        <Box sx={{ mb: 4 }}>
+                            {/* Basis-Kleidungsstück Info */}
                             <Paper
-                                elevation={3}
+                                elevation={0}
                                 sx={{
-                                    p: 2,
-                                    mb: 3,
-                                    backgroundColor: 'primary.light',
-                                    color: 'primary.contrastText'
+                                    p: 2.5,
+                                    mb: 2,
+                                    background: 'linear-gradient(145deg, #e3f2fd 0%, #f5f5f5 100%)',
+                                    border: '1px solid',
+                                    borderColor: 'primary.light',
+                                    borderRadius: 2
                                 }}
                             >
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                                    Ausgewähltes Basis-Kleidungsstück:
-                                </Typography>
-                                <Box sx={{ backgroundColor: 'white', p: 2, borderRadius: 1 }}>
-                                    <Typography variant="h6" color="primary">
-                                        {basisKleidungsstueck.getName()}
-                                    </Typography>
-                                    <Typography color="textSecondary">
-                                        Typ: {basisKleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
-                                    </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <CheckCircleOutlineIcon color="primary" sx={{ fontSize: 28 }} />
+                                    <Box>
+                                        <Typography variant="overline" color="primary.main" sx={{ fontWeight: 500 }}>
+                                            Basis-Kleidungsstück
+                                        </Typography>
+                                        <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                            {basisKleidungsstueck?.getName()}
+                                        </Typography>
+                                        <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                                            {basisKleidungsstueck?.getTyp()?.getBezeichnung()}
+                                        </Typography>
+                                    </Box>
                                 </Box>
                             </Paper>
-                        )}
 
-                        {error && (
-                            <Typography color="error" sx={{ mb: 2 }}>
-                                {error}
-                            </Typography>
-                        )}
+                            {/* Style Info */}
+                            {selectedStyle && (
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 2.5,
+                                        background: 'linear-gradient(145deg, #f3e5f5 0%, #f5f5f5 100%)',
+                                        border: '1px solid',
+                                        borderColor: 'secondary.light',
+                                        borderRadius: 2
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                        <StyleIcon color="secondary" sx={{ fontSize: 28 }} />
+                                        <Box>
+                                            <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 500 }}>
+                                                Ausgewählter Style
+                                            </Typography>
+                                            <Typography variant="h6" sx={{ fontWeight: 500 }}>
+                                                {selectedStyle.getName()}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Paper>
+                            )}
+                        </Box>
 
-                        <Grid container spacing={2}>
+                        <Grid container spacing={3}>
                             {/* Verfügbare Kleidungsstücke */}
                             <Grid item xs={12} md={6}>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                                <Typography variant="h6" gutterBottom sx={{
+                                    pl: 1,
+                                    borderLeft: 3,
+                                    borderColor: 'primary.main',
+                                    fontWeight: 500
+                                }}>
                                     Verfügbare Kleidungsstücke
                                 </Typography>
-                                <Box sx={{ maxHeight: '60vh', overflow: 'auto' }}>
-                                    <Grid container spacing={1}>
-                                        {passendeKleidungsstuecke.map((kleidungsstueck) => (
-                                            <Grid item xs={12} key={kleidungsstueck.getID()}>
-                                                <Card
-                                                    onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
-                                                    sx={{
-                                                        cursor: 'pointer',
-                                                        backgroundColor: ausgewaehlteKleidungsstuecke.some(
-                                                            item => item.getID() === kleidungsstueck.getID()
-                                                        ) ? 'action.selected' : 'background.paper',
-                                                        '&:hover': {
-                                                            boxShadow: 2,
-                                                            transform: 'scale(1.01)',
-                                                            transition: 'all 0.2s'
-                                                        }
-                                                    }}
-                                                >
-                                                    <CardContent>
-                                                        <Box display="flex" alignItems="center">
-                                                            <Checkbox
-                                                                checked={ausgewaehlteKleidungsstuecke.some(
-                                                                    item => item.getID() === kleidungsstueck.getID()
-                                                                )}
-                                                            />
-                                                            <Box>
-                                                                <Typography variant="h6">
-                                                                    {kleidungsstueck.getName()}
-                                                                </Typography>
-                                                                <Typography color="textSecondary">
-                                                                    Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Box>
-                                                    </CardContent>
-                                                </Card>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
+                                <Box sx={{ maxHeight: '400px', overflow: 'auto', pr: 1 }}>
+                                    {passendeKleidungsstuecke.map((kleidungsstueck) => (
+                                        <Card
+                                            key={kleidungsstueck.getID()}
+                                            sx={{
+                                                mb: 1,
+                                                cursor: 'pointer',
+                                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                                '&:hover': {
+                                                    transform: 'translateX(4px)',
+                                                    boxShadow: 2
+                                                },
+                                                ...(ausgewaehlteKleidungsstuecke.some(
+                                                    item => item.getID() === kleidungsstueck.getID()
+                                                ) && {
+                                                    borderLeft: '3px solid',
+                                                    borderColor: 'primary.main'
+                                                })
+                                            }}
+                                            onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
+                                        >
+                                            <CardContent sx={{
+                                                py: '12px !important',
+                                                display: 'flex',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Checkbox
+                                                    checked={ausgewaehlteKleidungsstuecke.some(
+                                                        item => item.getID() === kleidungsstueck.getID()
+                                                    )}
+                                                    sx={{ mr: 1 }}
+                                                />
+                                                <Box>
+                                                    <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                                                        {kleidungsstueck.getName()}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {kleidungsstueck.getTyp()?.getBezeichnung()}
+                                                    </Typography>
+                                                </Box>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
                                 </Box>
                             </Grid>
 
                             {/* Ausgewählte Kleidungsstücke */}
                             <Grid item xs={12} md={6}>
-                                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-                                    Ausgewählte Kleidungsstücke ({ausgewaehlteKleidungsstuecke.length})
-                                </Typography>
-                                <Box sx={{
-                                    maxHeight: '60vh',
-                                    overflow: 'auto',
-                                    backgroundColor: 'grey.100',
-                                    borderRadius: 1,
-                                    p: 2
+                                <Typography variant="h6" gutterBottom sx={{
+                                    pl: 1,
+                                    borderLeft: 3,
+                                    borderColor: 'secondary.main',
+                                    fontWeight: 500
                                 }}>
-                                    {ausgewaehlteKleidungsstuecke.length === 0 ? (
-                                        <Typography color="textSecondary" align="center" sx={{ py: 4 }}>
-                                            Noch keine Kleidungsstücke ausgewählt
-                                        </Typography>
-                                    ) : (
-                                        <Grid container spacing={1}>
-                                            {ausgewaehlteKleidungsstuecke.map((kleidungsstueck) => (
-                                                <Grid item xs={12} key={kleidungsstueck.getID()}>
-                                                    <Card>
-                                                        <CardContent>
-                                                            <Box display="flex" justifyContent="space-between" alignItems="center">
-                                                                <Box>
-                                                                    <Typography variant="h6">
-                                                                        {kleidungsstueck.getName()}
-                                                                    </Typography>
-                                                                    <Typography color="textSecondary">
-                                                                        Typ: {kleidungsstueck.getTyp()?.getBezeichnung() || 'Unbekannt'}
-                                                                    </Typography>
-                                                                </Box>
-                                                                <Button
-                                                                    color="error"
-                                                                    onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
-                                                                    disableRipple
-                                                                >
-                                                                    Entfernen
-                                                                </Button>
-                                                            </Box>
-                                                        </CardContent>
-                                                    </Card>
-                                                </Grid>
-                                            ))}
-                                        </Grid>
-                                    )}
-                                </Box>
+                                    Outfit-Zusammenstellung ({ausgewaehlteKleidungsstuecke.length + 1} Teile)
+                                </Typography>
+                                <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+                                    <Box sx={{ maxHeight: '400px', overflow: 'auto' }}>
+                                        {/* Basis-Kleidungsstück */}
+                                        <Card sx={{
+                                            mb: 1,
+                                            bgcolor: '#f8f9fa',
+                                            border: '1px solid',
+                                            borderColor: 'primary.light'
+                                        }}>
+                                            <CardContent sx={{
+                                                py: '12px !important',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'space-between'
+                                            }}>
+                                                <Box>
+                                                    <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                                                        {basisKleidungsstueck?.getName()}
+                                                    </Typography>
+                                                    <Typography variant="body2" color="primary.main">
+                                                        Basis-Element
+                                                    </Typography>
+                                                </Box>
+                                                <LockIcon color="action" />
+                                            </CardContent>
+                                        </Card>
+
+                                        {ausgewaehlteKleidungsstuecke.map((kleidungsstueck) => (
+                                            <Card
+                                                key={kleidungsstueck.getID()}
+                                                sx={{
+                                                    mb: 1,
+                                                    bgcolor: 'background.paper'
+                                                }}
+                                            >
+                                                <CardContent sx={{
+                                                    py: '12px !important',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between'
+                                                }}>
+                                                    <Box>
+                                                        <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                                                            {kleidungsstueck.getName()}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary">
+                                                            {kleidungsstueck.getTyp()?.getBezeichnung()}
+                                                        </Typography>
+                                                    </Box>
+                                                    <Button
+                                                        color="error"
+                                                        size="small"
+                                                        onClick={() => this.handleKleidungsstueckToggle(kleidungsstueck)}
+                                                    >
+                                                        Entfernen
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </Box>
+                                </Paper>
                             </Grid>
                         </Grid>
                     </DialogContent>
-                    <DialogActions>
-                        <Button onClick={this.handleClose}
-                        disableRipple>
+
+                    <DialogActions sx={{
+                        px: 3,
+                        py: 2,
+                        borderTop: '1px solid',
+                        borderColor: 'divider',
+                        background: 'linear-gradient(to right, #f5f5f5, #ffffff)'
+                    }}>
+                        <Button onClick={this.handleClose}>
                             Abbrechen
                         </Button>
                         <Button
-                            onClick={this.handleOutfitErstellen}
                             variant="contained"
                             color="primary"
+                            onClick={this.handleOutfitErstellen}
                             disabled={ausgewaehlteKleidungsstuecke.length === 0}
-                            disableRipple
+                            sx={{ px: 4 }}
                         >
-                            Outfit erstellen ({ausgewaehlteKleidungsstuecke.length} Teile)
+                            Outfit erstellen
                         </Button>
                     </DialogActions>
                 </Dialog>

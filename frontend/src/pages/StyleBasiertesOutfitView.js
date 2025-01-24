@@ -117,26 +117,35 @@ class StyleBasiertesOutfitView extends Component {
                     {styles.map((style) => (
                         <Grid item xs={12} sm={6} md={4} key={style.getID()}>
                             <Card
-                                onClick={() => this.handleStyleClick(style)}
                                 sx={{
+                                    p: 2,
                                     cursor: 'pointer',
+                                    borderRadius: 2,
                                     '&:hover': {
-                                        boxShadow: 3,
-                                        transform: 'scale(1.02)',
-                                        transition: 'all 0.2s ease-in-out'
+                                        transform: 'translateY(-2px)',
+                                        transition: 'all 0.2s'
                                     }
                                 }}
+                                onClick={() => this.handleStyleClick(style)}
                             >
-                                <CardContent>
-                                    <Typography variant="h6">
-                                        {style.getName()}
-                                    </Typography>
-                                    <Typography color="textSecondary">
-                                        Features: {style.getFeatures().length} Kleidungstypen
-                                    </Typography>
-                                    <Typography color="textSecondary">
-                                        Constraints: {style.getConstraints().length} Regeln
-                                    </Typography>
+                                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Box>
+                                            <Typography variant="h6">
+                                                {style.getName()}
+                                            </Typography>
+                                            <Typography color="textSecondary">
+                                                Features: {style.getFeatures().length}
+                                            </Typography>
+                                            <Typography color="textSecondary">
+                                                Constraints: {
+                                                    (style.getConstraints().kardinalitaeten?.length || 0) +
+                                                    (style.getConstraints().mutexe?.length || 0) +
+                                                    (style.getConstraints().implikationen?.length || 0)
+                                                }
+                                            </Typography>
+                                        </Box>
+                                    </Box>
                                 </CardContent>
                             </Card>
                         </Grid>

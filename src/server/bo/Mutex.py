@@ -2,7 +2,6 @@ from server.bo.BinaryConstraint import BinaryConstraint
 from server.bo.Kleidungstyp import Kleidungstyp
 from server.bo.Style import Style
 
-
 class Mutex(BinaryConstraint):
 
     def __init__(self):

@@ -47,7 +47,6 @@ class OutfitMapper(Mapper):
 
         return outfit
 
-
     def update(self, outfit):
         """Wiederholtes Schreiben eines Objekts in die Datenbank."""
         cursor = self._cnx.cursor()
@@ -74,7 +73,6 @@ class OutfitMapper(Mapper):
 
         self._cnx.commit()
         cursor.close()
-
 
     def delete(self, outfit):
 

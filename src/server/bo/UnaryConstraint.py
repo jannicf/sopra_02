@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from server.bo.Constraint import Constraint
 
-
 class UnaryConstraint(Constraint):
 
     def __init__(self):
@@ -20,5 +19,5 @@ class UnaryConstraint(Constraint):
         return self.__bezugsobjekt
 
     @abstractmethod
-    def check_constraint(self):
+    def check_constraint(self, kleidungsstuecke):
         pass
