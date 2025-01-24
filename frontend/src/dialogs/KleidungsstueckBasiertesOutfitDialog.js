@@ -12,6 +12,8 @@ import {
     CardContent,
     Checkbox,
     Paper,
+    Alert,
+    AlertTitle
 } from '@mui/material';
 import StyleSelectionDialog from './StyleSelectionDialog';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
@@ -128,7 +130,7 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
 
         } catch (error) {
             this.setState({
-                error: "Fehler beim Erstellen des Outfits"
+                error: 'Das Outfit erfüllt nicht die Style-Constraints'
             });
         }
     };
@@ -180,6 +182,20 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                     </DialogTitle>
 
                     <DialogContent sx={{ pt: 3 }}>
+                        {error && (
+                            <Alert
+                                severity="warning"
+                                sx={{ mb: 3 }}
+                                action={
+                                    <Button color="inherit" size="small" onClick={() => this.setState({error: null})}>
+                                        VERSTANDEN
+                                    </Button>
+                                }
+                            >
+                                <AlertTitle>Outfit kann nicht erstellt werden</AlertTitle>
+                                {error}
+                            </Alert>
+                        )}
                         {/* Info Bereich */}
                         <Box sx={{ mb: 4 }}>
                             {/* Basis-Kleidungsstück Info */}
@@ -236,12 +252,6 @@ class KleidungsstueckBasiertesOutfitDialog extends Component {
                                 </Paper>
                             )}
                         </Box>
-
-                        {error && (
-                            <Typography color="error" sx={{ mb: 2 }}>
-                                {error}
-                            </Typography>
-                        )}
 
                         <Grid container spacing={3}>
                             {/* Verfügbare Kleidungsstücke */}
