@@ -7,8 +7,7 @@ import {
     Button,
     Typography,
     Box,
-    Chip,
-    Paper
+    Chip
 } from '@mui/material';
 
 const KleidungstypDetailDialog = ({ open, kleidungstyp, onClose }) => {
@@ -36,32 +35,16 @@ const KleidungstypDetailDialog = ({ open, kleidungstyp, onClose }) => {
                     {verwendungen.length > 0 ? (
                         <Box sx={{
                             display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2
+                            gap: 1,
+                            flexWrap: 'wrap'
                         }}>
                             {verwendungen.map(style => (
-                                <Paper
+                                <Chip
                                     key={style.getID()}
+                                    label={style.getName()}
                                     variant="outlined"
-                                    sx={{ p: 2 }}
-                                >
-                                    <Typography variant="subtitle2" gutterBottom>
-                                        {style.getName()}
-                                    </Typography>
-                                    <Box sx={{
-                                        display: 'flex',
-                                        gap: 1,
-                                        flexWrap: 'wrap'
-                                    }}>
-                                        <Chip
-                                            label={`ID: ${style.getID()}`}
-                                            size="small"
-                                            color="primary"
-                                            variant="outlined"
-                                        />
-                                        {/* Add more style details as needed */}
-                                    </Box>
-                                </Paper>
+                                    color="primary"
+                                />
                             ))}
                         </Box>
                     ) : (

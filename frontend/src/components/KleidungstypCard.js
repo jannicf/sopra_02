@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Typography, Card, CardContent, Box, IconButton, Chip } from '@mui/material';
+import { Typography, Card, CardContent, Box, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import KleidungstypForm from '../dialogs/KleidungstypForm';
@@ -17,7 +17,6 @@ class KleidungstypCard extends Component {
         };
     }
 
-    // Event handlers remain unchanged
     handleEditClick = () => {
         const { kleidungstyp } = this.props;
         console.log("Edit Kleidungstyp:", {
@@ -59,7 +58,6 @@ class KleidungstypCard extends Component {
     };
 
     handleCardClick = (event) => {
-        // Only open detail dialog if we didn't click on an action button
         if (!event.target.closest('button')) {
             this.setState({ showDetailDialog: true });
         }
@@ -80,8 +78,8 @@ class KleidungstypCard extends Component {
                     cursor: 'pointer',
                     p: 2,
                     borderRadius: 2,
-                    boxShadow: 2,
-                    height: '112px',
+                    height: '112px', // Gleiche Höhe wie in KleidungsstueckCard.js
+                    display: 'flex', // Für vertikale Zentrierung
                     '&:hover': {
                         transform: 'translateY(-2px)',
                         transition: 'all 0.2s'
@@ -92,67 +90,53 @@ class KleidungstypCard extends Component {
                     <CardContent sx={{
                         p: 0,
                         '&:last-child': { pb: 0 },
-                        height: '100%',
-                        position: 'relative'
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center' // Vertikale Zentrierung wie in KleidungsstueckCard.js
                     }}>
-                        {/* Main content area */}
                         <Box sx={{
-                            height: '100%',
                             display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            pr: 16  // Increased right padding to accommodate buttons
+                            justifyContent: 'space-between',
+                            width: '100%',
+                            alignItems: 'center'
                         }}>
-                            <Typography variant="h6" align="center" gutterBottom>
-                                {kleidungstyp.getBezeichnung()}
-                            </Typography>
+                            <Box>
+                                <Typography variant="h6">
+                                    {kleidungstyp.getBezeichnung()}
+                                </Typography>
 
-                            <Chip
-                                label={`${verwendungen.length} ${verwendungen.length === 1 ? 'Style' : 'Styles'}`}
-                                color="primary"
-                                variant="outlined"
-                                size="small"
-                            />
-                        </Box>
-
-                        {/* Action buttons container - Now horizontally arranged */}
-                        <Box sx={{
-                            position: 'absolute',
-                            top: '50%',  // Center vertically
-                            right: 8,    // Maintain some right margin
-                            transform: 'translateY(-50%)',  // Perfect vertical centering
-                            display: 'flex',
-                            flexDirection: 'row',  // Changed to row for horizontal layout
-                            gap: 1  // Add space between buttons
-                        }}>
-                            <IconButton
-                                onClick={this.handleEditClick}
-                                sx={{
-                                    color: 'primary.main',
-                                    '&:hover': { bgcolor: '#f5f5f5' }
-                                }}
-                                disableRipple
-                                size="small"
-                            >
-                                <EditIcon />
-                            </IconButton>
-                            <IconButton
-                                onClick={this.handleDeleteClick}
-                                sx={{
-                                    color: 'error.main',
-                                    '&:hover': { bgcolor: '#f5f5f5' }
-                                }}
-                                disableRipple
-                                size="small"
-                            >
-                                <DeleteIcon />
-                            </IconButton>
+                                <Typography color="textSecondary">
+                                    Styles: {verwendungen.length}
+                                </Typography>
+                            </Box>
+                            <Box>
+                                <IconButton
+                                    onClick={this.handleEditClick}
+                                    sx={{
+                                        color: 'primary.main',
+                                        '&:hover': { bgcolor: '#f5f5f5' }
+                                    }}
+                                    disableRipple
+                                    size="small"
+                                >
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton
+                                    onClick={this.handleDeleteClick}
+                                    sx={{
+                                        color: 'error.main',
+                                        '&:hover': { bgcolor: '#f5f5f5' }
+                                    }}
+                                    disableRipple
+                                    size="small"
+                                >
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Box>
                         </Box>
                     </CardContent>
                 </Card>
 
-                {/* Dialogs */}
                 <KleidungstypForm
                     show={showEditDialog}
                     kleidungstyp={kleidungstyp}
