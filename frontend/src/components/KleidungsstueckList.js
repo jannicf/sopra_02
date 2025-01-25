@@ -7,10 +7,8 @@ class KleidungsstueckList extends Component {
   constructor(props) {
     super(props);
   }
-  // kein eigener state, da wir lediglich props von der übergeordneten Komponente entgegennehmen
 
   handleKleidungsstueckDelete = (deletedKleidungsstueck) => {
-      // Nach dem Löschen die übergeordnete Komponente informieren
       this.props.onUpdate();
   }
 
@@ -18,19 +16,18 @@ class KleidungsstueckList extends Component {
     const { kleidungsstuecke, onUpdate, kleiderschrankId } = this.props;
 
     return (
-
       <Grid container spacing={3}>
         {/* Add Button Card */}
         <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{
-              cursor: 'pointer',
-              height: '100%',
               p: 2,
               borderRadius: 2,
               boxShadow: 2,
               bgcolor: 'primary.main',
               color: 'white',
+              display: 'flex',
+              height: '112px', // Festgelegte Höhe für alle Karten
               '&:hover': {
                 transform: 'translateY(-2px)',
                 transition: 'all 0.2s'
@@ -38,15 +35,22 @@ class KleidungsstueckList extends Component {
             }}
             onClick={this.props.onCreateClick}
           >
-            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+            <CardContent sx={{
+              p: 0,
+              '&:last-child': { pb: 0 },
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
               <Box sx={{
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
+                gap: 1
               }}>
-                <AddIcon sx={{ fontSize: 40, color: 'white', mb: 1 }} />
-                <Typography variant="h6" color="white">
+                <AddIcon sx={{ fontSize: 40 }} />
+                <Typography variant="h6">
                   Neues Kleidungsstück
                 </Typography>
               </Box>
