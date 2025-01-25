@@ -198,7 +198,7 @@ class KleiderschrankView extends Component {
                 {/* Bedingte Anzeige der Listen */}
                 {activeView === 'kleidungsstuecke' ? (
                     <>
-                        {kleidungsstuecke.length > 0 ? (
+                        {kleidungsstuecke.length === 0 ? (
                             <KleidungsstueckList
                                 kleidungsstuecke={kleidungsstuecke}
                                 onUpdate={this.loadKleidungsstuecke}
@@ -223,7 +223,7 @@ class KleiderschrankView extends Component {
                     </>
                 ) : (
                     <>
-                        {kleidungstypen.length > 0 ? (
+                        {kleidungstypen.length === 0 ? (
                             <KleidungstypList
                                 kleidungstypen={kleidungstypen}
                                 kleiderschrankId={this.state.kleiderschrankId}
