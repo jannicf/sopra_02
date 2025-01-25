@@ -46,9 +46,13 @@ const StyleForm = ({ show, style, onClose, kleiderschrankId }) => {
 
   useEffect(() => {
     if (show && style) {
+        const styleFeatures = style.getFeatures();
         setFormData({
             name: style.getName(),
-            features: style.getFeatures(),
+            features: styleFeatures.map(featureId => {
+                const matchingType = kleidungstypen.find(kt => kt.getID() === featureId);
+                return matchingType || featureId;
+            }),
             constraints: {
                 kardinalitaeten: style.getConstraints()?.kardinalitaeten || [],
                 mutexe: style.getConstraints()?.mutexe || [],
@@ -67,7 +71,7 @@ const StyleForm = ({ show, style, onClose, kleiderschrankId }) => {
             }
         });
     }
-}, [show, style]);
+}, [show, style, kleidungstypen]);
 
   /**
    * Wird aufgerufen, wenn wir in KardinalitaetDialog / MutexDialog / ImplikationDialog speichern.
@@ -283,21 +287,27 @@ const handleSubmit = async () => {
             multiple
             value={formData.features.map(f => typeof f === 'object' ? f.getID() : f)}
             onChange={(e) => {
-              const selectedIDs = e.target.value; // Array von IDs
-              const selectedTypes = kleidungstypen.filter(typ => selectedIDs.includes(typ.getID()));
-              setFormData({ ...formData, features: selectedTypes });
+                const selectedIDs = e.target.value;
+                const selectedTypes = kleidungstypen.filter(typ => selectedIDs.includes(typ.getID()));
+                setFormData(prev => ({
+                    ...prev,
+                    features: selectedTypes
+                }));
             }}
             renderValue={(selected) => (
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {formData.features.map((feature) => (
-                  <Chip
-                      key={typeof feature === 'object' ? feature.getID() : feature}
-                      label={typeof feature === 'object' ? feature.getBezeichnung() : kleidungstypen.find(
-                          kt => kt.getID() === feature)?.getBezeichnung()
-                  }
-                  />
-                ))}
-              </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {formData.features.map((feature) => {
+                        const kleidungstyp = kleidungstypen.find(kt =>
+                            kt.getID() === (typeof feature === 'object' ? feature.getID() : feature)
+                        );
+                        return (
+                            <Chip
+                                key={typeof feature === 'object' ? feature.getID() : feature}
+                                label={kleidungstyp ? kleidungstyp.getBezeichnung() : 'Unbekannt'}
+                            />
+                        );
+                    })}
+                </Box>
             )}
           >
             {kleidungstypen.map((typ) => (

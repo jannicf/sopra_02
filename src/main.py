@@ -124,6 +124,7 @@ style = api.inherit('Style', bo, {
     'name': fields.String(attribute='_Style__name', description='Name des Styles'),
     'kleiderschrank_id': fields.Integer(attribute='_Style__kleiderschrank_id',
                                         description='ID des zugehörigen Kleiderschranks'),
+    'features': fields.List(fields.Nested(kleidungstyp), attribute='_Style__features'),
     'constraints': fields.Raw(attribute='_Style__constraints')
 })
 
@@ -132,7 +133,7 @@ style = api.inherit('Style', bo, {
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class PersonListOperations(Resource):
     @wardrobe_ns.marshal_list_with(person)
-    # @secured
+    @secured
     def get(self):
         """Auslesen aller Customer-Objekte.
 
@@ -143,7 +144,7 @@ class PersonListOperations(Resource):
 
     @wardrobe_ns.marshal_with(person, code=200)
     @wardrobe_ns.expect(person)
-    # @secured
+    @secured
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
 
@@ -185,7 +186,7 @@ class PersonListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Personen-Objekts')
 class PersonOperations(Resource):
     @wardrobe_ns.marshal_with(person)
-    # @secured
+    @secured
     def get(self, id):
         """Auslesen eines bestimmten Personen-Objekts.
 
@@ -195,7 +196,7 @@ class PersonOperations(Resource):
         pers = adm.get_person_by_id(id)
         return pers
 
-    # @secured
+    @secured
     def delete(self, id):
         """Löschen eines bestimmten Personen-Objekts.
 
@@ -213,7 +214,7 @@ class PersonOperations(Resource):
 
     @wardrobe_ns.marshal_with(person)
     @wardrobe_ns.expect(person, validate=True)
-    #@secured
+    @secured
     def put(self, id):
         """Update eines bestimmten Personen-Objekts.
 
@@ -238,7 +239,7 @@ class PersonOperations(Resource):
 @wardrobe_ns.param('nachname', 'Der Nachname der Person')
 class PersonsByNameOperations(Resource):
     @wardrobe_ns.marshal_with(person)
-    #@secured
+    @secured
     def get(self, nachname):
         """ Auslesen von Personen-Objekten, die durch den Nachnamen bestimmt werden.
 
@@ -253,7 +254,7 @@ class PersonsByNameOperations(Resource):
 @wardrobe_ns.param('google_id', 'Die Google ID der Person')
 class PersonByGoogleIdOperations(Resource):
     @wardrobe_ns.marshal_with(person)
-    #@secured
+    @secured
     def get(self, google_id):
         """Auslesen einer bestimmten Person anhand ihrer Google ID."""
         adm = KleiderschrankAdministration()
@@ -264,7 +265,7 @@ class PersonByGoogleIdOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class WardrobeListOperations(Resource):
     @wardrobe_ns.marshal_list_with(kleiderschrank_model)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Kleiderschrank-Objekte.
 
@@ -275,12 +276,12 @@ class WardrobeListOperations(Resource):
 
     @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
     @wardrobe_ns.expect(kleiderschrank_model)
-    # @secured
+    @secured
     @wardrobe_ns.route('/wardrobes')
     class WardrobeListOperations(Resource):
         @wardrobe_ns.marshal_with(kleiderschrank_model, code=201)
         @wardrobe_ns.expect(kleiderschrank_model)
-        # @secured
+        @secured
         def post(self):
             try:
                 print("Empfangene Payload:", api.payload)
@@ -315,7 +316,7 @@ class WardrobeListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Kleiderschrank-Objekts')
 class WardrobeOperations(Resource):
     @wardrobe_ns.marshal_with(kleiderschrank_model)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines bestimmten Kleiderschrank-Objekts.
 
@@ -325,7 +326,7 @@ class WardrobeOperations(Resource):
         wardrobe_obj = adm.get_kleiderschrank_by_id(id)
         return wardrobe_obj
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines bestimmten Kleiderschrank-Objekts.
 
@@ -338,7 +339,7 @@ class WardrobeOperations(Resource):
 
     @wardrobe_ns.marshal_with(kleiderschrank_model)
     @wardrobe_ns.expect(kleiderschrank_model, validate=True)
-    #@secured
+    @secured
     def put(self, id):
         """Update eines bestimmten Kleiderschrank-Objekts.
 
@@ -370,7 +371,7 @@ class WardrobeOperations(Resource):
 @wardrobe_ns.param('google_id', 'Die Google ID der Person')
 class PersonsByGoogleIdOperations(Resource):
     @wardrobe_ns.marshal_with(person)
-    #@secured
+    @secured
     def get(self, google_id):
         """Auslesen einer Person anhand der Google ID"""
         adm = KleiderschrankAdministration()
@@ -391,7 +392,7 @@ class PersonsByGoogleIdOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ClothesListOperations(Resource):
     @wardrobe_ns.marshal_list_with(kleidungsstueck)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Kleidungsstück-Objekte.
 
@@ -402,7 +403,7 @@ class ClothesListOperations(Resource):
 
     @wardrobe_ns.marshal_with(kleidungsstueck, code=201)
     @wardrobe_ns.expect(kleidungsstueck)
-    #@secured
+    @secured
     def post(self):
         """Anlegen eines neuen Kleidungsstück-Objekts.
 
@@ -437,7 +438,7 @@ class ClothesListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Kleidungsstück-Objekts')
 class ClothingItemOperations(Resource):
     @wardrobe_ns.marshal_with(kleidungsstueck)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines bestimmten Kleidungsstück-Objekts.
 
@@ -447,7 +448,7 @@ class ClothingItemOperations(Resource):
         clothing_item = adm.get_kleidungsstueck_by_id(id)
         return clothing_item
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines bestimmten Kleidungsstück-Objekts.
 
@@ -459,7 +460,7 @@ class ClothingItemOperations(Resource):
         return '', 200
 
     @wardrobe_ns.expect(kleidungsstueck, validate=True)
-    #@secured
+    @secured
     def put(self, id):
         """Update eines bestimmten Kleidungsstück-Objekts.
 
@@ -489,7 +490,7 @@ class ClothingItemOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class StyleListOperations(Resource):
     @wardrobe_ns.marshal_list_with(style)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Style-Objekte.
 
@@ -500,7 +501,7 @@ class StyleListOperations(Resource):
 
     @wardrobe_ns.marshal_with(style, code=201)
     @wardrobe_ns.expect(style)
-    #@secured
+    @secured
     def post(self):
         """Anlegen eines neuen Style-Objekts.
 
@@ -547,7 +548,7 @@ class StyleListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Style-Objekts')
 class StyleOperations(Resource):
     @wardrobe_ns.marshal_with(style)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines bestimmten Style-Objekts.
 
@@ -570,7 +571,7 @@ class StyleOperations(Resource):
 
     @wardrobe_ns.marshal_with(style)
     @wardrobe_ns.expect(style, validate=True)
-    #@secured
+    @secured
     @wardrobe_ns.route('/styles/<int:id>')
     class StyleOperations(Resource):
         @wardrobe_ns.marshal_with(style)
@@ -633,7 +634,7 @@ class StyleOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ClothingTypeListOperations(Resource):
     @wardrobe_ns.marshal_list_with(kleidungstyp)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Kleidungstyp-Objekte.
 
@@ -644,7 +645,7 @@ class ClothingTypeListOperations(Resource):
 
     @wardrobe_ns.marshal_with(kleidungstyp, code=201)
     @wardrobe_ns.expect(kleidungstyp_request, validate=True)
-    #@secured
+    @secured
     def post(self):
         """Erstellen eines neuen Kleidungstyp-Objekts."""
         adm = KleiderschrankAdministration()
@@ -663,7 +664,7 @@ class ClothingTypeListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Kleidungstyp-Objekts')
 class ClothingTypeOperations(Resource):
     @wardrobe_ns.marshal_with(kleidungstyp)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines bestimmten Kleidungstyp-Objekts.
 
@@ -673,7 +674,7 @@ class ClothingTypeOperations(Resource):
         clothing_type = adm.get_kleidungstyp_by_id(id)
         return clothing_type, 200
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines bestimmten Kleidungstyp-Objekts.
 
@@ -714,7 +715,7 @@ class ClothingTypeOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ClothingTypeByKleiderschrankOperations(Resource):
     @wardrobe_ns.marshal_list_with(kleidungstyp)
-    #@secured
+    @secured
     def get(self, kleiderschrank_id):
         adm = KleiderschrankAdministration()
         clothing_types = adm.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank_id)
@@ -725,7 +726,7 @@ class ClothingTypeByKleiderschrankOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class OutfitListOperations(Resource):
     @wardrobe_ns.marshal_list_with(outfit)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Outfit-Objekte.
 
@@ -764,7 +765,7 @@ class OutfitListOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class OutfitsByKleiderschrankOperations(Resource):
     @wardrobe_ns.marshal_list_with(outfit)
-    #@secured
+    @secured
     def get(self, kleiderschrank_id):
         """Auslesen aller Outfits eines bestimmten Kleiderschranks."""
         adm = KleiderschrankAdministration()
@@ -776,14 +777,14 @@ class OutfitsByKleiderschrankOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Outfit-Objekts')
 class OutfitOperations(Resource):
     @wardrobe_ns.marshal_with(outfit)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines bestimmten Outfit-Objekts."""
         adm = KleiderschrankAdministration()
         outfit = adm.get_outfit_by_id(id)
         return outfit
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines bestimmten Outfit-Objekts."""
         adm = KleiderschrankAdministration()
@@ -797,7 +798,7 @@ class OutfitOperations(Resource):
 @wardrobe_ns.route('/styles/<int:style_id>/outfits/complete')
 class OutfitCompletion(Resource):
     @wardrobe_ns.expect(kleidungsstueck)
-    #@secured
+    @secured
     def post(self, style_id):
         """Outfit vervollständigen basierend auf einem Basis-Kleidungsstück"""
         adm = KleiderschrankAdministration()
@@ -834,7 +835,7 @@ class OutfitCompletionOperations(Resource):
 
 @wardrobe_ns.route('/outfits/validate/<int:id>')
 class OutfitValidation(Resource):
-    #@secured
+    @secured
     def get(self, id):
         """Überprüft, ob ein Outfit alle Style-Constraints erfüllt."""
         adm = KleiderschrankAdministration()
@@ -863,7 +864,7 @@ def kleidungsstueck_to_dict(kleidungsstueck):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class CardinalityConstraintListOperations(Resource):
     @wardrobe_ns.marshal_list_with(kardinalitaet)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
@@ -872,7 +873,7 @@ class CardinalityConstraintListOperations(Resource):
 
     @wardrobe_ns.marshal_with(kardinalitaet, code=201)
     @wardrobe_ns.expect(kardinalitaet)
-    #@secured
+    @secured
     def post(self):
         """Erstellen eines neuen Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
@@ -894,14 +895,14 @@ class CardinalityConstraintListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Kardinalitäts-Constraints')
 class CardinalityConstraintOperations(Resource):
     @wardrobe_ns.marshal_with(kardinalitaet)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines spezifischen Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
         constraint = adm.get_kardinalitaet_by_id(id)
         return constraint
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
@@ -911,7 +912,7 @@ class CardinalityConstraintOperations(Resource):
 
     @wardrobe_ns.marshal_with(kardinalitaet)
     @wardrobe_ns.expect(kardinalitaet, validate=True)
-    # @secured
+    @secured
     def put(self, id):
         """Updaten eines Kardinalitäts-Constraints"""
         adm = KleiderschrankAdministration()
@@ -949,7 +950,7 @@ class CardinalityConstraintOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class ImplicationConstraintListOperations(Resource):
     @wardrobe_ns.marshal_list_with(implikation)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Implikations-Constraints"""
         adm = KleiderschrankAdministration()
@@ -958,7 +959,7 @@ class ImplicationConstraintListOperations(Resource):
 
     @wardrobe_ns.marshal_with(implikation, code=201)
     @wardrobe_ns.expect(implikation)
-    #@secured
+    @secured
     def post(self):
         """Erstellen eines neuen Implikations-Constraints"""
         adm = KleiderschrankAdministration()
@@ -979,14 +980,14 @@ class ImplicationConstraintListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Implikations-Constraints')
 class ImplicationConstraintOperations(Resource):
     @wardrobe_ns.marshal_with(implikation)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines spezifischen Implikations-Constraints"""
         adm = KleiderschrankAdministration()
         constraint = adm.get_implikation_by_id(id)
         return constraint
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines Implikations-Constraints"""
         adm = KleiderschrankAdministration()
@@ -996,7 +997,7 @@ class ImplicationConstraintOperations(Resource):
 
     @wardrobe_ns.marshal_with(implikation)
     @wardrobe_ns.expect(implikation, validate=True)
-    # @secured
+    @secured
     def put(self, id):
         """Updaten eines Implikations-Constraints"""
         adm = KleiderschrankAdministration()
@@ -1033,7 +1034,7 @@ class ImplicationConstraintOperations(Resource):
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
 class MutexConstraintListOperations(Resource):
     @wardrobe_ns.marshal_list_with(mutex)
-    #@secured
+    @secured
     def get(self):
         """Auslesen aller Mutex-Constraints"""
         adm = KleiderschrankAdministration()
@@ -1042,7 +1043,7 @@ class MutexConstraintListOperations(Resource):
 
     @wardrobe_ns.marshal_with(mutex, code=201)
     @wardrobe_ns.expect(mutex)
-    #@secured
+    @secured
     def post(self):
         """Erstellen eines neuen Mutex-Constraints"""
         adm = KleiderschrankAdministration()
@@ -1062,14 +1063,14 @@ class MutexConstraintListOperations(Resource):
 @wardrobe_ns.param('id', 'Die ID des Mutex-Constraints')
 class MutexConstraintOperations(Resource):
     @wardrobe_ns.marshal_with(mutex)
-    #@secured
+    @secured
     def get(self, id):
         """Auslesen eines spezifischen Mutex-Constraints"""
         adm = KleiderschrankAdministration()
         constraint = adm.get_mutex_by_id(id)
         return constraint
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines Mutex-Constraints"""
         adm = KleiderschrankAdministration()
@@ -1079,7 +1080,7 @@ class MutexConstraintOperations(Resource):
 
     @wardrobe_ns.marshal_with(mutex)
     @wardrobe_ns.expect(mutex, validate=True)
-    #@secured
+    @secured
     def put(self, id):
         """Updaten eines Mutex-Constraints"""
         adm = KleiderschrankAdministration()
