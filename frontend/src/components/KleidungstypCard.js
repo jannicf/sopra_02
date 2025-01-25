@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Typography, Card, CardContent, Grid, Button, ButtonGroup, Box, Chip } from '@mui/material';
+import { Typography, Card, CardContent, Grid, Button, ButtonGroup, Box, Chip, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import KleidungstypForm from '../dialogs/KleidungstypForm';
 import KleidungstypDeleteDialog from '../dialogs/KleidungstypDeleteDialog';
 
@@ -65,44 +67,59 @@ class KleidungstypCard extends Component {
         });
 
         return (
-            <Card sx={{ mb: 1 }}>
-                <CardContent>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
-                                <Box>
-                                    <Typography variant="h6" gutterBottom>
-                                        {kleidungstyp.getBezeichnung()}
-                                    </Typography>
-                                    {verwendungen && verwendungen.length > 0 ? (
-                                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-                                            {verwendungen.map(style => (
-                                                <Chip
-                                                    key={style.getID()}
-                                                    label={style.getName()}
-                                                    size="small"
-                                                    color="primary"
-                                                    variant="outlined"
-                                                />
-                                            ))}
-                                        </Box>
-                                    ) : (
-                                        <Typography color="textSecondary" variant="body2">
-                                            Keine Styles zugeordnet
-                                        </Typography>
-                                    )}
-                                </Box>
-                                <ButtonGroup variant="text" size="small">
-                                    <Button color="primary" onClick={this.handleEditClick}>
-                                        Bearbeiten
-                                    </Button>
-                                    <Button color="secondary" onClick={this.handleDeleteClick}>
-                                        Löschen
-                                    </Button>
-                                </ButtonGroup>
-                            </Box>
-                        </Grid>
-                    </Grid>
+            <Card sx={{
+                p: 2,
+                cursor: 'pointer',
+                borderRadius: 2,
+                '&:hover': {
+                    transform: 'translateY(-2px)',
+                    transition: 'all 0.2s'
+                }
+            }}>
+                <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Box>
+                            <Typography variant="h6">
+                                {kleidungstyp.getBezeichnung()}
+                            </Typography>
+                            {verwendungen && verwendungen.length > 0 ? (
+                                <Box sx={{ mt: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 }}>
+            {verwendungen.map(style => (
+                <Chip
+                    key={style.getID()}
+                    label={style.getName()}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ width: 'fit-content' }}
+                />
+            ))}
+        </Box>
+        </Box>
+        ) : (
+            <Typography color="textSecondary" variant="body2">
+                Keine Styles zugeordnet
+            </Typography>
+        )}
+                        </Box>
+                        <Box>
+                            <IconButton
+                                onClick={this.handleEditClick}
+                                sx={{ color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                                disableRipple
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton
+                                onClick={this.handleDeleteClick}
+                                sx={{ color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                                disableRipple
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </Box>
+                    </Box>
                 </CardContent>
 
                 <KleidungstypForm

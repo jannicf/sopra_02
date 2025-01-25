@@ -203,6 +203,7 @@ class KleiderschrankView extends Component {
                                 kleidungsstuecke={kleidungsstuecke}
                                 onUpdate={this.loadKleidungsstuecke}
                                 kleiderschrankId={this.state.kleiderschrankId}
+                                onCreateClick={this.handleCreateClick}
                             />
                         ) : (
                             <Typography
@@ -219,16 +220,6 @@ class KleiderschrankView extends Component {
                                 indem du auf den "Neues Kleidungsstück" Button klickst.
                             </Typography>
                         )}
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            onClick={this.handleCreateClick}
-                            disableRipple
-                            sx={{ position: 'fixed', bottom: '4.5rem', right: '2rem' }}
-                        >
-                            Neues Kleidungsstück
-                        </Button>
                     </>
                 ) : (
                     <>
@@ -238,6 +229,7 @@ class KleiderschrankView extends Component {
                                 kleiderschrankId={this.state.kleiderschrankId}
                                 onUpdate={this.loadKleidungstypen}
                                 onDelete={this.handleDeleteKleidungstyp}
+                                onCreateClick={this.handleCreateTypClick}
                             />
                         ) : (
                             <Typography
@@ -254,16 +246,6 @@ class KleiderschrankView extends Component {
                                 indem du auf den "Neuer Kleidungstyp" Button klickst.
                             </Typography>
                         )}
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            onClick={this.handleCreateTypClick}
-                            disableRipple
-                            sx={{ position: 'fixed', bottom: '4.5rem', right: '2rem' }}
-                        >
-                            Neuer Kleidungstyp
-                        </Button>
                     </>
                 )}
 
