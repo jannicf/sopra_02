@@ -5,7 +5,6 @@ import { Box, ThemeProvider, Container, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Theme from './Theme';
 import ErrorAlert from './dialogs/ErrorAlert';
-import LoadingProgress from './dialogs/LoadingProgress';
 import Header from './layout/header';
 import Footer from './layout/footer';
 import Login from './pages/Login';
@@ -235,7 +234,7 @@ class App extends React.Component {
                         } />
                     </Routes>
                     </Box>
-                    {authLoading && <LoadingProgress />}
+                    {authLoading}
                     {/* Fehlerbehandlung für allgemeine App-Fehler */}
                         {appError && (
                             <ErrorAlert

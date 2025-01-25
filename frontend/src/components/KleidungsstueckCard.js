@@ -44,7 +44,6 @@ class KleidungsstueckCard extends Component {
     return (
       <Card sx={{
         p: 2,
-        cursor: 'pointer',
         borderRadius: 2,
         height: '112px', // Gleiche Höhe wie Add Button Card
         display: 'flex',

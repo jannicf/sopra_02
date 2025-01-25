@@ -36,6 +36,7 @@ class KleidungsstueckList extends Component {
             onClick={this.props.onCreateClick}
           >
             <CardContent sx={{
+              cursor: 'pointer',
               p: 0,
               '&:last-child': { pb: 0 },
               width: '100%',

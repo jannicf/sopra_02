@@ -1,11 +1,7 @@
 # größtenteils übernommen aus der Vorlage von Prof. Thies aus 'PythonBankBeispiel-RELEASE_1.2.2'
-
 from flask import request
 from google.auth.transport import requests
 import google.oauth2.id_token
-
-from server.KleiderschrankAdministration import KleiderschrankAdministration
-
 
 def secured(function):
     """Decorator zur Google Firebase-basierten Authentifizierung von Benutzern
@@ -23,9 +19,6 @@ def secured(function):
     def wrapper(*args, **kwargs):
         # Firebase auth verifizieren
         id_token = request.cookies.get("token")
-        error_message = None
-        claims = None
-        objects = None
 
         if id_token:
             try:
@@ -34,39 +27,8 @@ def secured(function):
                     id_token, firebase_request_adapter)
 
                 if claims is not None:
-                    adm = KleiderschrankAdministration()
-
                     google_user_id = claims.get("user_id")
-                    email = claims.get("email")
-                    name = claims.get("name")
-
-                    # Name in Vor- und Nachname aufteilen
-                    name_parts = name.split(" ", 1)
-                    vorname = name_parts[0]
-                    nachname = name_parts[1] if len(name_parts) > 1 else ""
-
-                    # Nickname aus Email generieren (Teil vor dem @)
-                    nickname = email.split("@")[0]
-
-                    person = adm.get_person_by_google_id(google_user_id)
-                    if person is not None:
-                        """Fall: Der Benutzer ist unserem System bereits bekannt.
-                        Wir aktualisieren den Namen für den Fall, dass sich
-                        dieser in Firebase geändert hat."""
-                        person.set_vorname(vorname)
-                        person.set_nachname(nachname)
-                        adm.save_person(person)
-                    else:
-                        """Fall: Erster Login des Benutzers.
-                        Wir legen eine neue Person an."""
-                        person = adm.create_person(
-                            vorname,
-                            nachname,
-                            nickname,
-                            google_user_id
-                        )
-
-                    print(request.method, request.path, "angefragt durch:", nickname)
+                    print(request.method, request.path, "angefragt durch:", google_user_id)
 
                     objects = function(*args, **kwargs)
                     return objects
@@ -74,7 +36,7 @@ def secured(function):
                     return '', 401  # UNAUTHORIZED
             except ValueError as exc:
                 error_message = str(exc)
-                return exc, 401  # UNAUTHORIZED
+                return error_message, 401  # UNAUTHORIZED
 
         return '', 401  # UNAUTHORIZED
 

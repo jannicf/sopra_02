@@ -1,5 +1,4 @@
 // übernommen aus der Vorlage von Prof. Kunz aus 'PythonBankBeispiel-RELEASE_1.2.2'
-
 import { createTheme } from '@mui/material/styles';
 import { colors } from '@mui/material';
 
