@@ -558,7 +558,7 @@ class StyleOperations(Resource):
         sty = adm.get_style_by_id(id)
         return sty
 
-    #@secured
+    @secured
     def delete(self, id):
         """Löschen eines bestimmten Style-Objekts.
 

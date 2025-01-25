@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { List } from '@mui/material';
+import { Grid, Card, CardContent, Typography, Box } from '@mui/material';
 import KleidungsstueckCard from "./KleidungsstueckCard";
+import AddIcon from '@mui/icons-material/Add';
 
 class KleidungsstueckList extends Component {
   constructor(props) {
@@ -14,23 +15,59 @@ class KleidungsstueckList extends Component {
   }
 
   render() {
-    const { kleidungsstuecke } = this.props;
+    const { kleidungsstuecke, onUpdate, kleiderschrankId } = this.props;
 
     return (
 
-      <List>
+      <Grid container spacing={3}>
+        {/* Add Button Card */}
+        <Grid item xs={12} sm={6} md={4}>
+          <Card
+            sx={{
+              cursor: 'pointer',
+              height: '100%',
+              p: 2,
+              borderRadius: 2,
+              boxShadow: 2,
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                transition: 'all 0.2s'
+              }
+            }}
+            onClick={this.props.onCreateClick}
+          >
+            <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+              <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <AddIcon sx={{ fontSize: 40, color: 'white', mb: 1 }} />
+                <Typography variant="h6" color="white">
+                  Neues Kleidungsstück
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Kleidungsstück Cards */}
         {kleidungsstuecke.map(kleidungsstueck => (
-          <KleidungsstueckCard
-            key={kleidungsstueck.getID()}
-            kleidungsstueck={kleidungsstueck}
-            onDelete={this.handleKleidungsstueckDelete}
-            onUpdate={this.props.onUpdate}
-            kleiderschrankId={this.props.kleiderschrankId}
+          <Grid item xs={12} sm={6} md={4} key={kleidungsstueck.getID()}>
+            <KleidungsstueckCard
+              kleidungsstueck={kleidungsstueck}
+              onDelete={this.handleKleidungsstueckDelete}
+              onUpdate={onUpdate}
+              kleiderschrankId={kleiderschrankId}
             />
-           ))}
-            </List>
-        );
-    }
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
 }
 
 export default KleidungsstueckList;

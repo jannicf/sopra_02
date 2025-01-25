@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Typography, Card, CardContent, Grid, Button, ButtonGroup } from '@mui/material';
+import { Typography, Card, CardContent, Grid, Button, ButtonGroup, IconButton, Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import KleidungsstueckForm from '../dialogs/KleidungsstueckForm';
 import KleidungsstueckDeleteDialog from '../dialogs/KleidungsstueckDeleteDialog';
 
@@ -45,32 +47,44 @@ class KleidungsstueckCard extends Component {
     const typBezeichnung = kleidungsstueck?.typ?.bezeichnung || 'Kein Typ zugewiesen';
 
     return (
+       <Card sx={{
+        p: 2,
+        cursor: 'pointer',
+        borderRadius: 2,
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          transition: 'all 0.2s'
+        }
+      }}>
+        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box>
+              <Typography variant="h6">
+                {kleidungsstueck.getName()}
+              </Typography>
+              <Typography color="textSecondary">
+                Typ: {typBezeichnung}
+              </Typography>
+            </Box>
+            <Box>
+              <IconButton
+                onClick={this.handleEditClick}
+                sx={{ color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                disableRipple
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                onClick={this.handleDeleteClick}
+                sx={{ color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' } }}
+                disableRipple
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        </CardContent>
 
-        <Card sx={{ mb: 1 }}>  {/* Fügt 8px Margin unten hinzu */}
-          <CardContent>
-            <Grid container justifyContent="space-between" alignItems='center'>
-              <Grid item>
-                <Typography variant='h6'>
-                  {kleidungsstueck.getName()}
-                </Typography>
-                <Typography color='textSecondary'>
-                  Typ: {typBezeichnung}
-                </Typography>
-              </Grid>
-              <Grid item>
-                <ButtonGroup variant='text' size='small'>
-                  <Button color='primary' onClick={this.handleEditClick}>
-                    Bearbeiten
-                  </Button>
-                  <Button color='secondary' onClick={this.handleDeleteClick}>
-                    Löschen
-                  </Button>
-                </ButtonGroup>
-              </Grid>
-            </Grid>
-          </CardContent>
-
-        {/* Die Dialoge werden als separate Komponenten eingebunden */}
         <KleidungsstueckForm
           show={showEditDialog}
           kleidungsstueck={kleidungsstueck}
@@ -82,9 +96,8 @@ class KleidungsstueckCard extends Component {
           kleidungsstueck={kleidungsstueck}
           onClose={this.handleDeleteDialogClosed}
         />
-        </Card>
+      </Card>
     );
-
   }
 }
 
