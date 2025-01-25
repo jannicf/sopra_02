@@ -93,7 +93,7 @@ class App extends React.Component {
                      * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
                      * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
                      * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
-                    document.cookie = `token=${token};path=/;SameSite=None;Secure`;
+                    document.cookie = `token=${token};path=/;SameSite=Lax;`
                     console.log("2. Token gesetzt:", token);
 
                     // Prüfen ob ein Profil existiert
@@ -139,7 +139,7 @@ class App extends React.Component {
                  * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
                  * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
                  * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
-                document.cookie = 'token=;path=/;SameSite=None;Secure';
+                document.cookie = `token=;path=/;SameSite=Lax`;
 
                 // Zurücksetzung des ausgeloggten Nutzers
                 this.setState({

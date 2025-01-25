@@ -1,3 +1,5 @@
+<!-- übernommen aus der Vorlage von Prof. Kunz aus 'PythonBankBeispiel-RELEASE_1.2.2' --> 
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -144,7 +144,6 @@ class PersonListOperations(Resource):
 
     @wardrobe_ns.marshal_with(person, code=200)
     @wardrobe_ns.expect(person)
-    @secured
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
 

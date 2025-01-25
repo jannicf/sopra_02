@@ -1,5 +1,6 @@
 #zeigt welche Python-Version wir verwenden für die Google App Engine
 runtime: python39
+
 handlers:
-  - url: /.*
-    script: auto
+  - url: /.*  #handler für jede mögliche URL
+    script: auto  #automatische Weiterleitung der Anfragen an main.py
