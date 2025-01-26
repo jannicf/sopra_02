@@ -3,8 +3,33 @@ import { Typography, Button, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import OutfitList from '../components/OutfitList';
 import { Link } from 'react-router-dom';
+import OutfitForm from '../dialogs/OutfitForm';
+import KleidungsstueckBasiertesOutfit from '../components/KleidungsstueckBasiertesOutfit';
+import StyleBasiertesOutfit from '../components/StyleBasiertesOutfit';
 
 class OutfitView extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+          showKleidungsstueckBasiert: false,
+          showStyleBasiert: false,
+          showOutfitForm: false
+        }
+    }
+
+    handleOutfitCreated = () => {
+      this.setState({
+        showKleidungsstueckBasiert: false,
+        showStyleBasiert: false,
+        showOutfitForm: false
+      });
+      this.loadOutfits();
+    }
+
+    handleFormClose = () => {
+      this.setState({ showOutfitForm: false });
+    }
+
   render() {
     return (
       <div>
@@ -91,6 +116,27 @@ class OutfitView extends Component {
               </Box>
             </Box>
           </Button>
+            {this.state.showKleidungsstueckBasiert && (
+              <KleidungsstueckBasiertesOutfit
+                user={this.props.user}
+                onOutfitCreated={this.handleOutfitCreated}
+              />
+            )}
+
+            {this.state.showStyleBasiert && (
+              <StyleBasiertesOutfit
+                user={this.props.user}
+                onOutfitCreated={this.handleOutfitCreated}
+              />
+            )}
+
+            {this.state.showOutfitForm && (
+              <OutfitForm
+                show={showOutfitForm}
+                onClose={this.handleFormClose}
+                kleiderschrankAPI={KleiderschrankAPI.getAPI()}
+              />
+            )}
         </Box>
 
         {/* Hauptüberschrift */}
