@@ -1,10 +1,6 @@
 // Alle benötigten Imports im Zusammenhang mit Style importieren
 import BusinessObject from './BusinessObject.js';
 import KleidungstypBO from "./KleidungstypBO.js";
-import ConstraintBO from "./ConstraintBO.js";
-import MutexBO from "./MutexBO.js";
-import KardinalitaetBO from "./KardinalitaetBO.js";
-import ImplikationBO from "./ImplikationBO.js";
 
 /**
  * Repräsentiert einen Style im digitalen Kleiderschranksystem.

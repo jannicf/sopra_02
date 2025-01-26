@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
-         Typography, Box } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Box } from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class PersonEditForm extends Component {

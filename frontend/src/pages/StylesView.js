@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Typography, Button } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Typography} from '@mui/material';
 import StyleForm from "../dialogs/StyleForm";
 import StyleDeleteDialog from "../dialogs/StyleDeleteDialog";
 import KleiderschrankAPI from '../api/KleiderschrankAPI';

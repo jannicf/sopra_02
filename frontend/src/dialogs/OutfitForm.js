@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
-         Select, MenuItem, FormControl, InputLabel, List, ListItem,
-         ListItemText, Typography, Box } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Select, MenuItem, FormControl, InputLabel, List,
+  ListItem, ListItemText, Typography, Box } from '@mui/material';
 import OutfitBO from '../api/OutfitBO';
 import StyleBO from '../api/StyleBO';
 import KleidungsstueckBO from '../api/KleidungsstueckBO';

@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-    Box,
-    Chip
-} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Box, Chip} from '@mui/material';
 
 const KleidungstypDetailDialog = ({ open, kleidungstyp, onClose }) => {
     const verwendungen = kleidungstyp?.getVerwendungen() || [];

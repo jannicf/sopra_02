@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    List,
-    ListItem,
-    ListItemText,
-    Typography,
+import {Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItem, ListItemText, Typography,
 } from '@mui/material';
 
 const StyleSelectionDialog = ({ open, onClose, styles, onSelect }) => {
