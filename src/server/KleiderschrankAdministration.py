@@ -479,8 +479,9 @@ class KleiderschrankAdministration(object):
             # Aus allen Outfits entfernen
             outfits = self.get_all_outfits()
             for outfit in outfits:
-                outfit.remove_baustein(kleidungsstueck)
-                self.save_outfit(outfit)
+                if kleidungsstueck in outfit.get_bausteine():
+                    outfit.remove_baustein(kleidungsstueck)
+                    self.save_outfit(outfit)
 
             # Kleidungsstück direkt löschen ohne vorher die kleiderschrank_id zu ändern
             mapper.delete(kleidungsstueck)
@@ -536,6 +537,20 @@ class KleiderschrankAdministration(object):
         with KleidungstypMapper() as mapper:
             # Erst alle abhängigen Kleidungsstücke löschen
             kleidungsstuecke = self.get_kleidungsstueck_by_typ(kleidungstyp)
+            outfits_to_delete = set()  # Set um Duplikate zu vermeiden
+
+            # Für jedes Kleidungsstück die zugehörigen Outfits finden
+            for kleidungsstueck in kleidungsstuecke:
+                outfits = self.get_all_outfits()
+                for outfit in outfits:
+                    if kleidungsstueck in outfit.get_bausteine():
+                        outfits_to_delete.add(outfit)
+
+            # Gefundene Outfits löschen
+            for outfit in outfits_to_delete:
+                self.delete_outfit(outfit)
+
+            # Dann erst die abhängigen Kleidungsstücke löschen
             for kleidungsstueck in kleidungsstuecke:
                 self.delete_kleidungsstueck(kleidungsstueck)
 

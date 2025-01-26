@@ -55,6 +55,10 @@ class KleidungsstueckMapper(Mapper):
         """
         cursor = self._cnx.cursor()
 
+        # Erst die Verknüpfungen in der outfit_kleidungsstueck Tabelle löschen
+        cmd = "DELETE FROM outfit_kleidungsstueck WHERE kleidungsstueck_id = %s"
+        cursor.execute(cmd, (kleidungsstueck.get_id(),))
+
         command = "DELETE FROM kleidungsstueck WHERE id={}".format(kleidungsstueck.get_id())
         cursor.execute(command)
 
