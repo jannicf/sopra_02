@@ -1,7 +1,7 @@
 import React from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { Box, ThemeProvider, Container, CssBaseline } from '@mui/material';
+import { Box, ThemeProvider, Container, CssBaseline, CircularProgress } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Theme from './Theme';
 import ErrorAlert from './dialogs/ErrorAlert';
@@ -17,6 +17,19 @@ import ProfilView from "./pages/ProfilView";
 import About from './pages/About';
 import KleiderschrankAPI from "./api/KleiderschrankAPI";
 import firebaseConfig from './firebase/firebaseconfig';
+
+// LoadingIndicator Komponente
+const LoadingIndicator = () => (
+    <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        width: '100%'
+    }}>
+        <CircularProgress size={60} thickness={4} />
+    </Box>
+);
 
 class App extends React.Component {
     constructor(props) {
@@ -169,7 +182,10 @@ class App extends React.Component {
                         {/* Startseite mit Login */}
                         <Route path="/" element={
                             currentUser ?
-                                userHasProfile ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    userHasProfile ?
                                     <Navigate replace to="/kleiderschrank" />
                                     :
                                     <Navigate replace to="/profile" />
@@ -179,52 +195,88 @@ class App extends React.Component {
 
                         {/* Profilseite - als einzige auch ohne Profil zugänglich */}
                         <Route path="/profile" element={
-                            currentUser ? <ProfilView user={currentUser} /> : <Navigate to="/" />
+                            currentUser ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    <ProfilView user={currentUser} />
+                                :
+                                <Navigate to="/" />
                         } />
 
                         {/* Alle anderen Routen erfordern ein Profil */}
                        <Route path="/kleiderschrank" element={
-                            currentUser ? <KleiderschrankView user={currentUser} /> : <Navigate to="/" />
+                            currentUser ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    userHasProfile ?
+                                        <KleiderschrankView user={currentUser} />
+                                        :
+                                        <Navigate to="/profile" />
+                                :
+                                <Navigate to="/" />
                         } />
 
                         <Route path="/outfits" element={
-                            currentUser && userHasProfile ?
-                                <OutfitView
-                                    user={currentUser}
-                                />
+                            currentUser ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    userHasProfile ?
+                                <OutfitView user={currentUser} />
                                 :
                                 <Navigate to="/profile" />
+                            :
+                            <Navigate to="/" />
                         } />
 
                         <Route path="/outfits/erstellen-nach-style" element={
-                            currentUser && userHasProfile ?
-                                <StyleBasiertesOutfitView
-                                    user={currentUser}
-                                />
+                            currentUser ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    userHasProfile ?
+                                <StyleBasiertesOutfitView user={currentUser} />
                                 :
                                 <Navigate to="/profile" />
+                            :
+                            <Navigate to="/" />
                         } />
 
                         <Route path="/outfits/create-by-item" element={
-                            currentUser && userHasProfile ?
-                                <KleidungsstueckBasiertesOutfitView
-                                    user={currentUser}  // sicherstellen dass currentUser übergeben wird
-                                />
+                            currentUser ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    userHasProfile ?
+                                        <KleidungsstueckBasiertesOutfitView user={currentUser} />
+                                        :
+                                        <Navigate to="/profile" />
                                 :
-                                <Navigate to="/profile" />
+                                <Navigate to="/" />
                         } />
 
                         <Route path="/styles" element={
-                            currentUser && userHasProfile ?
-                                <StylesView user={currentUser}/>
+                            currentUser ?
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    userHasProfile ?
+                                        <StylesView user={currentUser} />
+                                        :
+                                        <Navigate to="/profile" />
                                 :
-                                <Navigate to="/profile" />
+                                <Navigate to="/" />
                         } />
 
                         {/* About Seite bleibt öffentlich, braucht aber Login */}
                         <Route path="/about" element={
                             currentUser ?
-                                <About />
+                                authLoading ?
+                                    <LoadingIndicator />
+                                    :
+                                    <About />
                                 :
                                 <Navigate to="/" />
                         } />
