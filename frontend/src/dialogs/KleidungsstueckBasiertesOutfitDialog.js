@@ -1,20 +1,6 @@
 import React, { Component } from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    Typography,
-    Grid,
-    Box,
-    Card,
-    CardContent,
-    Checkbox,
-    Paper,
-    Alert,
-    AlertTitle
-} from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Grid, Box, Card, CardContent, Checkbox,
+    Paper, Alert, AlertTitle} from '@mui/material';
 import StyleSelectionDialog from './StyleSelectionDialog';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import LockIcon from '@mui/icons-material/Lock';

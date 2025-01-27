@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Typography, Button, Box } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import KleidungsstueckList from "../components/KleidungsstueckList";
 import KleidungstypList from "../components/KleidungstypList";
 import KleidungsstueckForm from "../dialogs/KleidungsstueckForm";

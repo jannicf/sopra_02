@@ -1,5 +1,4 @@
 import BusinessObject from './BusinessObject.js';
-import KleiderschrankBO from "./KleiderschrankBO";
 
 /**
  * Repräsentiert eine Person im digitalen Kleiderschranksystem.

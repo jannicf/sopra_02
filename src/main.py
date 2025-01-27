@@ -3,18 +3,12 @@ from flask_restx import Api, fields, Resource
 from flask_cors import CORS
 
 from server.KleiderschrankAdministration import KleiderschrankAdministration
-from server.bo.BinaryConstraint import BinaryConstraint
-from server.bo.Constraint import Constraint
 from server.bo.Implikation import Implikation
 from server.bo.Kardinalitaet import Kardinalitaet
-from server.bo.Kleiderschrank import Kleiderschrank
 from server.bo.Kleidungsstueck import Kleidungsstueck
-from server.bo.Kleidungstyp import Kleidungstyp
 from server.bo.Mutex import Mutex
-from server.bo.Outfit import Outfit
 from server.bo.Person import Person
 from server.bo.Style import Style
-from server.bo.UnaryConstraint import UnaryConstraint
 
 from SecurityDecorator import secured
 

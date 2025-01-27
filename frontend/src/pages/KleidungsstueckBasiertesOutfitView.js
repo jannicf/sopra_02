@@ -1,13 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import {
-    Grid,
-    Typography,
-    Box,
-    Card,
-    CardContent,
-    Alert,
-} from '@mui/material';
+import {Grid, Typography, Box, Card, CardContent, Alert} from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 import KleidungsstueckBasiertesOutfitDialog from '../dialogs/KleidungsstueckBasiertesOutfitDialog';
 
