@@ -61,7 +61,7 @@ class KleidungsstueckDeleteDialog extends Component {
             Abbrechen
           </Button>
           <Button
-            color="secondary"
+            color="error"
             onClick={async () => {
               try {
                 // Erst die betroffenen Outfits löschen

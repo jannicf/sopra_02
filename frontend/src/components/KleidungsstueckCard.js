@@ -45,7 +45,7 @@ class KleidungsstueckCard extends Component {
       <Card sx={{
         p: 2,
         borderRadius: 2,
-        height: '112px', // Gleiche Höhe wie Add Button Card
+        height: '112px',
         display: 'flex',
         '&:hover': {
           transform: 'translateY(-2px)',

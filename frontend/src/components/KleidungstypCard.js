@@ -78,8 +78,8 @@ class KleidungstypCard extends Component {
                     cursor: 'pointer',
                     p: 2,
                     borderRadius: 2,
-                    height: '112px', // Gleiche Höhe wie in KleidungsstueckCard.js
-                    display: 'flex', // Für vertikale Zentrierung
+                    height: '112px',
+                    display: 'flex',
                     '&:hover': {
                         transform: 'translateY(-2px)',
                         transition: 'all 0.2s'
@@ -92,7 +92,7 @@ class KleidungstypCard extends Component {
                         '&:last-child': { pb: 0 },
                         width: '100%',
                         display: 'flex',
-                        alignItems: 'center' // Vertikale Zentrierung wie in KleidungsstueckCard.js
+                        alignItems: 'center'
                     }}>
                         <Box sx={{
                             display: 'flex',
@@ -104,7 +104,6 @@ class KleidungstypCard extends Component {
                                 <Typography variant="h6">
                                     {kleidungstyp.getBezeichnung()}
                                 </Typography>
-
                                 <Typography color="textSecondary">
                                     Styles: {verwendungen.length}
                                 </Typography>
@@ -112,23 +111,15 @@ class KleidungstypCard extends Component {
                             <Box>
                                 <IconButton
                                     onClick={this.handleEditClick}
-                                    sx={{
-                                        color: 'primary.main',
-                                        '&:hover': { bgcolor: '#f5f5f5' }
-                                    }}
+                                    sx={{ color: 'primary.main', '&:hover': { bgcolor: '#f5f5f5' } }}
                                     disableRipple
-                                    size="small"
                                 >
                                     <EditIcon />
                                 </IconButton>
                                 <IconButton
                                     onClick={this.handleDeleteClick}
-                                    sx={{
-                                        color: 'error.main',
-                                        '&:hover': { bgcolor: '#f5f5f5' }
-                                    }}
+                                    sx={{ color: 'error.main', '&:hover': { bgcolor: '#f5f5f5' } }}
                                     disableRipple
-                                    size="small"
                                 >
                                     <DeleteIcon />
                                 </IconButton>
