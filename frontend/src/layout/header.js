@@ -78,51 +78,63 @@ class Header extends Component {
                         justifyContent: 'space-evenly',
                     }}>
 
-                            <Tabs
-                                value={this.state.tabindex}
-                                onChange={this.handleTabChange}
-                                textColor="inherit"
-                                TabIndicatorProps={{ sx: { display: 'none' } }} // keine blaue Leiste mehr unten dran
-                                sx={{
-                                    width: '100%',
-                                    '& .MuiTabs-flexContainer': {
-                                        justifyContent: 'space-evenly',
+                        <Tabs
+                            value={this.state.tabindex}
+                            onChange={this.handleTabChange}
+                            textColor="inherit"
+                            TabIndicatorProps={{ sx: { display: 'none' } }}
+                            sx={{
+                                width: '100%',
+                                '& .MuiTabs-flexContainer': {
+                                    justifyContent: 'space-evenly',
+                                },
+                                '& .MuiTab-root': {
+                                    flex: 1,
+                                    maxWidth: 'none',
+                                    minWidth: 0,
+                                    fontSize: { xs: 0, md: '1.1rem' },
+                                    '& .MuiSvgIcon-root': { // Icons werden kleiner bei kleinerem Bildschirm
+                                        fontSize: { xs: '1.5rem', md: '2rem' },
                                     },
-                                    '& .MuiTab-root': {
-                                        flex: 1,     // Jeder Tab nimmt ein Drittel der Breite ein
-                                        maxWidth: 'none',  // Überschreibt die Standard-maxWidth von Tabs
-                                        minWidth: 0,       // Erlaubt dem Tab schmaler zu werden
-                                        fontSize: '1.1rem',      // Größerer Text
-                                        '& .MuiSvgIcon-root': {  // Größeres Icon
-                                            fontSize: '2rem'
-                                        }
+                                    '& .MuiTab-labelIcon .MuiTab-wrapper': {
+                                        flexDirection: { xs: 'column', md: 'row' }
                                     }
+                                }
+                            }}
+                        >
+                            <Tab
+                                icon={<HomeIcon />}
+                                label={window.innerWidth > 600 ? "Kleiderschrank" : ""}  // Label ab 600px ausblenden
+                                component={RouterLink}
+                                to='/kleiderschrank'
+                                disableRipple
+                                sx={{
+                                    borderRight: '1px solid rgba(255, 255, 255, 0.3)',
+                                    padding: { xs: 1, md: 2 }
                                 }}
-                            >
-                                <Tab
-                                    icon={<HomeIcon />}
-                                    label="Kleiderschrank"
-                                    component={RouterLink}
-                                    to='/kleiderschrank'
-                                    disableRipple
-                                    sx={{borderRight: '1px solid rgba(255, 255, 255, 0.3)'}}
-                                />
-                                <Tab
-                                    icon={<StyleIcon />}
-                                    label="Styles"
-                                    component={RouterLink}
-                                    to='/styles'
-                                    disableRipple
-                                />
-                                <Tab
-                                    icon={<CheckroomIcon />}
-                                    label="Outfits"
-                                    component={RouterLink}
-                                    to='/outfits'
-                                    disableRipple
-                                    sx={{borderLeft: '1px solid rgba(255, 255, 255, 0.3)'}}
-                                />
-                            </Tabs>
+                            />
+                            <Tab
+                                icon={<StyleIcon />}
+                                label={window.innerWidth > 600 ? "Styles" : ""} // Label ab 600px ausblenden
+                                component={RouterLink}
+                                to='/styles'
+                                disableRipple
+                                sx={{
+                                    padding: { xs: 1, md: 2 }
+                                }}
+                            />
+                            <Tab
+                                icon={<CheckroomIcon />}
+                                label={window.innerWidth > 600 ? "Outfits" : ""} // Label ab 600px ausblenden
+                                component={RouterLink}
+                                to='/outfits'
+                                disableRipple
+                                sx={{
+                                    borderLeft: '1px solid rgba(255, 255, 255, 0.3)',
+                                    padding: { xs: 1, md: 2 }
+                                }}
+                            />
+                        </Tabs>
                     </Box>
                         ):
 
