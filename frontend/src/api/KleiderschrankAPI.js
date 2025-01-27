@@ -147,13 +147,6 @@ class KleiderschrankAPI {
     }
 
     addPerson(personBO) {
-    // Debug Log vor dem Request
-    console.log("AddPerson Input:", {
-        person: personBO,
-        hasKleiderschrank: personBO.getKleiderschrank() !== null,
-        kleiderschrankName: personBO.getKleiderschrank()?.getName()
-    });
-
     const requestData = {
         vorname: personBO.getVorname(),
         nachname: personBO.getNachname(),
@@ -166,7 +159,6 @@ class KleiderschrankAPI {
         requestData.kleiderschrank = {
             name: personBO.getKleiderschrank().getName()
         };
-        console.log("RequestData mit Kleiderschrank:", requestData);
     }
 
     return this.#fetchAdvanced(this.#addPersonURL(), {
@@ -177,7 +169,6 @@ class KleiderschrankAPI {
         },
         body: JSON.stringify(requestData)
     }).then(responseJSON => {
-        console.log("Server Response:", responseJSON);
         const person = PersonBO.fromJSON(responseJSON);
         return person;
         });
@@ -399,15 +390,12 @@ class KleiderschrankAPI {
     getKleidungstypByKleiderschrankId(kleiderschrank_id) {
         return this.#fetchAdvanced(this.#getKleidungstypByKleiderschrankIdURL(kleiderschrank_id))
             .then(responseJSON => {
-                console.log("API Response für Kleidungstypen:", responseJSON);
                 const kleidungstypen = KleidungstypBO.fromJSON(responseJSON);
-                console.log("Konvertierte Kleidungstypen:", kleidungstypen);
                 return kleidungstypen;
             });
     }
 
     addKleidungstyp(kleidungstypData) {
-        console.log("API Request Data:", JSON.stringify(kleidungstypData, null, 2));
         return this.#fetchAdvanced(this.#addKleidungstypURL(), {
             method: 'POST',
             headers: {
@@ -416,7 +404,6 @@ class KleiderschrankAPI {
             },
             body: JSON.stringify(kleidungstypData)
         }).then(responseJSON => {
-            console.log("API Response:", responseJSON);
             let responseKleidungstypBO = KleidungstypBO.fromJSON(responseJSON)[0];
             return new Promise(function (resolve) {
                 resolve(responseKleidungstypBO);
@@ -427,7 +414,6 @@ class KleiderschrankAPI {
     updateKleidungstyp(kleidungstyp) {
         // Nur wenn eine ID vorhanden ist, wird ein Update durchgeführt
         if (!kleidungstyp.id) {
-            console.log("Keine ID vorhanden - führe stattdessen addKleidungstyp aus");
             return this.addKleidungstyp(kleidungstyp);
         }
 
@@ -461,7 +447,6 @@ class KleiderschrankAPI {
             'Accept': 'application/json, text/plain'
         }
     }).then(responseJSON => {
-        console.log("API Response for style:", responseJSON); // Debug
         // Array von Style-Objekten erstellen
         let styleBOs = StyleBO.fromJSON(responseJSON);
         return new Promise(function (resolve) {
@@ -537,7 +522,6 @@ class KleiderschrankAPI {
             });
             return response;
         } catch (error) {
-            console.error("API: Fehler beim Löschen des Styles:", error);
             throw error;
         }
     }

@@ -81,7 +81,6 @@ class App extends React.Component {
                 this.setState({
                     authLoading: true
                 });
-                console.log("1. Google Auth erfolgreich, User:", user.uid);
 
                 // Token generieren und setzen
                 user.getIdToken().then(token => {
@@ -93,12 +92,10 @@ class App extends React.Component {
                      * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
                      * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
                     document.cookie = `token=${token};path=/;SameSite=Lax;`
-                    console.log("2. Token gesetzt:", token);
 
                     // Prüfen ob ein Profil existiert
                     return KleiderschrankAPI.getAPI().getPersonByGoogleId(user.uid)
                         .then(person => {
-                            console.log("3. Person geladen:", person);
                             this.setState({
                                 currentUser: user,
                                 userHasProfile: person !== null,
@@ -130,7 +127,6 @@ class App extends React.Component {
                     });
                 });
             } else {
-                console.log("1. Nutzer ausgeloggt");
                 // Der Nutzer ist ausgeloggt -> Token löschen
                 /** Das Cookie "token" verfügt über keinen gültigen Wert für das "SameSite"-Attribut.
                  * Bald werden Cookies ohne das "SameSite"-Attribut oder mit einem ungültigen Wert

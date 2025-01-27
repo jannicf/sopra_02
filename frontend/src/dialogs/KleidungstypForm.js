@@ -8,15 +8,6 @@ class KleidungstypForm extends Component {
         constructor(props) {
         super(props);
         const { kleidungstyp, kleiderschrankId } = props;
-
-         console.log("Constructor Input:", {
-        originalKleidungstyp: kleidungstyp ? {
-            id: kleidungstyp.getID(),
-            bezeichnung: kleidungstyp.getBezeichnung()
-        } : null,
-        kleiderschrankId
-    });
-
     // Erstelle eine echte Kopie des Kleidungstyps
     let initialKleidungstyp;
     if (kleidungstyp) {
@@ -76,12 +67,10 @@ class KleidungstypForm extends Component {
     loadStyles = async () => {
         try {
             const api = KleiderschrankAPI.getAPI();
-            console.log("Lade Styles für Kleiderschrank ID:", this.props.kleiderschrankId);
             const styles = await api.getStyles();
             const filteredStyles = styles.filter(style =>
                 style.getKleiderschrankId() === this.props.kleiderschrankId
             );
-            console.log("Gefilterte Styles:", filteredStyles);
             this.setState({ allStyles: filteredStyles });
         } catch (error) {
             console.error("Fehler beim Laden der Styles:", error);
@@ -91,11 +80,6 @@ class KleidungstypForm extends Component {
 
     handleBezeichnungChange = (event) => {
         const { kleidungstyp } = this.state;
-        console.log("Vor Bezeichnungsänderung:", {
-            id: kleidungstyp.getID(),
-            bezeichnung: kleidungstyp.getBezeichnung()
-        });
-
         const updatedKleidungstyp = new KleidungstypBO();
         updatedKleidungstyp.setID(kleidungstyp.getID());
         updatedKleidungstyp.setBezeichnung(event.target.value);
@@ -105,12 +89,6 @@ class KleidungstypForm extends Component {
         kleidungstyp.getVerwendungen().forEach(style => {
             updatedKleidungstyp.addVerwendung(style);
         });
-
-        console.log("Nach Bezeichnungsänderung:", {
-            id: updatedKleidungstyp.getID(),
-            bezeichnung: updatedKleidungstyp.getBezeichnung()
-        });
-
         this.setState({ kleidungstyp: updatedKleidungstyp });
     };
 
@@ -147,9 +125,6 @@ class KleidungstypForm extends Component {
           kleiderschrank_id: kleiderschrankId,
           verwendungen: this.state.selectedStyleIds  // [5,7] etc.
         };
-
-        console.log("Request data being sent:", JSON.stringify(requestData, null, 2));
-
         // POST oder PUT?
         let result = null;
         if (requestData.id) {
