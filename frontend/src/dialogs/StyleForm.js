@@ -166,23 +166,22 @@ const handleSubmit = async () => {
         const api = KleiderschrankAPI.getAPI();
 
         const submitData = {
-            id: style?.getID(),
             name: formData.name,
-            features: [...new Set(formData.features.map(f => typeof f === 'object' ? f.getID() : f))],
+            features: formData.features.map(f => f.getID()),
             kleiderschrank_id: kleiderschrankId,
             constraints: {
-                kardinalitaeten: formData.constraints.kardinalitaeten.map(k => ({
+                kardinalitaeten: (formData.constraints?.kardinalitaeten || []).map(k => ({
                     type: 'kardinalitaet',
                     min_anzahl: parseInt(k.minAnzahl),
                     max_anzahl: parseInt(k.maxAnzahl),
                     bezugsobjekt_id: k.bezugsobjekt.id
                 })),
-                mutexe: formData.constraints.mutexe.map(m => ({
+                mutexe: (formData.constraints?.mutexe || []).map(m => ({
                     type: 'mutex',
                     bezugsobjekt1_id: m.bezugsobjekt1.id,
                     bezugsobjekt2_id: m.bezugsobjekt2.id
                 })),
-                implikationen: formData.constraints.implikationen.map(i => ({
+                implikationen: (formData.constraints?.implikationen || []).map(i => ({
                     type: 'implikation',
                     bezugsobjekt1_id: i.bezugsobjekt1.id,
                     bezugsobjekt2_id: i.bezugsobjekt2.id
@@ -370,6 +369,7 @@ const handleSubmit = async () => {
           variant="contained"
           color="primary"
           disableRipple
+          disabled={!formData.name}
         >
           {style ? 'Speichern' : 'Erstellen'}
         </Button>

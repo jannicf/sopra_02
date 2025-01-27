@@ -128,6 +128,13 @@ style = api.inherit('Style', bo, {
     'constraints': fields.Raw(attribute='_Style__constraints')
 })
 
+style_request = api.inherit('StyleRequest', bo, {
+    'name': fields.String(required=True),
+    'kleiderschrank_id': fields.Integer(required=True),
+    'features': fields.List(fields.Integer),
+    'constraints': fields.Raw()
+})
+
 
 @wardrobe_ns.route('/persons')
 @wardrobe_ns.response(500, 'Falls es zu einem Server-seitigen Fehler kommt.')
@@ -499,7 +506,7 @@ class StyleListOperations(Resource):
         return styles_list
 
     @wardrobe_ns.marshal_with(style, code=201)
-    @wardrobe_ns.expect(style)
+    @wardrobe_ns.expect(style_request)
     @secured
     def post(self):
         """Anlegen eines neuen Style-Objekts.
@@ -508,38 +515,45 @@ class StyleListOperations(Resource):
         Die Vergabe der ID erfolgt serverseitig.
         *Das korrigierte Objekt wird zurückgegeben.*
         """
-        adm = KleiderschrankAdministration()
+        try:
+            adm = KleiderschrankAdministration()
 
-        # Style-Objekt aus den Daten erstellen
-        proposal = Style.from_dict(api.payload)
-
-        if proposal is not None:
-            # Hier die kleiderschrank_id aus dem payload holen
+            name = api.payload.get('name')
             kleiderschrank_id = api.payload.get('kleiderschrank_id')
-            if kleiderschrank_id is None:
+            features = api.payload.get('features', [])
+
+            if not name:
+                return {'message': 'Name fehlt'}, 400
+
+            if not kleiderschrank_id:
                 return {'message': 'kleiderschrank_id fehlt'}, 400
 
-            # Style mit Namen UND kleiderschrank_id erstellen
-            sty = adm.create_style(proposal.get_name(), kleiderschrank_id)
+            # Style erstellen
+            style = adm.create_style(name, kleiderschrank_id)
 
-            # Features übernehmen
-            if proposal.get_features():
-                for feature_id in proposal.get_features():
+            # Features hinzufügen
+            if features:
+                for feature_id in features:
                     feature = adm.get_kleidungstyp_by_id(feature_id)
                     if feature:
-                        sty.add_feature(feature)
+                        style.add_feature(feature)
+                        feature.add_verwendung(style)
 
-             # Constraints direkt aus dem proposal übernehmen
-            if hasattr(proposal, '_Style__constraints'):
-                sty._Style__constraints = proposal._Style__constraints
+            # Constraints setzen
+            if 'constraints' in api.payload:
+                style.set_constraints(api.payload['constraints'])
 
-            # Style mit Features und Constraints speichern
-            adm.save_style(sty)
+            # Style mit allen Features und Constraints speichern
+            adm.save_style(style)
 
-            # Aktuellen Stand zurückgeben
-            return adm.get_style_by_id(sty.get_id()), 201
-        else:
-            return '', 500
+            # Aktualisierten Style zurückgeben
+            return style, 201
+
+        except Exception as e:
+            print(f"Fehler beim Erstellen des Styles: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {'message': str(e)}, 500
 
 
 @wardrobe_ns.route('/styles/<int:id>')

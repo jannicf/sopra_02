@@ -26,7 +26,10 @@ class Style(bo.BusinessObject):
         from server.bo.Kleidungstyp import Kleidungstyp  # Lokaler Import
         if not isinstance(kleidungstyp, Kleidungstyp):
             return
-        self.__features.append(kleidungstyp)
+        if kleidungstyp not in self.__features:
+            self.__features.append(kleidungstyp)
+            if not any(v.get_id() == self.get_id() for v in kleidungstyp.get_verwendungen()):
+                kleidungstyp.add_verwendung(self)
 
     def remove_feature(self, kleidungstyp):
         """Entfernt einen Kleidungstyp aus dem Style"""
@@ -112,6 +115,7 @@ class Style(bo.BusinessObject):
         obj = Style()
         obj.set_id(dictionary.get("id"))
         obj.set_name(dictionary["name"])
+        obj.set_kleiderschrank_id(dictionary.get("kleiderschrank_id"))
 
         # Features verarbeiten
         if "features" in dictionary:

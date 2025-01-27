@@ -39,7 +39,8 @@ class StyleMapper(Mapper):
             # Features einfügen
             features = style.get_features()
             if features:
-                for feature_id in features:
+                for feature in features:
+                    feature_id = feature if isinstance(feature, int) else feature.get_id()
                     command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s,%s)"
                     data = (style.get_id(), feature_id)
                     cursor.execute(command, data)
