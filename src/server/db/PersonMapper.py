@@ -2,48 +2,51 @@ from server.db.Mapper import Mapper
 from server.bo.Person import Person
 
 class PersonMapper(Mapper):
+
     def insert(self, person):
-        try:
-            cursor = self._cnx.cursor()
-            if person.get_kleiderschrank():
-                person.get_kleiderschrank().get_name()
+        """Einfügen eines Person-Objekts in die Datenbank.
+                Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.
+                berichtigt.
 
-            # ID generieren
-            cursor.execute("SELECT MAX(id) AS maxid FROM person")
-            tuples = cursor.fetchall()
+                :param person das zu speichernde Objekt
+                :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
+                """
+        cursor = self._cnx.cursor()
+        if person.get_kleiderschrank():
+            person.get_kleiderschrank().get_name()
 
-            for (maxid) in tuples:
-                if maxid[0] is not None:
-                    person.set_id(maxid[0] + 1)
-                else:
-                    person.set_id(1)
+        # ID generieren
+        cursor.execute("SELECT MAX(id) AS maxid FROM person")
+        tuples = cursor.fetchall()
 
-            # Person in DB einfügen
-            command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
-            data = (person.get_id(), person.get_vorname(), person.get_nachname(),
-                    person.get_nickname(), person.get_google_id())
-            cursor.execute(command, data)
+        for (maxid) in tuples:
+            if maxid[0] is not None:
+                person.set_id(maxid[0] + 1)
+            else:
+                person.set_id(1)
 
-            # Kleiderschrank erstellen wenn vorhanden
-            if person.get_kleiderschrank():
-                from src.server.db.KleiderschrankMapper import KleiderschrankMapper
+        # Person in DB einfügen
+        command = "INSERT INTO person (id, vorname, nachname, nickname, google_id) VALUES (%s,%s,%s,%s,%s)"
+        data = (person.get_id(), person.get_vorname(), person.get_nachname(),
+                person.get_nickname(), person.get_google_id())
+        cursor.execute(command, data)
 
-                kleiderschrank = person.get_kleiderschrank()
-                kleiderschrank.set_eigentuemer(person)
+        # Kleiderschrank erstellen wenn vorhanden
+        if person.get_kleiderschrank():
+            from src.server.db.KleiderschrankMapper import KleiderschrankMapper
 
-                with KleiderschrankMapper() as kleiderschrank_mapper:
-                    saved_kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
-                    person.set_kleiderschrank(saved_kleiderschrank)
+            kleiderschrank = person.get_kleiderschrank()
+            kleiderschrank.set_eigentuemer(person)
 
-            self._cnx.commit()
-            cursor.close()
-            return person
+            with KleiderschrankMapper() as kleiderschrank_mapper:
+                saved_kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
+                person.set_kleiderschrank(saved_kleiderschrank)
 
-        except Exception as e:
-            print(f"FEHLER bei Person-Erstellung: {str(e)}")
-            self._cnx.rollback()
-            cursor.close()
-            raise e
+        self._cnx.commit()
+        cursor.close()
+
+        return person
+
 
     def update(self, person):
         """Wiederholtes Schreiben eines Person-Objekts in die Datenbank.

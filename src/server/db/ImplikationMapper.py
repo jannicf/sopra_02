@@ -160,7 +160,7 @@ class ImplikationMapper(Mapper):
             implikation = Implikation()
             implikation.set_id(id)
 
-            # Lädt die zugehörigen Kleidungstyp-Objekte separat
+            # Lädt die zugehörigen Kleidungstyp-Objekte separat aus der Datenbank
             with KleidungstypMapper() as kleidungstyp_mapper:
                 bezugsobjekt1 = kleidungstyp_mapper.find_by_id(bezugsobjekt1_id)
                 bezugsobjekt2 = kleidungstyp_mapper.find_by_id(bezugsobjekt2_id)

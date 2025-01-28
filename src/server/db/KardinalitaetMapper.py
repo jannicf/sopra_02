@@ -111,7 +111,7 @@ class KardinalitaetMapper(Mapper):
 
 
     def find_all_bezugsobjekt(self, bezugsobjekt):
-        """Suchen aller Kardinalitäten mit einem bestimmten Bezugsobjekt.
+        """Suchen aller Kardinalitaeten mit einem bestimmten Bezugsobjekt.
 
             :param bezugsobjekt: Das Bezugsobjekt nach dem gesucht werden soll
             :return Eine Liste mit Kardinalitaets-Objekten, die dem übergebenen Bezugsobjekt
@@ -146,7 +146,7 @@ class KardinalitaetMapper(Mapper):
         return result
 
     def find_all_style(self, style):
-        """Suchen aller Kardinalitäten, die einem bestimmten Style zugeordnet sind.
+        """Suchen aller Kardinalitaeten, die einem bestimmten Style zugeordnet sind.
 
         :param style: Das Style-Objekt, nach dessen Kardinalitäten gesucht werden soll
         :return Eine Liste mit Kardinalitaets-Objekten, die dem übergebenen Style
@@ -169,7 +169,7 @@ class KardinalitaetMapper(Mapper):
                 bezugsobjekt = kleidungstyp_mapper.find_by_id(bezugsobjekt_id)
             kardinalitaet.set_bezugsobjekt(bezugsobjekt)
 
-            # Style setzen (wir haben es ja schon)
+            # Style setzen
             kardinalitaet.set_style(style)
 
             result.append(kardinalitaet)

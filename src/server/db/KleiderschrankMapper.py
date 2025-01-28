@@ -31,7 +31,7 @@ class KleiderschrankMapper(Mapper):
                 """
         cursor = self._cnx.cursor()
         try:
-            # Hauptdaten des Kleiderschranks aktualisieren, inklusive Eigentümer
+            # Hauptdaten des Kleiderschranks aktualisieren
             command = "UPDATE kleiderschrank SET name = %s, eigentuemer_id = %s WHERE id = %s"
             data = (kleiderschrank.get_name(),
                     kleiderschrank.get_eigentuemer().get_id(),
@@ -42,7 +42,6 @@ class KleiderschrankMapper(Mapper):
             return kleiderschrank
 
         except Exception as e:
-            print(f"Mapper: Fehler beim Update: {str(e)}")
             self._cnx.rollback()
             raise e
 

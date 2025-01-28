@@ -4,6 +4,7 @@ from server.bo.Kleidungsstueck import Kleidungsstueck
 from server.bo.Style import Style
 
 class OutfitMapper(Mapper):
+
     def insert(self, outfit):
         """Ein Outfit-Objekt in die Datenbaknk einfügen,
             und den Primärschlüssel des übergebenen Objekts prüfen,

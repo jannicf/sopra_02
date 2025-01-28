@@ -2,8 +2,8 @@ from server.db.Mapper import Mapper
 from server.bo.Kleidungsstueck import Kleidungsstueck
 from server.db.KleidungstypMapper import KleidungstypMapper
 
-
 class KleidungsstueckMapper(Mapper):
+
     def insert(self, kleidungsstueck):
         """Einfügen eines Kleidungsstück-Objekts in die Datenbank.
         Dabei wird auch der Primärschlüssel des übergebenen Objekts geprüft und ggf.

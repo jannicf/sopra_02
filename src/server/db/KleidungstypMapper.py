@@ -6,8 +6,7 @@ from server.bo.Style import Style
 direkt aufrufen, um die benötigten Daten zu laden bzw. zu verändern. Da dies jedoch zu einem
 Verbindungsfehler der Datenbank führt, weil die Mapper sich immer wieder selbst aufrufen, wurde der Aufruf 
 der Mapper durch eine ausführlichere Implementierung mit SQL-Statements ersetzt, was zwar aufwendiger
-daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht."""
-
+daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht und denselben Effekt hat."""
 
 class KleidungstypMapper(Mapper):
 
@@ -20,34 +19,33 @@ class KleidungstypMapper(Mapper):
             :return das bereits übergebene Objekt, jedoch mit ggf. korrigierter ID.
         """
         cursor = self._cnx.cursor()
-        try:
-            # ID generieren
-            cursor.execute("SELECT MAX(id) AS maxid FROM kleidungstyp")
-            tuples = cursor.fetchall()
-            maxid = tuples[0][0]
-            kleidungstyp.set_id(maxid + 1 if maxid is not None else 1)
+        cursor.execute("SELECT MAX(id) AS maxid FROM kleidungstyp")
+        tuples = cursor.fetchall()
 
-            # Kleidungstyp einfügen
-            command = "INSERT INTO kleidungstyp (id, bezeichnung, kleiderschrank_id) VALUES (%s, %s, %s)"
-            data = (kleidungstyp.get_id(), kleidungstyp.get_bezeichnung(), kleidungstyp.get_kleiderschrank_id())
+        for (maxid) in tuples:
+            if maxid[0] is not None:
+                """Wenn wir eine maximale ID festellen konnten, zählen wir diese
+                um 1 hoch und weisen diesen Wert als ID dem Kleidungsstück-Objekt zu."""
+                kleidungstyp.set_id(maxid[0] + 1)
+            else:
+                """Wenn wir KEINE maximale ID feststellen konnten, dann gehen wir
+                davon aus, dass die Tabelle leer ist und wir mit der ID 1 beginnen können."""
+                kleidungstyp.set_id(1)
+
+        command = "INSERT INTO kleidungstyp (id, bezeichnung, kleiderschrank_id) VALUES (%s,%s,%s)"
+        data = (kleidungstyp.get_id(), kleidungstyp.get_bezeichnung(), kleidungstyp.get_kleiderschrank_id())
+        cursor.execute(command, data)
+
+        # Verwendungen in Zwischentabelle einfügen
+        for verwendung in kleidungstyp.get_verwendungen():
+            command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s,%s)"
+            data = (verwendung.get_id(), kleidungstyp.get_id())
             cursor.execute(command, data)
 
-            # Verwendungen einfügen
-            verwendungen = kleidungstyp.get_verwendungen()
-            for style_obj in verwendungen:
-                style_id = style_obj.get_id()
-                command = "INSERT INTO style_kleidungstyp (style_id, kleidungstyp_id) VALUES (%s, %s)"
-                cursor.execute(command, (style_id, kleidungstyp.get_id()))
+        self._cnx.commit()
+        cursor.close()
 
-            self._cnx.commit()
-            return kleidungstyp
-
-        except Exception as e:
-            print(f"Error in KleidungstypMapper.insert: {str(e)}")
-            self._cnx.rollback()
-            raise e
-        finally:
-            cursor.close()
+        return kleidungstyp
 
     def update(self, kleidungstyp):
         """
@@ -58,61 +56,48 @@ class KleidungstypMapper(Mapper):
         :raises: Exception wenn ein Datenbankfehler auftritt
         """
         cursor = self._cnx.cursor()
-        try:
 
-            # Hauptobjekt aktualisieren
-            command = "UPDATE kleidungstyp SET bezeichnung=%s, kleiderschrank_id=%s WHERE id=%s"
-            data = (kleidungstyp.get_bezeichnung(),
-                    kleidungstyp.get_kleiderschrank_id(),
-                    kleidungstyp.get_id())
-            cursor.execute(command, data)
-            print(f"Hauptdaten aktualisiert")
+        # Hauptobjekt aktualisieren
+        command = "UPDATE kleidungstyp SET bezeichnung=%s, kleiderschrank_id=%s WHERE id=%s"
+        data = (kleidungstyp.get_bezeichnung(),
+                kleidungstyp.get_kleiderschrank_id(),
+                kleidungstyp.get_id())
+        cursor.execute(command, data)
 
-            # Vorhandene Style-Verknüpfungen laden
+        # Vorhandene Style-Verknüpfungen laden
+        cursor.execute("""
+                        SELECT style_id 
+                        FROM style_kleidungstyp 
+                        WHERE kleidungstyp_id = %s
+                    """, (kleidungstyp.get_id(),))
+        existing_style_ids = {row[0] for row in cursor.fetchall()}
+
+        # Neue Style-IDs aus dem Kleidungstyp-Objekt
+        new_style_ids = {verwendung.get_id() for verwendung in kleidungstyp.get_verwendungen()}
+
+        # Zu löschende Styles
+        styles_to_delete = existing_style_ids - new_style_ids
+        # Neu hinzuzufügende Styles
+        styles_to_add = new_style_ids - existing_style_ids
+
+        # Nicht mehr benötigte Verknüpfungen löschen
+        if styles_to_delete:
+            delete_command = """
+                            DELETE FROM style_kleidungstyp 
+                            WHERE kleidungstyp_id = %s AND style_id IN ({})
+                        """.format(','.join(['%s'] * len(styles_to_delete)))
+            cursor.execute(delete_command, (kleidungstyp.get_id(), *styles_to_delete))
+
+        # Neue Verknüpfungen hinzufügen
+        for style_id in styles_to_add:
             cursor.execute("""
-                    SELECT style_id 
-                    FROM style_kleidungstyp 
-                    WHERE kleidungstyp_id = %s
-                """, (kleidungstyp.get_id(),))
-            existing_style_ids = {row[0] for row in cursor.fetchall()}
-            print(f"Vorhandene Style-IDs: {existing_style_ids}")
+                            INSERT INTO style_kleidungstyp (kleidungstyp_id, style_id) 
+                            VALUES (%s, %s)
+                        """, (kleidungstyp.get_id(), style_id))
 
-            # Neue Style-IDs aus dem Kleidungstyp-Objekt
-            new_style_ids = {verwendung.get_id() for verwendung in kleidungstyp.get_verwendungen()}
-            print(f"Neue Style-IDs: {new_style_ids}")
-
-            # Zu löschende Styles (in existing aber nicht in new)
-            styles_to_delete = existing_style_ids - new_style_ids
-            # Neu hinzuzufügende Styles (in new aber nicht in existing)
-            styles_to_add = new_style_ids - existing_style_ids
-
-            # Nicht mehr benötigte Verknüpfungen löschen
-            if styles_to_delete:
-                delete_command = """
-                        DELETE FROM style_kleidungstyp 
-                        WHERE kleidungstyp_id = %s AND style_id IN ({})
-                    """.format(','.join(['%s'] * len(styles_to_delete)))
-                cursor.execute(delete_command, (kleidungstyp.get_id(), *styles_to_delete))
-                print(f"Gelöschte Style-Verknüpfungen: {styles_to_delete}")
-
-            # Neue Verknüpfungen hinzufügen
-            for style_id in styles_to_add:
-                cursor.execute("""
-                        INSERT INTO style_kleidungstyp (kleidungstyp_id, style_id) 
-                        VALUES (%s, %s)
-                    """, (kleidungstyp.get_id(), style_id))
-                print(f"Neue Style-Verknüpfung hinzugefügt: {style_id}")
-
-            self._cnx.commit()
-            print(f"Update erfolgreich abgeschlossen")
-            return kleidungstyp
-
-        except Exception as e:
-            print(f"Fehler beim Update des Kleidungstyps: {str(e)}")
-            self._cnx.rollback()
-            raise e
-        finally:
-            cursor.close()
+        self._cnx.commit()
+        cursor.close()
+        return kleidungstyp
 
     def delete(self, kleidungstyp):
         """
@@ -177,12 +162,13 @@ class KleidungstypMapper(Mapper):
                     kleidungstyp.add_verwendung(style)
 
                 result = kleidungstyp
+        except IndexError:
+            """Der IndexError wird oben beim Zugriff auf tuples[0] auftreten, wenn der vorherige SELECT-Aufruf
+            keine Tupel liefert, sondern tuples = cursor.fetchall() eine leere Sequenz zurück gibt."""
+            result = None
 
-        except Exception as e:
-            print(f"Fehler in find_by_id: {str(e)}")
-            raise e
-        finally:
-            cursor.close()
+        self._cnx.commit()
+        cursor.close()
 
         return result
 
@@ -196,21 +182,16 @@ class KleidungstypMapper(Mapper):
         result = None
         cursor = self._cnx.cursor()
 
-        try:
-            # Nur die ID abfragen
-            command = "SELECT id FROM kleidungstyp WHERE bezeichnung=%s"
-            cursor.execute(command, (bezeichnung,))
-            tuples = cursor.fetchall()
+        command = "SELECT id FROM kleidungstyp WHERE bezeichnung=%s"
+        cursor.execute(command, (bezeichnung,))
+        tuples = cursor.fetchall()
 
-            if tuples:
-                (id,) = tuples[0]
-                # Vollständiges Objekt über find_by_id laden
-                result = self.find_by_id(id)
+        if tuples:
+            (id,) = tuples[0]
+            result = self.find_by_id(id)
 
-        except Exception as e:
-            raise e
-        finally:
-            cursor.close()
+        self._cnx.commit()
+        cursor.close()
 
         return result
 
@@ -225,45 +206,41 @@ class KleidungstypMapper(Mapper):
         result = []
         cursor = self._cnx.cursor()
 
-        try:
-            # Basis-Daten der Kleidungstypen laden
+        # Basis-Daten der Kleidungstypen laden
+        cursor.execute("""
+                SELECT id, bezeichnung, kleiderschrank_id 
+                FROM kleidungstyp 
+                WHERE kleiderschrank_id = %s
+            """, (kleiderschrank_id,))
+
+        tuples = cursor.fetchall()
+
+        for (id, bezeichnung, k_id) in tuples:
+            kleidungstyp = Kleidungstyp()
+            kleidungstyp.set_id(id)
+            kleidungstyp.set_bezeichnung(bezeichnung)
+            kleidungstyp.set_kleiderschrank_id(k_id)
+
+            # Styles/Verwendungen für diesen Kleidungstyp laden
             cursor.execute("""
-                    SELECT id, bezeichnung, kleiderschrank_id 
-                    FROM kleidungstyp 
-                    WHERE kleiderschrank_id = %s
-                """, (kleiderschrank_id,))
+                    SELECT s.id, s.name 
+                    FROM style s
+                    JOIN style_kleidungstyp sk ON s.id = sk.style_id
+                    WHERE sk.kleidungstyp_id = %s
+                """, (id,))
 
-            tuples = cursor.fetchall()
+            style_tuples = cursor.fetchall()
 
-            for (id, bezeichnung, k_id) in tuples:
-                kleidungstyp = Kleidungstyp()
-                kleidungstyp.set_id(id)
-                kleidungstyp.set_bezeichnung(bezeichnung)
-                kleidungstyp.set_kleiderschrank_id(k_id)
+            for (style_id, style_name) in style_tuples:
+                style = Style()
+                style.set_id(style_id)
+                style.set_name(style_name)
+                kleidungstyp.add_verwendung(style)
 
-                # Styles/Verwendungen für diesen Kleidungstyp laden
-                cursor.execute("""
-                        SELECT s.id, s.name 
-                        FROM style s
-                        JOIN style_kleidungstyp sk ON s.id = sk.style_id
-                        WHERE sk.kleidungstyp_id = %s
-                    """, (id,))
+            result.append(kleidungstyp)
 
-                style_tuples = cursor.fetchall()
-
-                for (style_id, style_name) in style_tuples:
-                    style = Style()
-                    style.set_id(style_id)
-                    style.set_name(style_name)
-                    kleidungstyp.add_verwendung(style)
-
-                result.append(kleidungstyp)
-
-        except Exception as e:
-            print(f"Fehler in find_by_kleiderschrank_id: {str(e)}")
-            raise e
-        finally:
-            cursor.close()
+        self._cnx.commit()
+        cursor.close()
 
         return result
 

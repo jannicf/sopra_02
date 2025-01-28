@@ -7,7 +7,7 @@ from server.bo.Kleidungstyp import Kleidungstyp
 direkt aufrufen, um die benötigten Daten zu laden bzw. zu verändern. Da dies jedoch zu einem
 Verbindungsfehler der Datenbank führt, da die Mapper sich immer wieder selbst aufrufen, wurden der Aufruf 
 der Mapper durch eine ausführlichere Implementierung mit SQL-Statements ersetzt, was zwar aufwendiger
-daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht."""
+daherkommt, aber das Problem der zu vielen aufgebauten Datenbankverbindungen umgeht und denselben Effekt hat."""
 
 class StyleMapper(Mapper):
     def insert(self, style):
