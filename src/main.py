@@ -12,19 +12,23 @@ from server.bo.Style import Style
 
 from SecurityDecorator import secured
 
+#build-Ordner als Quelle für statische/kompilierte Dateien (HTML, CSS, JS, Icon) verwenden
 app = Flask(__name__, static_folder='build', static_url_path='')
 
+#Startpunkt der Anwendung
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
 
-
+#React übernimmt das Routing, wenn Flask einen Fehler werfen würde
 @app.errorhandler(404)
 def not_found():
     return app.send_static_file('index.html')
 
-CORS(app, resources=r'/wardrobe/*')  # Erlaubt CORS für alle Wardrobe-Endpoints
+#erlaubt CORS für alle Wardrobe-Endpoints
+CORS(app, resources=r'/wardrobe/*')
 
+#Konfiguration der API mit Flask-RestX
 api = Api(app, version='1.0', title='Digitaler Kleiderschrank API',
           description='Eine API zur Verwaltung digitaler Kleiderschränke',
           validate=True)

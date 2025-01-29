@@ -241,11 +241,6 @@ class PersonMapper(Mapper):
                     if kleiderschrank:
                         person.set_kleiderschrank(kleiderschrank)
                         kleiderschrank.set_eigentuemer(person)  # Wichtig: Beidseitige Beziehung setzen
-                        print(f"PersonMapper: Kleiderschrank {kleiderschrank.get_name()} gefunden und zugewiesen")
-                    else:
-                        print("PersonMapper: Kleiderschrank konnte nicht vollständig geladen werden")
-            else:
-                print("PersonMapper: Kein Kleiderschrank für diese Person gefunden")
 
             result = person
 

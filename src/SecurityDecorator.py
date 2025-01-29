@@ -28,7 +28,7 @@ def secured(function):
 
                 if claims is not None:
                     google_user_id = claims.get("user_id")
-                    print(request.method, request.path, "angefragt durch:", google_user_id)
+                    #print(request.method, request.path, "angefragt durch:", google_user_id)
 
                     objects = function(*args, **kwargs)
                     return objects

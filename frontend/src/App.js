@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {Component} from 'react';
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { Box, ThemeProvider, Container, CssBaseline, CircularProgress } from '@mui/material';
@@ -31,7 +31,7 @@ const LoadingIndicator = () => (
     </Box>
 );
 
-class App extends React.Component {
+class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
