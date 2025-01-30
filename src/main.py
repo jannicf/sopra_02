@@ -12,23 +12,23 @@ from server.bo.Style import Style
 
 from SecurityDecorator import secured
 
-#build-Ordner als Quelle für statische/kompilierte Dateien (HTML, CSS, JS, Icon) verwenden
+# build-Ordner wird als Quelle für statische/kompilierte Dateien (HTML, CSS, JS, Icon) verwendet
 app = Flask(__name__, static_folder='build', static_url_path='')
 
-#Startpunkt der Anwendung
+# Startpunkt der Anwendung
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
 
-#React übernimmt das Routing, wenn Flask einen Fehler werfen würde
+# React übernimmt das Routing, wenn Flask einen Fehler werfen würde
 @app.errorhandler(404)
 def not_found():
     return app.send_static_file('index.html')
 
-#erlaubt CORS für alle Wardrobe-Endpoints
+# erlaubt CORS für alle Wardrobe-Endpoints
 CORS(app, resources=r'/wardrobe/*')
 
-#Konfiguration der API mit Flask-RestX
+# Konfiguration der API mit Flask-RestX
 api = Api(app, version='1.0', title='Digitaler Kleiderschrank API',
           description='Eine API zur Verwaltung digitaler Kleiderschränke',
           validate=True)
@@ -73,7 +73,6 @@ kleidungstyp = api.inherit('Kleidungstyp', bo, {
 
 kleidungstyp_request = api.inherit('KleidungstypRequest', bo, {
     'bezeichnung': fields.String(attribute='_Kleidungstyp__bezeichnung', required=True),
-    # Hier nur Integer-Liste:
     'verwendungen': fields.List(fields.Integer, description='Liste von Style-IDs'),
     'kleiderschrank_id': fields.Integer(description='ID des zugehörigen Kleiderschranks')
 })
@@ -152,14 +151,13 @@ class PersonListOperations(Resource):
     def post(self):
         """Anlegen eines neuen Personen-Objekts."""
 
-
         adm = KleiderschrankAdministration()
 
         proposal = Person.from_dict(api.payload)
 
         if proposal is not None:
             try:
-                # Erst die Person erstellen
+                # Erst wird die Person erstellt
                 p = adm.create_person(
                     proposal.get_vorname(),
                     proposal.get_nachname(),
@@ -179,7 +177,6 @@ class PersonListOperations(Resource):
                         # Person mit dem neuen Kleiderschrank speichern
                         adm.save_person(p)
                     else:
-                        print("Fehler: Kleiderschrank konnte nicht erstellt werden")
                         return '', 500
 
                 return p, 200
@@ -253,7 +250,7 @@ class PersonsByNameOperations(Resource):
     def get(self, nachname):
         """ Auslesen von Personen-Objekten, die durch den Nachnamen bestimmt werden.
 
-        Die auszulesenden Objekte werden durch ```lastname``` in dem URI bestimmt.
+        Die auszulesenden Objekte werden durch ```nachname``` in dem URI bestimmt.
         """
         adm = KleiderschrankAdministration()
         persons = adm.get_person_by_nachname(nachname)
@@ -294,8 +291,6 @@ class WardrobeListOperations(Resource):
         @secured
         def post(self):
             try:
-                print("Empfangene Payload:", api.payload)
-
                 adm = KleiderschrankAdministration()
 
                 # Erst die Person laden
@@ -303,16 +298,11 @@ class WardrobeListOperations(Resource):
                 if not eigentuemer:
                     return {'message': 'Eigentümer nicht gefunden'}, 404
 
-                print("Gefundener Eigentümer:", eigentuemer)
-                print("Eigentümer ID:", eigentuemer.get_id())
-
                 # Kleiderschrank erstellen
                 result = adm.create_kleiderschrank(
                     api.payload['name'],
                     eigentuemer
                 )
-                print("Kleiderschrank erstellt:", result)
-                print("Kleiderschrank ID:", result.get_id())
 
                 return result, 201
 
@@ -387,13 +377,6 @@ class PersonsByGoogleIdOperations(Resource):
         adm = KleiderschrankAdministration()
         person = adm.get_person_by_google_id(google_id)
 
-        # Neue Debug-Ausgaben
-        if person:
-            print(f"Backend: Person hat Kleiderschrank: {person.getKleiderschrank()}")
-            if person.getKleiderschrank():
-                print(f"Backend: Kleiderschrank Name: {person.getKleiderschrank().getName()}")
-                print(f"Backend: Kleiderschrank ID: {person.getKleiderschrank().getId()}")
-
         if person is None:
             return '', 204
         return person
@@ -423,10 +406,10 @@ class ClothesListOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Holt zuerst den Typ als vollständiges Objekt
+        # Erst den Typ als vollständiges Objekt holen
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziert das payload so dass es ein Typ-Objekt enthält
+        # Das payload so bearbeiten, dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -478,10 +461,10 @@ class ClothingItemOperations(Resource):
         """
         adm = KleiderschrankAdministration()
 
-        # Holt zuerst den Typ als vollständiges Objekt
+        # Erst den Typ als vollständiges Objekt holen
         typ = adm.get_kleidungstyp_by_id(api.payload['typ_id'])
 
-        # Modifiziert das payload so dass es ein Typ-Objekt enthält
+        # Das payload so bearbeiten, dass es ein Typ-Objekt enthält
         modified_payload = api.payload.copy()
         modified_payload['typ'] = typ
 
@@ -718,7 +701,7 @@ class ClothingTypeOperations(Resource):
         existing_type.set_bezeichnung(data['bezeichnung'])
         existing_type.set_kleiderschrank_id(data['kleiderschrank_id'])
 
-        # Alte Verwendungen raus, neue rein
+        # Neue Verwendungen hinzufügen
         existing_type._Kleidungstyp__verwendungen = []
         for style_id in data.get('verwendungen', []):
             style_obj = adm.get_style_by_id(style_id)
@@ -1024,26 +1007,24 @@ class ImplicationConstraintOperations(Resource):
         ic = Implikation.from_dict(payload)
 
         if ic is not None:
-            # Setzt die ID des Constraints
+            # Die ID des Constraints setzen
             ic.set_id(id)
 
-            # Lädt den Style basierend auf der Style-ID aus dem Payload
+            # Den Style basierend auf der Style-ID aus dem Payload laden
             style_id = payload.get('style')
             style = adm.get_style_by_id(style_id)
 
             if not style:
                 return '', 404
 
-            # Setzt den Style in der Implikation
+            # Den Style in der Implikation setzen
             ic.set_style(style)
 
-            # Speichert die aktualisierte Implikation
+            # Die aktualisierte Implikation speichern
             adm.save_implikation(ic)
 
-            # Erfolgreiche Antwort
             return ic, 200
         else:
-            # Fehler beim Verarbeiten des Payloads
             return '', 400
 
 
