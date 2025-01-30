@@ -76,15 +76,15 @@ class ProfilView extends Component {
 
     handleCreateDialogClosed = async (createdPerson) => {
         if (createdPerson) {
-            await this.loadPerson();
-            this.setState({
-                showCreateDialog: false,
-                error: null
-            });
+            // Warten damit die Backend-Daten vollständig gespeichert sind
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Seite neu laden und zur Kleiderschrank-Ansicht navigieren
+            window.location.href = '/kleiderschrank';
         } else {
             this.setState({showCreateDialog: false});
         }
-    }
+}
 
     handleEditDialogClosed = async (editedPerson) => {
     if (editedPerson) {

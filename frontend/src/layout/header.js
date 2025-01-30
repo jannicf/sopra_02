@@ -15,7 +15,7 @@ class Header extends Component {
         };
     }
     // Eventhandler für Auswahl eines neuen Tabs
-    handleTabChange = (e, newIndex) => {
+    handleTabChange = (newIndex) => {
         this.setState({
             tabindex: newIndex
         })
@@ -156,7 +156,7 @@ class Header extends Component {
                     </Box>
                     )}
 
-                    {/* Profile-Button */}
+                    {/* Profil-Button */}
                     {user && <ProfileDropDown user={user} onLogout={this.props.onLogout} />}
                 </Box>
             </Paper>
