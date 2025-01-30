@@ -17,7 +17,13 @@ class KleiderschrankMapper(Mapper):
                 kleiderschrank.set_id(1)
 
         command = "INSERT INTO kleiderschrank (id, eigentuemer_id, name) VALUES (%s,%s,%s)"
-        data = (kleiderschrank.get_id(), kleiderschrank.get_eigentuemer().get_id(), kleiderschrank.get_name())
+
+        # Sicherstellen dass der Eigentümer existiert
+        eigentuemer_id = None
+        if kleiderschrank.get_eigentuemer():
+            eigentuemer_id = kleiderschrank.get_eigentuemer().get_id()
+
+        data = (kleiderschrank.get_id(), eigentuemer_id, kleiderschrank.get_name())
         cursor.execute(command, data)
 
         self._cnx.commit()

@@ -158,30 +158,36 @@ class PersonListOperations(Resource):
         proposal = Person.from_dict(api.payload)
 
         if proposal is not None:
-            adm = KleiderschrankAdministration()
-
-            # Erst Person erstellen
-            p = adm.create_person(
-                proposal.get_vorname(),
-                proposal.get_nachname(),
-                proposal.get_nickname(),
-                proposal.get_google_id()
-            )
-
-            # Wenn ein Kleiderschrank im Proposal ist, diesen auch erstellen
-            if proposal.get_kleiderschrank():
-                kleiderschrank = adm.create_kleiderschrank(
-                    proposal.get_kleiderschrank().get_name(),
-                    p  # Die gerade erstellte Person als Eigentümer
+            try:
+                # Erst die Person erstellen
+                p = adm.create_person(
+                    proposal.get_vorname(),
+                    proposal.get_nachname(),
+                    proposal.get_nickname(),
+                    proposal.get_google_id()
                 )
-                # Den erstellten Kleiderschrank der Person zuweisen
-                p.set_kleiderschrank(kleiderschrank)
-                # Person mit dem neuen Kleiderschrank speichern
-                adm.save_person(p)
 
-            return p, 200
+                # Wenn ein Kleiderschrank im Proposal ist, diesen auch erstellen
+                if 'kleiderschrank' in api.payload and api.payload['kleiderschrank']:
+                    kleiderschrank = adm.create_kleiderschrank(
+                        api.payload['kleiderschrank']['name'],
+                        p  # Die gerade erstellte Person als Eigentümer
+                    )
+                    if kleiderschrank:
+                        # Den erstellten Kleiderschrank der Person zuweisen
+                        p.set_kleiderschrank(kleiderschrank)
+                        # Person mit dem neuen Kleiderschrank speichern
+                        adm.save_person(p)
+                    else:
+                        print("Fehler: Kleiderschrank konnte nicht erstellt werden")
+                        return '', 500
+
+                return p, 200
+
+            except Exception as e:
+                print("Fehler beim Erstellen der Person:", str(e))
+                return '', 500
         else:
-            # Wenn irgendetwas schiefgeht, dann geben wir nichts zurück und werfen einen Server-Fehler.
             return '', 500
 
 
