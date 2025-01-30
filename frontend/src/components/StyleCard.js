@@ -28,10 +28,9 @@ loadKleidungstypen = async () => {
         this.props.onEdit(this.props.style);
     };
 
-    handleDeleteClick = (e) => {
-        e.stopPropagation(); // Stoppt das Event hier direkt
-        this.props.onDelete(this.props.style);
-    };
+    handleDeleteClick = () => {
+        this.setState({ showDeleteDialog: true });
+    }
 
     handleCloseDetails = () => {
         this.setState({
