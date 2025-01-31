@@ -61,7 +61,6 @@ class Person(bo.BusinessObject):
 
     @staticmethod
     def from_dict(dictionary=dict()):
-        print("Person.from_dict input:", dictionary)  # Debug print
         obj = Person()
 
         if "id" in dictionary:

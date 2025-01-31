@@ -65,6 +65,7 @@ class KleidungstypForm extends Component {
                 kleidungstyp: updatedKleidungstyp,
                 selectedStyleIds: verwendungen.map(style => style.getID())
         });
+        this.loadStyles();
     }
 }
 
