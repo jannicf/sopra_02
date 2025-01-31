@@ -38,12 +38,10 @@ class KleiderschrankAPI {
     // URLs für Person
     #getPersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #addPersonURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
-    #getPersonsURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
     #updatePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #deletePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
-
-    #searchPersonByNameURL = (name) => `${this.#KleiderschrankServerBaseURL}/persons-by-name/${name}`;
     #getPersonByGoogleIdURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons-by-google-id/${id}`;
+
     // URLs für Kleiderschrank (Wardrobe)
     #getKleiderschrankURL = (id) => `${this.#KleiderschrankServerBaseURL}/wardrobes/${id}`;
     #getKleiderschraenkeURL = () => `${this.#KleiderschrankServerBaseURL}/wardrobes`;
@@ -81,7 +79,6 @@ class KleiderschrankAPI {
     `${this.#KleiderschrankServerBaseURL}/outfits/by-kleiderschrank/${kleiderschrankId}`;
     #addOutfitURL = () => `${this.#KleiderschrankServerBaseURL}/outfits`;
     #updateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
-    #deleteOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
     #validateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/validate/${id}`;
     #getPossibleOutfitsForStyleURL = (styleId, wardrobeId) => `${this.#KleiderschrankServerBaseURL}/styles/${styleId}/wardrobes/${wardrobeId}/possible-outfits`;
     #getPossibleOutfitCompletionsURL = (styleId, kleidungsstueckId) => `${this.#KleiderschrankServerBaseURL}/styles/${styleId}/outfits/complete/${kleidungsstueckId}`;
@@ -102,9 +99,7 @@ class KleiderschrankAPI {
     #updateImplikationURL = (id) => `${this.#KleiderschrankServerBaseURL}/implicationconstraints/${id}`;
     #deleteImplikationURL = (id) => `${this.#KleiderschrankServerBaseURL}/implicationconstraints/${id}`;
 
-    /*
-     * Erweiterte fetch Methode, die auch bei HTTP Fehlern einen Fehler wirft
-     */
+    // Erweiterte fetch Methode, die auch bei HTTP Fehlern einen Fehler wirft
     #fetchAdvanced = (url, init) => fetch(url, init)
         .then(res => {
             if (!res.ok) {
@@ -132,18 +127,6 @@ class KleiderschrankAPI {
                 }
                 return null;
             });
-    }
-
-
-    getPerson(id) {
-        return this.#fetchAdvanced(this.#getPersonURL(id), {
-            method: 'GET'
-        }).then(responseJSON => {
-                let personBO = PersonBO.fromJSON(responseJSON)[0];
-                return new Promise(function (resolve) {
-                    resolve(personBO);
-                })
-            })
     }
 
     addPerson(personBO) {
@@ -175,7 +158,7 @@ class KleiderschrankAPI {
     }
 
     updatePerson(personBO) {
-    // Erstelle ein neues Objekt mit den benötigten Daten
+    // Erstellt ein neues Objekt mit den benötigten Daten
     const requestData = {
         id: personBO.getID(),
         vorname: personBO.getVorname(),
@@ -212,7 +195,7 @@ class KleiderschrankAPI {
         });
     }
 
-    // Kleiderschrank-bezogene Methoden
+// Kleiderschrank-bezogene Methoden
     getKleiderschrank(id) {
         return this.#fetchAdvanced(this.#getKleiderschrankURL(id))
             .then(responseJSON => {
@@ -222,37 +205,8 @@ class KleiderschrankAPI {
                 })
             })
     }
-
-    getKleiderschraenke() {
-        return this.#fetchAdvanced(this.#getKleiderschraenkeURL())
-            .then(responseJSON => {
-                let kleiderschrankBOs = KleiderschrankBO.fromJSON(responseJSON);
-                return new Promise(function (resolve) {
-                    resolve(kleiderschrankBOs);
-                })
-            })
-    }
-
-    addKleiderschrank(kleiderschrankBO) {
-        return this.#fetchAdvanced(this.#addKleiderschrankURL(), {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(kleiderschrankBO)
-        }).then(responseJSON => {
-            let responseKleiderschrankBO = KleiderschrankBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responseKleiderschrankBO);
-            })
-        })
-    }
-
-    // KleiderschrankAPI.js
-
     updateKleiderschrank = async (kleiderschrank) => {
-        // Erstelle ein einfaches Objekt für den Request
+        // Erstellt ein einfaches Objekt für den Request
         const requestData = {
             id: kleiderschrank.getID(),
             name: kleiderschrank.getName(),
@@ -270,13 +224,6 @@ class KleiderschrankAPI {
             return KleiderschrankBO.fromJSON(responseJSON)[0];
             });
     };
-
-    deleteKleiderschrank(id) {
-        return this.#fetchAdvanced(this.#deleteKleiderschrankURL(id), {
-            method: 'DELETE'
-        })
-    }
-
 // Kleidungsstück Methoden
     addKleidungsstueck(kleidungsstueckBO) {
         return this.#fetchAdvanced(this.#addKleidungsstueckURL(), {
@@ -322,8 +269,8 @@ class KleiderschrankAPI {
                 'Accept': 'application/json, text/plain',
             }
         }).then(responseJSON => {
-            // Array von Kleidungsstück-Objekten erstellen, aber nur die,
-            // die zum spezifischen Kleiderschrank gehören
+             /* Array von Kleidungsstück-Objekten erstellen, aber nur die,
+             die zum spezifischen Kleiderschrank gehören */
             let kleidungsstueckBOs = KleidungsstueckBO.fromJSON(responseJSON);
             // Filtern nach kleiderschrank_id
             return kleidungsstueckBOs.filter(kleidungsstueck =>
@@ -367,16 +314,6 @@ class KleiderschrankAPI {
     }
 
 // Kleidungstyp Methoden
-    getKleidungstyp(id) {
-        return this.#fetchAdvanced(this.#getKleidungstypURL(id))
-            .then(responseJSON => {
-                let kleidungstypBO = KleidungstypBO.fromJSON(responseJSON)[0];
-                return new Promise(function (resolve) {
-                    resolve(kleidungstypBO);
-                })
-            })
-    }
-
     getKleidungstypen() {
         return this.#fetchAdvanced(this.#getKleidungstypenURL())
             .then(responseJSON => {
@@ -454,12 +391,6 @@ class KleiderschrankAPI {
         })
     })
 }
-
-    getStylesByKleiderschrankId(kleiderschrankId) {
-        return this.#fetchAdvanced(this.#getStylesURL())
-        .then(styles => styles.filter(s => s.kleiderschrank_id === kleiderschrankId));
-}
-
     getStyle(id) {
         // Fetch mit den standardGetOptions
         return this.#fetchAdvanced(this.#getStyleURL(id), {
@@ -496,9 +427,8 @@ class KleiderschrankAPI {
         const requestData = {
             name: styleData.name,
             features: Array.isArray(styleData.features) ? styleData.features : [],
-            constraints: styleData.constraints // Füge Constraints hinzu
+            constraints: styleData.constraints
         };
-        console.log('Style update data being sent:', requestData); // Debug log
 
         return this.#fetchAdvanced(this.#updateStyleURL(id), {
             method: 'PUT',
@@ -527,28 +457,13 @@ class KleiderschrankAPI {
     }
 
 // Outfit-bezogene Methoden
-    getOutfit(id) {
-        // Standardisierte GET-Anfrage mit expliziten Optionen
-        return this.#fetchAdvanced(this.#getOutfitURL(id), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
-            }
-        }).then(responseJSON => {
-            let outfitBO = OutfitBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(outfitBO);
-            })
-        })
-    }
-
     async getOutfits() {
         try {
           const responseJSON = await this.#fetchAdvanced(this.#getOutfitsURL());
 
           const outfits = OutfitBO.fromJSON(responseJSON);
 
-          // Lade für jedes Outfit die vollständigen Informationen
+          // Lädt für jedes Outfit die vollständigen Informationen
           const outfitsWithDetails = await Promise.all(outfits.map(async (outfit) => {
             // Style vollständig laden
             if (outfit.getStyle()) {
@@ -616,44 +531,11 @@ class KleiderschrankAPI {
         throw error;
     }
 };
-
-    updateOutfit(outfitBO) {
-
-        return this.#fetchAdvanced(this.#updateOutfitURL(outfitBO.getID()), {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json, text/plain',
-                'Content-type': 'application/json',
-            },
-            body: JSON.stringify(outfitBO)
-        }).then(responseJSON => {
-            let responseOutfitBO = OutfitBO.fromJSON(responseJSON)[0];
-            return new Promise(function (resolve) {
-                resolve(responseOutfitBO);
-            })
-        })
-    }
-
     deleteOutfit(id) {
         return this.#fetchAdvanced(`${this.#KleiderschrankServerBaseURL}/outfits/${id}`, {
             method: 'DELETE'
         });
     }
-
-    validateOutfit(outfitId) {
-        // Standardisierte GET-Anfrage mit expliziten Optionen
-        return this.#fetchAdvanced(this.#validateOutfitURL(outfitId), {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json, text/plain',
-            }
-        }).then(responseJSON => {
-            return new Promise(function (resolve) {
-                resolve(responseJSON.valid);
-            })
-        })
-    }
-
     createOutfitFromBaseItem(basisId, ausgewaehlteIds, styleId, kleiderschrankId) {
     const data = {
         style: styleId,
