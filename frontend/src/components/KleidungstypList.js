@@ -4,24 +4,9 @@ import KleidungstypCard from './KleidungstypCard';
 import AddIcon from '@mui/icons-material/Add';
 
 class KleidungstypList extends Component {
-    handleKleidungstypDelete = async (kleidungstyp) => {
-        try {
-            // Rufe die von der übergeordneten Komponente übergebene onDelete-Funktion auf
-            await this.props.onDelete(kleidungstyp);
-        } catch (error) {
-            console.error('Error deleting Kleidungstyp:', error);
-        }
-    }
 
     render() {
         const { kleidungstypen, onDelete, onUpdate, kleiderschrankId, onCreateClick } = this.props;
-       console.log("KleidungstypList - Kleidungstypen mit Verwendungen:",
-            this.props.kleidungstypen.map(kt => ({
-                id: kt.getID(),
-                bezeichnung: kt.getBezeichnung(),
-                verwendungen: kt.getVerwendungen()
-            }))
-        );
 
         return (
             <Grid container spacing={3}>

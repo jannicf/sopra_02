@@ -40,18 +40,16 @@ class OutfitList extends Component {
                         try {
                             return await KleiderschrankAPI.getAPI().getKleidungsstueck(baustein.getID());
                         } catch (error) {
-                            console.warn(`Konnte Kleidungsstück ${baustein.getID()} nicht laden`);
                             return null;
                         }
                     }));
 
                     // Null Werte filtern und bausteine updaten
-                    outfit.getBausteine().length = 0; // Clear array
+                    outfit.getBausteine().length = 0;
                     loadedBausteine.filter(b => b !== null).forEach(b => outfit.getBausteine().push(b));
 
                     return outfit;
                 } catch (error) {
-                    console.warn(`Konnte Outfit ${outfit.getID()} nicht vollständig laden`);
                     return null;
                 }
             }));
