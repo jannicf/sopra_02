@@ -17,7 +17,6 @@ class KleidungsstueckList extends Component {
 
     return (
       <Grid container spacing={3}>
-        {/* Add Button Card */}
         <Grid item xs={12} sm={6} md={4}>
           <Card
             sx={{
@@ -27,7 +26,7 @@ class KleidungsstueckList extends Component {
               bgcolor: 'primary.main',
               color: 'white',
               display: 'flex',
-              height: '112px', // Festgelegte Höhe für alle Karten
+              height: '112px',
               '&:hover': {
                 transform: 'translateY(-2px)',
                 transition: 'all 0.2s'

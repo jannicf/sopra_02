@@ -24,7 +24,7 @@ loadKleidungstypen = async () => {
 };
 
     handleEditClick = (e) => {
-        e.stopPropagation(); // Stoppt das Event hier direkt
+        e.stopPropagation();
         this.props.onEdit(this.props.style);
     };
 

@@ -25,7 +25,6 @@ class KleidungstypList extends Component {
 
         return (
             <Grid container spacing={3}>
-                {/* Add Button Card */}
                 <Grid item xs={12} sm={6} md={4}>
                     <Card
                         sx={{

@@ -45,7 +45,7 @@ class OutfitList extends Component {
                         }
                     }));
 
-                    // Filter out any null values and update bausteine
+                    // Null Werte filtern und bausteine updaten
                     outfit.getBausteine().length = 0; // Clear array
                     loadedBausteine.filter(b => b !== null).forEach(b => outfit.getBausteine().push(b));
 
@@ -56,19 +56,19 @@ class OutfitList extends Component {
                 }
             }));
 
-            // Filter out any null outfits
+            // Null Outfits filtern
             const validOutfits = loadedOutfits.filter(outfit => outfit !== null);
 
             this.setState({
                 outfits: validOutfits,
                 kleiderschrankId: kleiderschrankId,
-                error: null // Clear any previous errors
+                error: null
             });
         }
     } catch (error) {
         this.setState({
             error: error.message,
-            outfits: [] // Clear outfits on error
+            outfits: []
         });
     }
 };
@@ -89,19 +89,19 @@ class OutfitList extends Component {
 
   handleOutfitDelete = async (deletedOutfit) => {
     try {
-      // Zuerst den Dialog schließen
+      // Dialog schließen
       this.setState({
         selectedOutfit: null,
         dialogOpen: false
       });
 
-      // Dann Outfit aus lokalem State entfernen
+      // Outfit aus lokalem State entfernen
       this.setState(prevState => ({
         outfits: prevState.outfits.filter(outfit => outfit.getID() !== deletedOutfit.getID())
       }));
 
     } catch (error) {
-      // Wenn ein Fehler auftritt, laden wir die komplette Liste neu
+      // Wenn ein Fehler auftritt, komplette Liste neuladen
       await this.loadOutfits();
       this.setState({ error: error.message });
     }
@@ -116,7 +116,7 @@ class OutfitList extends Component {
               >Noch keine Outfits vorhanden.</Typography>;
       }
 
-      // Fehler nur anzeigen, wenn es KEINE Outfits gibt UND ein Fehler vorliegt
+      // Fehler nur anzeigen, wenn es keine Outfits gibt und ein Fehler vorliegt
       if (error && outfits.length === 0) {
         return <Typography color="error">Fehler beim Laden: {error}</Typography>;
       }
