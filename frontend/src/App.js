@@ -98,12 +98,6 @@ class App extends Component {
                 // Token generieren und setzen
                 user.getIdToken().then(token => {
                     // Token zu den Cookies des Browsers hinzufügen
-                    /** Das Cookie "token" verfügt über keinen gültigen Wert für das "SameSite"-Attribut.
-                     * Bald werden Cookies ohne das "SameSite"-Attribut oder mit einem ungültigen Wert
-                     * dafür als "Lax" behandelt. Dadurch wird das Cookie nicht länger an Kontexte gesendet,
-                     * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
-                     * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
-                     * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
                     document.cookie = `token=${token};path=/;SameSite=Lax;`
 
                     // Prüfen ob ein Profil existiert
@@ -114,26 +108,17 @@ class App extends Component {
                                 userHasProfile: person !== null,
                                 authError: null,
                                 authLoading: false
-                            }, () => {
-                                console.log("4. State aktualisiert:", {
-                                    userHasProfile: this.state.userHasProfile,
-                                    authLoading: this.state.authLoading
-                                });
                             });
                         })
                         .catch(e => {
-                            console.error("3. Fehler beim Laden der Person:", e);
                             this.setState({
                                 currentUser: user,
                                 userHasProfile: false,
-                                authError: null,
+                                authError: e,
                                 authLoading: false
-                            }, () => {
-                                console.log("4. State nach Fehler aktualisiert");
                             });
                         });
                 }).catch(e => {
-                    console.error("2. Token-Fehler:", e);
                     this.setState({
                         authError: e,
                         authLoading: false
@@ -141,12 +126,6 @@ class App extends Component {
                 });
             } else {
                 // Der Nutzer ist ausgeloggt -> Token löschen
-                /** Das Cookie "token" verfügt über keinen gültigen Wert für das "SameSite"-Attribut.
-                 * Bald werden Cookies ohne das "SameSite"-Attribut oder mit einem ungültigen Wert
-                 * dafür als "Lax" behandelt. Dadurch wird das Cookie nicht länger an Kontexte gesendet,
-                 * die zu einem Drittanbieter gehören. Falls Ihre Anwendung das Cookie in diesen Kontexten benötigt,
-                 * fügen Sie bitte das Attribut "SameSite=None" zu ihm hinzu.
-                 * Für weitere Infos siehe https://developer.mozilla.org/docs/Web/HTTP/Headers/Set-Cookie/SameSite.*/
                 document.cookie = `token=;path=/;SameSite=Lax`;
 
                 // Zurücksetzung des ausgeloggten Nutzers
@@ -154,8 +133,6 @@ class App extends Component {
                     currentUser: null,
                     userHasProfile: false,
                     authLoading: false
-                }, () => {
-                    console.log("2. Logout-State aktualisiert");
                 });
             }
         });
@@ -173,13 +150,13 @@ class App extends Component {
                       flexDirection: 'column'
                     }}>
                     <Header user={currentUser} onLogout={this.handleSignOut} />
-                    {/* Anzeige des gesamten Seiteninhalts in der Box */}
+                    {/* Anzeige der gesamten Seite innerhalb dieser Box */}
                     <Box sx={{
                             flex: 1,
-                            paddingBottom: '64px'  // reservierter Platz für Footer
+                            paddingBottom: '64px'
                     }}>
                     <Routes>
-                        {/* Startseite mit Login */}
+                        {/* Login-Seite */}
                         <Route path="/" element={
                             currentUser ?
                                 authLoading ?
@@ -193,7 +170,7 @@ class App extends Component {
                                 <Login onSignIn={this.handleSignIn} />
                         } />
 
-                        {/* Profilseite - als einzige auch ohne Profil zugänglich */}
+                        {/* Profilseite */}
                         <Route path="/profile" element={
                             currentUser ?
                                 authLoading ?
@@ -204,7 +181,7 @@ class App extends Component {
                                 <Navigate to="/" />
                         } />
 
-                        {/* Alle anderen Routen erfordern ein Profil */}
+                        {/* Alle anderen Routen */}
                        <Route path="/kleiderschrank" element={
                             currentUser ?
                                 authLoading ?
@@ -270,7 +247,7 @@ class App extends Component {
                                 <Navigate to="/" />
                         } />
 
-                        {/* About Seite bleibt öffentlich, braucht aber Login */}
+                        {/* About Seite  */}
                         <Route path="/about" element={
                             currentUser ?
                                 authLoading ?

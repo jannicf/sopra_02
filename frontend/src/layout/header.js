@@ -15,7 +15,7 @@ class Header extends Component {
         };
     }
     // Eventhandler für Auswahl eines neuen Tabs
-    handleTabChange = (newIndex) => {
+    handleTabChange = (event, newIndex) => {
         this.setState({
             tabindex: newIndex
         })
