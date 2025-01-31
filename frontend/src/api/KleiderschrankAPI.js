@@ -36,7 +36,6 @@ class KleiderschrankAPI {
     // URL Definitionen
 
     // URLs für Person
-    #getPersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #addPersonURL = () => `${this.#KleiderschrankServerBaseURL}/persons`;
     #updatePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
     #deletePersonURL = (id) => `${this.#KleiderschrankServerBaseURL}/persons/${id}`;
@@ -44,10 +43,7 @@ class KleiderschrankAPI {
 
     // URLs für Kleiderschrank (Wardrobe)
     #getKleiderschrankURL = (id) => `${this.#KleiderschrankServerBaseURL}/wardrobes/${id}`;
-    #getKleiderschraenkeURL = () => `${this.#KleiderschrankServerBaseURL}/wardrobes`;
-    #addKleiderschrankURL = () => `${this.#KleiderschrankServerBaseURL}/wardrobes`;
     #updateKleiderschrankURL = (id) => `${this.#KleiderschrankServerBaseURL}/wardrobes/${id}`;
-    #deleteKleiderschrankURL = (id) => `${this.#KleiderschrankServerBaseURL}/wardrobes/${id}`;
 
     // URLs für Kleidungsstück (Clothes)
     #getKleidungsstueckURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothes/${id}`;
@@ -57,10 +53,8 @@ class KleiderschrankAPI {
     #deleteKleidungsstueckURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothes/${id}`;
 
     // URLs für Kleidungstyp (Clothing Types)
-    #getKleidungstypURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothing-types/${id}`;
     #getKleidungstypenURL = () => `${this.#KleiderschrankServerBaseURL}/clothing-types`;
-    #getKleidungstypByKleiderschrankIdURL = (kleiderschrankId) =>
-    `${this.#KleiderschrankServerBaseURL}/clothing-types/by-kleiderschrank/${kleiderschrankId}`;
+    #getKleidungstypByKleiderschrankIdURL = (kleiderschrankId) => `${this.#KleiderschrankServerBaseURL}/clothing-types/by-kleiderschrank/${kleiderschrankId}`;
     #addKleidungstypURL = () => `${this.#KleiderschrankServerBaseURL}/clothing-types`;
     #updateKleidungstypURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothing-types/${id}`;
     #deleteKleidungstypURL = (id) => `${this.#KleiderschrankServerBaseURL}/clothing-types/${id}`;
@@ -73,13 +67,10 @@ class KleiderschrankAPI {
     #deleteStyleURL = (id) => `${this.#KleiderschrankServerBaseURL}/styles/${id}`;
 
     // URLs für Outfits
-    #getOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
     #getOutfitsURL = () => `${this.#KleiderschrankServerBaseURL}/outfits`;
     #getOutfitByKleiderschrankIdURL = (kleiderschrankId) =>
     `${this.#KleiderschrankServerBaseURL}/outfits/by-kleiderschrank/${kleiderschrankId}`;
     #addOutfitURL = () => `${this.#KleiderschrankServerBaseURL}/outfits`;
-    #updateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/${id}`;
-    #validateOutfitURL = (id) => `${this.#KleiderschrankServerBaseURL}/outfits/validate/${id}`;
     #getPossibleOutfitsForStyleURL = (styleId, wardrobeId) => `${this.#KleiderschrankServerBaseURL}/styles/${styleId}/wardrobes/${wardrobeId}/possible-outfits`;
     #getPossibleOutfitCompletionsURL = (styleId, kleidungsstueckId) => `${this.#KleiderschrankServerBaseURL}/styles/${styleId}/outfits/complete/${kleidungsstueckId}`;
 
