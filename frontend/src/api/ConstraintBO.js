@@ -29,13 +29,6 @@ export default class ConstraintBO extends BusinessObject {
   }
 
   /**
-   * Überprüft, ob das Constraint erfüllt ist.
-   */
-  checkConstraint() {
-    // Wird von den Klassen Implikation, Mutex und Kardinalität überschrieben
-  }
-
-  /**
    * Erstellt ein ConstraintBO aus einem JSON-Objekt.
    *
    * @param {Object} json - JSON-Daten aus dem Backend

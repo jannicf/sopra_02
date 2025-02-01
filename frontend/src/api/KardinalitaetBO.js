@@ -48,27 +48,6 @@ export default class KardinalitaetBO extends UnaryConstraintBO {
   }
 
   /**
-   * Überprüft, ob das Kardinalitäts-Constraint erfüllt ist.
-   *
-   * @param {Array} kleidungsstuecke - Array von KleidungsstueckBO Objekten
-   * @returns {boolean} - True wenn das Constraint erfüllt ist, sonst False
-   */
-  checkConstraint(kleidungsstuecke) {
-    // Wenn kein Bezugsobjekt gesetzt ist, können wir nicht prüfen
-    if (!this.getBezugsobjekt()) {
-      return true;
-    }
-
-    // Zähle die Kleidungsstücke vom Typ des Bezugsobjekts
-    let anzahl = kleidungsstuecke.filter(kleidungsstueck =>
-      kleidungsstueck.getTyp().getID() === this.getBezugsobjekt().getID()
-    ).length;
-
-    // Prüfe ob die Anzahl zwischen Minimum und Maximum liegt
-    return this.getMinAnzahl() <= anzahl && anzahl <= this.getMaxAnzahl();
-  }
-
-  /**
    * Konvertiert eine JSON-Antwort in ein KardinalitaetBO Objekt bzw. Array von KardinalitaetBO Objekten.
    *
    * @param {*} cardinalityconstraints - JSON-Daten aus dem Backend

@@ -47,13 +47,6 @@ export default class BinaryConstraintBO extends ConstraintBO {
   }
 
   /**
-   * Überprüft, ob das Constraint erfüllt ist.
-   */
-  checkConstraint() {
-    // Wird von den Klassen Implikation, Mutex und Kardinalität überschrieben
-  }
-
-  /**
    * Erstellt ein BinaryConstraintBO aus einem JSON-Objekt.
    *
    * @param {Object} json - JSON-Daten aus dem Backend
