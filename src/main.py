@@ -22,7 +22,7 @@ def index():
 
 # React übernimmt das Routing, wenn Flask einen Fehler werfen würde
 @app.errorhandler(404)
-def not_found():
+def not_found(error):
     return app.send_static_file('index.html')
 
 # erlaubt CORS für alle Wardrobe-Endpoints
