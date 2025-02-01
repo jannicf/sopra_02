@@ -1,4 +1,3 @@
-// Alle benötigten Imports im Zusammenhang mit Style importieren
 import BusinessObject from './BusinessObject.js';
 import KleidungstypBO from "./KleidungstypBO.js";
 
@@ -76,7 +75,7 @@ export default class StyleBO extends BusinessObject {
     } else {
         this._constraints = [constraint];
     }
-}
+  }
 
   /**
    * Entfernt einen Constraint aus dem Style.
@@ -97,7 +96,6 @@ export default class StyleBO extends BusinessObject {
    * Gibt alle Constraints des Styles zurück.
    */
   getConstraints() {
-      console.log("Returning constraints:", this._constraints); // Debug
     return this._constraints;
   }
 
@@ -174,6 +172,5 @@ export default class StyleBO extends BusinessObject {
         });
     }
     return result;
-}
-
+    }
 }

@@ -82,17 +82,13 @@ export default class OutfitBO extends BusinessObject {
    */
   static fromJSON(outfits) {
       let result = [];
-
-      // Debug-Logging
-      console.log("OutfitBO.fromJSON input:", outfits);
-
       if (Array.isArray(outfits)) {
         outfits.forEach((o) => {
           let outfit = new OutfitBO();
           outfit.setID(o.id);
           outfit.setKleiderschrankId(o.kleiderschrank_id);
 
-                      // Style als StyleBO Objekt erstellen
+          // Style als StyleBO Objekt erstellen
             if (o.style) {
                 // Wir erstellen ein neues StyleBO mit der ID
                 const style = new StyleBO();
@@ -109,15 +105,9 @@ export default class OutfitBO extends BusinessObject {
                     outfit.addBaustein(kleidungsstueck);
                 });
             }
-
-          console.log("Original Outfit-Daten:", o);  // Zeigt die rohen Daten vom Backend
-          console.log("Style-Daten:", o.style);      // Zeigt nur die Style-Daten
-          console.log("Bausteine-Daten:", o.bausteine); // Zeigt die Bausteine-Daten
-
           result.push(outfit);
         });
       }
-
       return result;
     }
 }

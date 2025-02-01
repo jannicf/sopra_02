@@ -34,6 +34,7 @@ export default class KleidungstypBO extends BusinessObject {
         setKleiderschrankId(id) {
             this.kleiderschrankId = id;
         }
+
         getKleiderschrankId() {
             return this.kleiderschrankId;
         }
@@ -66,7 +67,7 @@ export default class KleidungstypBO extends BusinessObject {
         * @param {StyleBO} aStyle - Der zu entfernende Style
         */
         deleteVerwendung(aStyle) {
-        const index = this.verwendungen.findIndex(v => v.getID() === aStyle.getId());
+        const index = this.verwendungen.findIndex(v => v.getID() === aStyle.getID());
         if (index > -1) {
          this.verwendungen.splice(index, 1);
          // Auch aus der anderen Richtung löschen
