@@ -32,18 +32,18 @@ class StyleDeleteDialog extends Component {
         api.getKleidungsstuecke()
       ]);
 
-      // Finde Outfits, die diesen Style verwenden
+      // Outfits finden, die diesen Style verwenden
       const affectedOutfits = outfits.filter(outfit =>
         outfit.getStyle().getID() === this.props.style.getID()
       );
 
-      // Finde Kleidungstypen, die nur diesen Style haben
+      // Kleidungstypen finden, die nur diesen Style haben
       const affectedKleidungstypen = allKleidungstypen.filter(typ => {
         const verwendungen = typ.getVerwendungen();
         return verwendungen.length === 1 && verwendungen[0].getID() === this.props.style.getID();
       });
 
-      // Finde Kleidungsstücke, die betroffene Kleidungstypen verwenden
+      // Kleidungsstücke finden, die betroffene Kleidungstypen verwenden
       const affectedTypIds = affectedKleidungstypen.map(typ => typ.getID());
       const affectedKleidungsstuecke = allKleidungsstuecke.filter(stueck =>
         affectedTypIds.includes(stueck.getTyp().getID())
@@ -72,17 +72,17 @@ class StyleDeleteDialog extends Component {
       const api = KleiderschrankAPI.getAPI();
 
       // Löschen in korrekter Reihenfolge zur Erhaltung der referenziellen Integrität
-      // 1. Lösche betroffene Outfits
+      // 1. Betroffene Outfits löschen
       for (const outfit of affectedOutfits) {
         await api.deleteOutfit(outfit.getID());
       }
 
-      // 2. Lösche betroffene Kleidungsstücke
+      // 2. Betroffene Kleidungsstücke löschen
       for (const stueck of affectedKleidungsstuecke) {
         await api.deleteKleidungsstueck(stueck.getID());
       }
 
-      // 3. Lösche betroffene Kleidungstypen
+      // 3. Betroffene Kleidungstypen löschen
       for (const typ of affectedKleidungstypen) {
         await api.deleteKleidungstyp(typ.getID());
       }

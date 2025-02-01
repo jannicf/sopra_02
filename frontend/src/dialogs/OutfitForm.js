@@ -24,7 +24,7 @@ class OutfitForm extends Component {
     };
   }
 
-  // Behandelt Änderungen der übergebenen Props
+  // Änderungen der übergebenen Props behandeln
   componentDidUpdate(prevProps) {
     if (this.props.outfit !== prevProps.outfit) {
       this.setState({
@@ -33,17 +33,17 @@ class OutfitForm extends Component {
     }
   }
 
-  // Lädt die initialen Daten beim Komponenten-Mount
+  // Die initialen Daten beim Komponenten-Mount laden
   componentDidMount() {
     this.loadStyles();
     this.loadKleidungsstuecke();
   }
 
-  // Lädt die verfügbaren Styles vom Backend
+  // Die verfügbaren Styles vom Backend laden
   loadStyles = async () => {
     try {
       const stylesData = await this.props.kleiderschrankAPI.getStyles();
-      // Konvertiere die rohen Daten in StyleBO Objekte
+      // Die rohen Daten in StyleBO Objekte konvertieren
       const styles = stylesData.map(styleData => {
         const style = new StyleBO();
         style.setID(styleData.getID());
@@ -56,11 +56,11 @@ class OutfitForm extends Component {
     }
   };
 
-  // Lädt die verfügbaren Kleidungsstücke vom Backend
+  // Die verfügbaren Kleidungsstücke vom Backend laden
   loadKleidungsstuecke = async () => {
     try {
       const kleidungsstueckeData = await this.props.kleiderschrankAPI.getKleidungsstuecke();
-      // Konvertiere die rohen Daten in KleidungsstueckBO Objekte
+      // Die rohen Daten in KleidungsstueckBO Objekte konvertieren
       const kleidungsstuecke = kleidungsstueckeData.map(ksData => {
         const kleidungsstueck = new KleidungsstueckBO();
         kleidungsstueck.setID(ksData.getID());
@@ -74,25 +74,25 @@ class OutfitForm extends Component {
     }
   };
 
-  // Behandelt die Auswahl eines Styles
+  // Die Auswahl eines Styles behandeln
   handleStyleChange = (event) => {
     const styleId = event.target.value;
     const selectedStyleData = this.state.alleStyles.find(style => style.getID() === styleId);
 
-    // Erstelle ein neues StyleBO Objekt
+    // Ein neues StyleBO Objekt erstellen
     const selectedStyle = new StyleBO();
     selectedStyle.setID(selectedStyleData.getID());
     selectedStyle.setName(selectedStyleData.getName());
 
-    // Update das OutfitBO mit dem neuen Style
+    // Das OutfitBO mit dem neuen Style updaten
     const outfit = this.state.outfit;
     outfit.setStyle(selectedStyle);
     this.setState({ outfit });
   };
 
-  // Behandelt das Hinzufügen/Entfernen von Kleidungsstücken
+  // Das Hinzufügen/Entfernen von Kleidungsstücken behandeln
   handleKleidungsstueckChange = (kleidungsstueckData) => {
-    // Erstelle ein neues KleidungsstueckBO Objekt
+    // Ein neues KleidungsstueckBO Objekt erstellen
     const kleidungsstueck = new KleidungsstueckBO();
     kleidungsstueck.setID(kleidungsstueckData.getID());
     kleidungsstueck.setName(kleidungsstueckData.getName());
@@ -103,23 +103,23 @@ class OutfitForm extends Component {
         k.getID() === kleidungsstueck.getID());
 
     if (index === -1) {
-      // Füge das neue KleidungsstueckBO zum Array hinzu
+      // Das neue KleidungsstueckBO zum Array hinzufügen
       this.setState({
         ausgewaehlteKleidungsstuecke: [...ausgewaehlteKleidungsstuecke, kleidungsstueck]
       });
     } else {
-      // Entferne das KleidungsstueckBO aus dem Array
+      // Das KleidungsstueckBO aus dem Array entfernen
       const updatedKleidungsstuecke = [...ausgewaehlteKleidungsstuecke];
       updatedKleidungsstuecke.splice(index, 1);
       this.setState({ ausgewaehlteKleidungsstuecke: updatedKleidungsstuecke });
     }
   };
 
-  // Speichert das erstellte/bearbeitete Outfit
+  // Das erstellte/bearbeitete Outfit speichern
   handleSave = () => {
     const { outfit, ausgewaehlteKleidungsstuecke } = this.state;
 
-    // Füge alle ausgewählten KleidungsstueckBOs dem OutfitBO hinzu
+    // Alle ausgewählten KleidungsstueckBOs dem OutfitBO hinzufügen
     ausgewaehlteKleidungsstuecke.forEach(kleidungsstueck => {
       outfit.addBaustein(kleidungsstueck);
     });

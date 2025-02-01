@@ -20,7 +20,7 @@ class PersonDeleteDialog extends Component {
         // Person löschen
         await KleiderschrankAPI.getAPI().deletePerson(person);
 
-        // Warte kurz, damit der Server Zeit hat
+        // Timeout, damit der Server Zeit hat
         await new Promise(resolve => setTimeout(resolve, 500));
 
         // Dialog schließen und true zurückgeben für erfolgreiche Löschung
