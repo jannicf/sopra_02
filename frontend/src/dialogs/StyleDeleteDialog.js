@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import {Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography} from '@mui/material';
 import KleiderschrankAPI from '../api/KleiderschrankAPI';
 
 class StyleDeleteDialog extends Component {
@@ -12,6 +12,12 @@ class StyleDeleteDialog extends Component {
       loading: false,
       error: null
     };
+  }
+
+  componentDidMount() {
+    if (this.props.show) {
+      this.checkAffectedItems();
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -32,9 +38,9 @@ class StyleDeleteDialog extends Component {
         api.getKleidungsstuecke()
       ]);
 
-      // Outfits finden, die diesen Style verwenden
+      // Filtere die Outfits nach dem Style
       const affectedOutfits = outfits.filter(outfit =>
-        outfit.getStyle().getID() === this.props.style.getID()
+          outfit.getStyle() && outfit.getStyle().getID() === this.props.style.getID()
       );
 
       // Kleidungstypen finden, die nur diesen Style haben
@@ -115,26 +121,56 @@ class StyleDeleteDialog extends Component {
           Style löschen
         </DialogTitle>
         <DialogContent>
-          <p>Möchten Sie den Style "{style?.getName()}" wirklich löschen?</p>
+          <Typography variant="body1" gutterBottom>
+            Möchten Sie den Style "{style?.getName()}" wirklich löschen?
+          </Typography>
 
           {(affectedOutfits.length > 0 ||
             affectedKleidungstypen.length > 0 ||
             affectedKleidungsstuecke.length > 0) && (
-            <div style={{ color: 'orange' }}>
-              <p>Achtung: Folgende Elemente werden ebenfalls gelöscht:</p>
-              {affectedOutfits.length > 0 && (
-                <p>{affectedOutfits.length} Outfit(s)</p>
-              )}
-              {affectedKleidungstypen.length > 0 && (
-                <p>{affectedKleidungstypen.length} Kleidungstyp(en)</p>
-              )}
-              {affectedKleidungsstuecke.length > 0 && (
-                <p>{affectedKleidungsstuecke.length} Kleidungsstück(e)</p>
-              )}
-            </div>
+            <>
+              <Typography variant="body2" sx={{ mt: 2, color: 'warning.main' }}>
+                Achtung: Das Löschen des Styles hat folgende Konsequenzen:
+              </Typography>
+
+              <Box sx={{ mt: 1, ml: 2 }}>
+                {affectedOutfits.length > 0 && (
+                  <>
+                    <Typography color="warning.main">
+                      • {affectedOutfits.length} Outfit(s) werden gelöscht:
+                    </Typography>
+                    <Box sx={{ ml: 2 }}>
+                      {affectedOutfits.map((outfit) => (
+                        <Typography key={outfit.getID()} color="warning.main">
+                          - Outfit {outfit.getID()}
+                        </Typography>
+                      ))}
+                    </Box>
+                  </>
+                )}
+                {affectedKleidungstypen.length > 0 && (
+                  <Typography color="warning.main">
+                    • {affectedKleidungstypen.length} Kleidungstyp(en)
+                  </Typography>
+                )}
+                {affectedKleidungsstuecke.length > 0 && (
+                  <Typography color="warning.main">
+                    • {affectedKleidungsstuecke.length} Kleidungsstück(e)
+                  </Typography>
+                )}
+              </Box>
+
+              <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+                Diese Aktion kann nicht rückgängig gemacht werden!
+              </Typography>
+            </>
           )}
 
-          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {error && (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {error}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button
@@ -146,9 +182,10 @@ class StyleDeleteDialog extends Component {
           <Button
             onClick={this.handleDelete}
             color="error"
+            variant="contained"
             disabled={loading}
           >
-            Löschen
+            {loading ? 'Wird gelöscht...' : 'Löschen'}
           </Button>
         </DialogActions>
       </Dialog>
