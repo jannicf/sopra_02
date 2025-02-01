@@ -182,10 +182,9 @@ class StyleDeleteDialog extends Component {
           <Button
             onClick={this.handleDelete}
             color="error"
-            variant="contained"
             disabled={loading}
           >
-            {loading ? 'Wird gelöscht...' : 'Löschen'}
+            Löschen
           </Button>
         </DialogActions>
       </Dialog>
