@@ -151,6 +151,8 @@ class KleidungsstueckForm extends Component {
                     <Button
                         onClick={this.handleSubmit}
                         disabled={loading || !kleidungsstueck.getName() || !kleidungsstueck.getTyp()}
+                        variant="contained"
+                        color="primary"
                     >
                         Speichern
                     </Button>

@@ -41,7 +41,13 @@ class Style(bo.BusinessObject):
 
     def get_features(self):
         """Gibt die IDs der Kleidungstypen zurück"""
-        return [feature if isinstance(feature, int) else feature.get_id() for feature in self.__features]
+        result = []
+        for feature in self.__features:
+            if isinstance(feature, int):
+                result.append(feature)
+            else:
+                result.append(feature.get_id())
+        return result
 
     def add_constraint(self, constraint):
         if isinstance(constraint, dict):
@@ -81,16 +87,6 @@ class Style(bo.BusinessObject):
         if constraint in self.__constraints:
             self.__constraints.remove(constraint)
 
-    def __eq__(self, other):
-        """Zwei Styles sind gleich, wenn sie die gleiche ID haben"""
-        if isinstance(other, Style):
-            return self.get_id() == other.get_id()
-        return False
-
-    def __str__(self) -> str:
-        """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
-        return "Style: {}, {}".format(self.get_id(), self.get_name())
-
     def get_features_as_list(self):
         """Gibt die Features in einem serialisierbaren Format zurück"""
         features = []
@@ -108,6 +104,16 @@ class Style(bo.BusinessObject):
     def get_kleiderschrank_id(self):
         """Auslesen der Kleiderschrank ID"""
         return self.__kleiderschrank_id
+
+    def __eq__(self, other):
+        """Zwei Styles sind gleich, wenn sie die gleiche ID haben"""
+        if isinstance(other, Style):
+            return self.get_id() == other.get_id()
+        return False
+
+    def __str__(self) -> str:
+        """Umwandlung des Objekts in eine lesbare String-Ausgabe"""
+        return "Style: {}, {}".format(self.get_id(), self.get_name())
 
     @staticmethod
     def from_dict(dictionary=dict()):

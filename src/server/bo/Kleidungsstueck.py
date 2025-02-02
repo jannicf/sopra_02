@@ -1,6 +1,5 @@
 from server.bo import BusinessObject as bo
 from server.bo.Kleidungstyp import Kleidungstyp
-#Kleidungstyp importieren um Kleidungstyp-Objekte speichern zu können
 
 class Kleidungsstueck(bo.BusinessObject):
 
