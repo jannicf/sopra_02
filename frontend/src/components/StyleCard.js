@@ -14,24 +14,15 @@ class StyleCard extends Component {
     this.loadKleidungstypen();
 }
 
-loadKleidungstypen = async () => {
-    try {
-        const kleidungstypen = await KleiderschrankAPI.getAPI().getKleidungstypen();
-        this.setState({ kleidungstypen });
-    } catch (error) {
-        console.error("Fehler beim Laden der Kleidungstypen:", error);
-    }
-};
-
-    handleEditClick = (e) => {
-        e.stopPropagation(); // Stoppt das Event hier direkt
-        this.props.onEdit(this.props.style);
+    loadKleidungstypen = async () => {
+        try {
+            const kleidungstypen = await KleiderschrankAPI.getAPI().getKleidungstypen();
+            this.setState({ kleidungstypen });
+        } catch (error) {
+            console.error("Fehler beim Laden der Kleidungstypen:", error);
+        }
     };
 
-    handleDeleteClick = (e) => {
-        e.stopPropagation(); // Stoppt das Event hier direkt
-        this.props.onDelete(this.props.style);
-    };
 
     handleCloseDetails = () => {
         this.setState({

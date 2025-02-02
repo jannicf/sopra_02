@@ -174,17 +174,11 @@ class KleiderschrankAdministration(object):
         person.set_google_id(google_id)
 
         with PersonMapper() as mapper:
-            person = mapper.insert(person)
-
-            # Kleiderschrank anlegen wenn vorhanden
-            if person.get_kleiderschrank():
-                kleiderschrank = person.get_kleiderschrank()
-                kleiderschrank.set_eigentuemer(person)
-
-                with KleiderschrankMapper() as kleiderschrank_mapper:
-                    kleiderschrank = kleiderschrank_mapper.insert(kleiderschrank)
-                    person.set_kleiderschrank(kleiderschrank)
-                    mapper.update(person)
+            created_person = mapper.insert(person)
+            if created_person:
+                return created_person
+            else:
+                raise ValueError("Person konnte nicht erstellt werden")
 
 
     def get_person_by_id(self, number):
@@ -224,13 +218,36 @@ class KleiderschrankAdministration(object):
 
     def delete_person(self, person):
         """Die gegebene Person und ihren Kleiderschrank aus unserem System löschen."""
-        with KleiderschrankMapper() as kleiderschrank_mapper:
-            # Kleiderschrank des Eigentümers löschen
-            kleiderschrank = kleiderschrank_mapper.find_by_eigentuemer(person)
-            if kleiderschrank is not None:
+        # Erst den Kleiderschrank der Person finden
+        kleiderschrank = self.get_kleiderschrank_by_eigentuemer(person)
+
+        if kleiderschrank:
+            # 1. Alle Outfits des Kleiderschranks löschen
+            outfits = self.get_outfit_by_kleiderschrank_id(kleiderschrank.get_id())
+            for outfit in outfits:
+                self.delete_outfit(outfit)
+
+            # 2. Alle Styles des Kleiderschranks löschen
+            styles = self.get_all_styles()
+            for style in styles:
+                if style.get_kleiderschrank_id() == kleiderschrank.get_id():
+                    self.delete_style(style)
+
+            # 3. Alle Kleidungstypen des Kleiderschranks löschen
+            kleidungstypen = self.get_kleidungstyp_by_kleiderschrank_id(kleiderschrank.get_id())
+            for kleidungstyp in kleidungstypen:
+                self.delete_kleidungstyp(kleidungstyp)
+
+            # 4. Alle Kleidungsstücke des Kleiderschranks löschen
+            kleidungsstuecke = self.get_kleidungsstueck_by_kleiderschrank_id(kleiderschrank.get_id())
+            for kleidungsstueck in kleidungsstuecke:
+                self.delete_kleidungsstueck(kleidungsstueck)
+
+            # 5. Den Kleiderschrank selbst löschen
+            with KleiderschrankMapper() as kleiderschrank_mapper:
                 kleiderschrank_mapper.delete(kleiderschrank)
 
-        # Danach die Person löschen
+        # 6. Zum Schluss die Person löschen
         with PersonMapper() as person_mapper:
             person_mapper.delete(person)
 
@@ -245,11 +262,19 @@ class KleiderschrankAdministration(object):
         kleiderschrank.set_eigentuemer(eigentuemer)
 
         with KleiderschrankMapper() as mapper:
-            result = mapper.insert(kleiderschrank)
-            # Person mit Kleiderschrank aktualisieren
-            eigentuemer.set_kleiderschrank(result)
-            with PersonMapper() as person_mapper:
-                person_mapper.update(eigentuemer)
+            # Kleiderschrank in DB speichern und das aktualisierte Objekt zurückbekommen
+            kleiderschrank = mapper.insert(kleiderschrank)
+
+            # Nur wenn der Insert erfolgreich war und wir einen Eigentümer haben
+            if kleiderschrank and eigentuemer:
+                # Den neuen Kleiderschrank dem Eigentümer zuweisen
+                eigentuemer.set_kleiderschrank(kleiderschrank)
+
+                # Person mit dem neuen Kleiderschrank speichern
+                with PersonMapper() as person_mapper:
+                    person_mapper.update(eigentuemer)
+
+            return kleiderschrank
 
     def get_kleiderschrank_by_id(self, number):
         """Den Kleiderschrank mit der gegebenen ID auslesen."""

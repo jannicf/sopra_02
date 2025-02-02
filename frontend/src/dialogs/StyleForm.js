@@ -78,7 +78,7 @@ const StyleForm = ({ show, style, onClose, kleiderschrankId }) => {
    */
 const handleConstraintSave = (constraintType, constraintData) => {
 
-    // Kopiert des aktuellen formData erstellen
+    // Kopie des aktuellen formData erstellen
     const updatedFormData = { ...formData };
 
     if (constraintType === 'kardinalitaet') {
@@ -89,7 +89,7 @@ const handleConstraintSave = (constraintType, constraintData) => {
             bezugsobjekt: { id: constraintData.bezugsobjekt_id }
         };
 
-        // Hier style.addConstraint aufrufen, wenn style existiert
+        // Wenn style existiert, wird style.addConstraint aufgerufen
         if (style) {
             style.addConstraint(kardinalitaet);
         }
@@ -128,7 +128,7 @@ const handleConstraintSave = (constraintType, constraintData) => {
         }
     }
 
-    // Aktualisiere den State mit der neuen Version
+    // Den State mit der neuen Version aktualisieren
     setFormData(updatedFormData);
 
     setActiveDialog(null);
@@ -147,7 +147,7 @@ const handleConstraintSave = (constraintType, constraintData) => {
           : 'implikationen'
       );
 
-      // Filtert das "index"-te Element raus
+      // Das "index"-te Element filtern
       updatedConstraints[arrayKey] = prev.constraints[arrayKey].filter((_, i) => i !== index);
 
       return {

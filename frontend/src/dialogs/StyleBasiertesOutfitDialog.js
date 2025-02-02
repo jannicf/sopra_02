@@ -32,10 +32,10 @@ class StyleBasiertesOutfitDialog extends Component {
             this.setState({ loading: true });
             const api = KleiderschrankAPI.getAPI();
 
-            // Hole alle Kleidungstücke
+            // Alle Kleidungstücke holen
             const alleKleidungsstuecke = await api.getKleidungsstuecke();
 
-            // Filtere nach Kleiderschrank ID und Style-Typen
+            // Nach Kleiderschrank ID und Style-Typen filtern
             const styleTypes = this.props.style.getFeatures();
             const passendeKleidung = alleKleidungsstuecke.filter(kleidungsstueck =>
                 kleidungsstueck.getKleiderschrankId() === this.props.kleiderschrankId && // Prüfe Kleiderschrank ID
@@ -96,7 +96,6 @@ class StyleBasiertesOutfitDialog extends Component {
         this.props.onClose(true);
 
     } catch (error) {
-        // Angepasste Fehlermeldung
         let errorMessage = 'Das Outfit erfüllt nicht die Style-Constraints';
         if (error.response) {
             errorMessage = error.response.data?.message || errorMessage;

@@ -72,13 +72,10 @@ class KleiderschrankView extends Component {
 
             if (person && person.getKleiderschrank()) {
                 const kleiderschrankId = person.getKleiderschrank().getID();
-                console.log("Lade Kleidungstypen für Kleiderschrank ID:", kleiderschrankId);
 
                 // Hier die spezifische Funktion zum Laden der Kleidungstypen für einen Kleiderschrank
                 const kleidungstypen = await KleiderschrankAPI.getAPI()
                     .getKleidungstypByKleiderschrankId(kleiderschrankId);
-
-                console.log("Erfolgreich geladene Kleidungstypen:", kleidungstypen);
 
                 this.setState({
                     kleidungstypen: kleidungstypen,

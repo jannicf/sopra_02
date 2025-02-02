@@ -16,36 +16,6 @@ export default class ImplikationBO extends BinaryConstraintBO {
   }
 
   /**
-   * Überprüft, ob das Implikations-Constraint erfüllt ist.
-   *
-   * @param {Array} kleidungsstuecke - Array von KleidungsstueckBO Objekten
-   * @returns {boolean} - True wenn das Constraint erfüllt ist, sonst False
-   */
-  checkConstraint(kleidungsstuecke) {
-    // Wenn keine Bezugsobjekte gesetzt sind, können wir nicht prüfen
-    if (!this.getBezugsobjekt1() || !this.getBezugsobjekt2()) {
-      return true;
-    }
-
-    let typ1Vorhanden = false;
-    let typ2Vorhanden = false;
-
-    // Prüfe für jedes Kleidungsstück, ob es von einem der relevanten Typen ist
-    kleidungsstuecke.forEach(kleidungsstueck => {
-      if (kleidungsstueck.getTyp().getID() === this.getBezugsobjekt1().getID()) {
-        typ1Vorhanden = true;
-      }
-      if (kleidungsstueck.getTyp().getID() === this.getBezugsobjekt2().getID()) {
-        typ2Vorhanden = true;
-      }
-    });
-
-    // Wenn Typ1 vorhanden ist, muss auch Typ2 vorhanden sein
-    // Wenn Typ1 nicht vorhanden ist, ist die Bedingung immer erfüllt
-    return !typ1Vorhanden || typ2Vorhanden;
-  }
-
-  /**
    * Konvertiert eine JSON-Antwort in ein ImplikationBO Objekt bzw. Array von ImplikationBO Objekten.
    *
    * @param {*} implicationconstraints - JSON-Daten aus dem Backend
@@ -87,8 +57,8 @@ export default class ImplikationBO extends BinaryConstraintBO {
             let bezugsobjekt2 = KleidungstypBO.fromJSON([i.bezugsobjekt2])[0];
             implikation.setBezugsobjekt2(bezugsobjekt2);
         }
-        result.push(implikation);
+            result.push(implikation);
+        }
+        return result;
     }
-    return result;
-}
 }

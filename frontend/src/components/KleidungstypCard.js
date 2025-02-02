@@ -19,12 +19,6 @@ class KleidungstypCard extends Component {
 
     handleEditClick = () => {
         const { kleidungstyp } = this.props;
-        console.log("Edit Kleidungstyp:", {
-            id: kleidungstyp.getID(),
-            bezeichnung: kleidungstyp.getBezeichnung(),
-            verwendungen: kleidungstyp.getVerwendungen(),
-            kleiderschrankId: kleidungstyp.getKleiderschrankId()
-        });
         this.setState({ showEditDialog: true });
     }
 

@@ -6,7 +6,7 @@ class PersonEditForm extends Component {
     constructor(props) {
         super(props);
 
-        // Initialisiere State mit den bestehenden Daten
+        // State mit den bestehenden Daten initialisieren
         const { person } = props;
         this.state = {
             formData: {

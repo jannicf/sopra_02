@@ -41,28 +41,33 @@ class KleidungstypForm extends Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (this.props.kleidungstyp !== prevProps.kleidungstyp) {
+        // Prüfen ob der Dialog neu geöffnet wird
+        if (this.props.show && !prevProps.show) {
             const { kleidungstyp, kleiderschrankId } = this.props;
 
+            let updatedKleidungstyp = new KleidungstypBO();
             if (kleidungstyp) {
-                const updatedKleidungstyp = new KleidungstypBO();
+                // Wenn ein existierender Kleidungstyp bearbeitet wird
                 updatedKleidungstyp.setID(kleidungstyp.getID());
                 updatedKleidungstyp.setBezeichnung(kleidungstyp.getBezeichnung());
-                updatedKleidungstyp.setKleiderschrankId(kleiderschrankId);
-
-                // Verwendungen kopieren
-                const verwendungen = kleidungstyp.getVerwendungen() || [];
-                verwendungen.forEach(style => {
-                    updatedKleidungstyp.addVerwendung(style);
-                });
-
-                this.setState({
-                    kleidungstyp: updatedKleidungstyp,
-                    selectedStyleIds: verwendungen.map(style => style.getID())
-                });
+            } else {
+                // Wenn ein neuer Kleidungstyp erstellt wird
+                updatedKleidungstyp.setBezeichnung('');
             }
-        }
+            updatedKleidungstyp.setKleiderschrankId(kleiderschrankId);
+
+            const verwendungen = kleidungstyp ? (kleidungstyp.getVerwendungen() || []) : [];
+            verwendungen.forEach(style => {
+                updatedKleidungstyp.addVerwendung(style);
+            });
+
+            this.setState({
+                kleidungstyp: updatedKleidungstyp,
+                selectedStyleIds: verwendungen.map(style => style.getID())
+        });
+        this.loadStyles();
     }
+}
 
     loadStyles = async () => {
         try {

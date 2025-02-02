@@ -16,35 +16,6 @@ export default class MutexBO extends BinaryConstraintBO {
   }
 
   /**
-   * Überprüft, ob das Mutex-Constraint erfüllt ist.
-   *
-   * @param {Array} kleidungsstuecke - Array von KleidungsstueckBO Objekten
-   * @returns {boolean} - True wenn das Constraint erfüllt ist, sonst False
-   */
-  checkConstraint(kleidungsstuecke) {
-    // Wenn keine Bezugsobjekte gesetzt sind, können wir nicht prüfen
-    if (!this.getBezugsobjekt1() || !this.getBezugsobjekt2()) {
-      return true;
-    }
-
-    let typ1Vorhanden = false;
-    let typ2Vorhanden = false;
-
-    // Prüfe für jedes Kleidungsstück, ob es von einem der relevanten Typen ist
-    kleidungsstuecke.forEach(kleidungsstueck => {
-      if (kleidungsstueck.getTyp().getID() === this.getBezugsobjekt1().getID()) {
-        typ1Vorhanden = true;
-      }
-      if (kleidungsstueck.getTyp().getID() === this.getBezugsobjekt2().getID()) {
-        typ2Vorhanden = true;
-      }
-    });
-
-    // Constraint ist verletzt, wenn BEIDE Typen vorkommen
-    return !(typ1Vorhanden && typ2Vorhanden);
-  }
-
-  /**
    * Konvertiert eine JSON-Antwort in ein MutexBO Objekt bzw. Array von MutexBO Objekten.
    *
    * @param {*} mutexconstraints - JSON-Daten aus dem Backend
